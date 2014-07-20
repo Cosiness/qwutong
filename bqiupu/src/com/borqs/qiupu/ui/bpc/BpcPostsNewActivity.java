@@ -4,20 +4,24 @@ import java.util.ArrayList;
 
 import twitter4j.UserCircle;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
 
 import com.borqs.common.SelectionItem;
 import com.borqs.common.api.BpcApiUtils;
@@ -33,16 +37,20 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleColumns;
+import com.borqs.qiupu.fragment.FriendsListFragment;
 import com.borqs.qiupu.fragment.StreamListFragment;
+import com.borqs.qiupu.fragment.UserProfileMainFragment;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
 import com.borqs.wutong.HomePickerActivity;
+import com.special.ResideMenu.ResideMenu;
+import com.special.ResideMenu.ResideMenuItem;
 
 public class BpcPostsNewActivity extends BasicNavigationActivity implements
         OnListItemClickListener, StreamListFragment.StreamListFragmentCallBack,
-        HomePickerActivity.PickerInterface {
+        HomePickerActivity.PickerInterface, View.OnClickListener {
 
 	private static final String TAG = "Qiupu.BpcPostsNewActivity";
 
@@ -50,7 +58,7 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
 
     StreamListFragment.MetaData mFragmentData;
 
-    StreamListFragment mStreamListFragment;
+//    StreamListFragment mStreamListFragment;
     
     private BottomMoreQuickAction mMoreDialog;
 
@@ -67,7 +75,7 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         PushingServiceAgent.bindNotificationService(getApplicationContext());
         
      // Create the list fragment and add it as our sole content.
-        mStreamListFragment = (StreamListFragment) getSupportFragmentManager().findFragmentById(R.id.stream_fragment);
+//        mStreamListFragment = (StreamListFragment) getSupportFragmentManager().findFragmentById(R.id.stream_fragment);
 //        if (mStreamListFragment == null) {
 //            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 //            mStreamListFragment = new StreamListFragment();
@@ -97,6 +105,11 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
                 QiupuORM.closeCursor(localCircles);
             }
         });
+
+
+        mContext = this;
+        setUpMenu();
+        changeFragment(new StreamListFragment());
     }
 
     @Override
@@ -114,9 +127,9 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
             if (resultCode == Activity.RESULT_OK && null != data) {
                 final int filterType = data.getIntExtra(BpcApiUtils.SEARCH_KEY_TYPE, mFragmentData.mSourceFilter);
                 Log.d(TAG, "onActivityResult, get type: " + filterType);
-                if (null != mStreamListFragment) {
-                    mStreamListFragment.applyFilterType(filterType);
-                }
+//                if (null != mStreamListFragment) {
+//                    mStreamListFragment.applyFilterType(filterType);
+//                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -185,11 +198,11 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
 
     @Override
     protected void loadRefresh() {
-        if(mStreamListFragment != null) {
-            mStreamListFragment.loadRefresh();
-        }else {
-            Log.d(TAG, "loadRefresh() mStreamListFragment is null ");
-        }
+//        if(mStreamListFragment != null) {
+//            mStreamListFragment.loadRefresh();
+//        }else {
+//            Log.d(TAG, "loadRefresh() mStreamListFragment is null ");
+//        }
     }
 
     @Override
@@ -270,7 +283,8 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         super.onPrepareOptionsMenu(menu);
 
         menu.findItem(R.id.menu_search).setVisible(false);
-        menu.findItem(R.id.menu_stream_filter).setVisible(null != mStreamListFragment && mStreamListFragment.isFilterNeeded() && !isUsingActionBar());
+//        menu.findItem(R.id.menu_stream_filter).setVisible(null != mStreamListFragment &&
+//                mStreamListFragment.isFilterNeeded() && !isUsingActionBar());
 
         return true;
     }
@@ -287,7 +301,7 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
         if (i == R.id.menu_stream_filter) {
-            mStreamListFragment.filterStream();
+//            mStreamListFragment.filterStream();
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -303,16 +317,10 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         long circleId = Long.parseLong(id);
         mFragmentData.mCircleId = circleId;
 
-        if (null != mStreamListFragment) {
-            mStreamListFragment.switchCircle(circleId);
-        }
+//        if (null != mStreamListFragment) {
+//            mStreamListFragment.switchCircle(circleId);
+//        }
     }
-
-//	@Override
-//	public void setLeftMenuPosition() {
-//		mPosition = LeftMenuMapping.getPositionForActivity(this);
-//		mTitle = getString(R.string.dynamic_friends);
-//	}
 
     /**
      * Override and set itself as persist activity.
@@ -320,22 +328,10 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
      */
     @Override
     protected boolean isPersistActivity() {
-//        mPosition = LeftMenuMapping.getPositionForActivity(this);
         return true;
     }
 
     private void setupActionButtons (boolean forApp) {
-//        showLeftActionBtn(true);
-//        showMiddleActionBtn(true);
-//        showRightActionBtn(true);
-//        overrideLeftActionBtn(R.drawable.actionbar_icon_search_normal, searchClickListener);
-//        overrideMiddleActionBtn(R.drawable.actionbar_icon_release_normal , composeStreamListener);
-//        if (forApp) {
-//            overrideRightActionBtn(R.drawable.bottom_app, appStreamListener);
-//        } else {
-//            overrideRightActionBtn(R.drawable.bottom_camera, photoStreamListener);
-//        }
-        
     	overrideRightActionBtn(R.drawable.ic_menu_moreoverflow, editProfileClick);
     	
         View searchView = findViewById(R.id.toggle_search);
@@ -430,9 +426,7 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
             }else {
             	Log.d(TAG, "have not orgazitaion Circles");
             }
-//            items.add(new SelectionItem("", getString(R.string.menu_title_search)));
-//            items.add(new SelectionItem("", getString(R.string.label_refresh)));
-//            items.add(new SelectionItem("", getString(R.string.wutong_home_picker_header)));
+
             showCorpusSelectionDialog(items);
         }
     };
@@ -478,14 +472,6 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
     		} catch (Exception e) {
     		}
     	}
-//        if(getString(R.string.label_refresh).equals(value)) {
-//            loadRefresh();
-//        }else if(getString(R.string.wutong_home_picker_header).equals(value)) {
-//        	HomePickerActivity.registerPickerListener(getClass().getName(), BpcPostsNewActivity.this);
-//            IntentUtil.gotoHomePickerActivity(BpcPostsNewActivity.this);
-//        }else if(getString(R.string.menu_title_search).equals(value)) {
-//        	loadSearch();
-//        }
     }
 
     @Override
@@ -506,16 +492,104 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         	loadSearch();
         }
     };
-    
-//    @Override
-//    public boolean onQueryTextSubmit(String query) {
-//    	Log.d(TAG, "IntentUtil onQueryTextSubmit: " + query);
-//    	if(query != null && query.length() > 0) {
-//    		IntentUtil.startSearchActivity(this, query, BpcSearchActivity.SEARCH_TYPE_STREAM);
-//		}else {
-//			Log.d(TAG, "onQueryTextSubmit, query is null " );
-//			ToastUtil.showShortToast(this, mHandler, R.string.search_recommend);
-//		}
-//    	return super.onQueryTextSubmit(query);
-//    }
+
+    // reside menu begin
+
+    private ResideMenu resideMenu;
+    private BpcPostsNewActivity mContext;
+    private ResideMenuItem itemHome;
+    private ResideMenuItem itemProfile;
+    private ResideMenuItem itemCalendar;
+    private ResideMenuItem itemSettings;
+
+    private void setUpMenu() {
+
+        // attach to current activity;
+        resideMenu = new ResideMenu(this);
+        resideMenu.setBackground(R.drawable.borqs_wutong);
+        resideMenu.attachToActivity(this);
+        resideMenu.setMenuListener(menuListener);
+        //valid scale factor is between 0.0f and 1.0f. leftmenu'width is 150dip.
+        resideMenu.setScaleValue(0.6f);
+
+        // create menu items;
+        itemHome     = new ResideMenuItem(this, R.drawable.actionbar_post,     "Home");
+        itemProfile  = new ResideMenuItem(this, R.drawable.default_user_icon,  "Profile");
+        itemCalendar = new ResideMenuItem(this, R.drawable.icon_album, "Calendar");
+        itemSettings = new ResideMenuItem(this, R.drawable.menu_setting, "Settings");
+
+        itemHome.setOnClickListener(this);
+        itemProfile.setOnClickListener(this);
+        itemCalendar.setOnClickListener(this);
+        itemSettings.setOnClickListener(this);
+
+        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
+        resideMenu.addMenuItem(itemProfile, ResideMenu.DIRECTION_LEFT);
+        resideMenu.addMenuItem(itemCalendar, ResideMenu.DIRECTION_RIGHT);
+        resideMenu.addMenuItem(itemSettings, ResideMenu.DIRECTION_RIGHT);
+
+        // You can disable a direction by setting ->
+        // resideMenu.setSwipeDirectionDisable(ResideMenu.DIRECTION_RIGHT);
+
+//        findViewById(R.id.title_bar_left_menu).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                resideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
+//            }
+//        });
+//        findViewById(R.id.title_bar_right_menu).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                resideMenu.openMenu(ResideMenu.DIRECTION_RIGHT);
+//            }
+//        });
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return resideMenu.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public void onClick(View view) {
+
+        if (view == itemHome){
+            changeFragment(new StreamListFragment());
+        }else if (view == itemProfile){
+            changeFragment(new UserProfileMainFragment());
+        }else if (view == itemCalendar){
+            changeFragment(new FriendsListFragment());
+        }else if (view == itemSettings){
+            changeFragment(new StreamListFragment());
+        }
+
+        resideMenu.closeMenu();
+    }
+
+    private ResideMenu.OnMenuListener menuListener = new ResideMenu.OnMenuListener() {
+        @Override
+        public void openMenu() {
+            Toast.makeText(mContext, "Menu is opened!", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void closeMenu() {
+            Toast.makeText(mContext, "Menu is closed!", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private void changeFragment(Fragment targetFragment){
+        resideMenu.clearIgnoredViewList();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_fragment, targetFragment, "fragment")
+                .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .commit();
+    }
+
+    // What good method is to access resideMenu？
+    public ResideMenu getResideMenu(){
+        return resideMenu;
+    }
+    // reside menu end
 }
