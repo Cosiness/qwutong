@@ -1,0 +1,1 @@
+vi src/com/borqs/common/util/IntentUtil.java src/com/borqs/common/view/LeftMenuListView.java src/com/borqs/qiupu/ui/SlidingMenuOverlayActivity.java src/com/borqs/qiupu/ui/bpc/BpcSettingsActivity.java src/com/borqs/qiupu/ui/bpc/MainSplashActivity.java

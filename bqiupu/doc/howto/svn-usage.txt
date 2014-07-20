@@ -1,0 +1,5 @@
+
+1. switch svn server
+# svn switch --relocate svn://from_ip svn://to_ip
+e.g. switch from 192.168.5.47 to 192.168.5.15
+# svn switch --relocate svn://192.168.5.47 svn://192.168.5.15
