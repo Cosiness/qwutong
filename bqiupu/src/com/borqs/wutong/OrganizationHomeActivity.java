@@ -1,13 +1,5 @@
 package com.borqs.wutong;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import twitter4j.PublicCircleRequestUser;
-import twitter4j.TwitterAdapter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterMethod;
-import twitter4j.UserCircle;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,7 +11,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -30,13 +21,10 @@ import android.widget.Toast;
 
 import com.borqs.account.service.AccountServiceUtils;
 import com.borqs.common.SelectionItem;
-import com.borqs.common.adapter.StreamFilpperFragmentAdapter;
 import com.borqs.common.listener.ActivityFinishListner;
 import com.borqs.common.util.DialogUtils;
 import com.borqs.common.util.IntentUtil;
 import com.borqs.common.view.CorpusSelectionItemView;
-import com.borqs.common.view.CustomViewPager;
-import com.borqs.common.view.CustomViewPager.CustomViewPagerListenter;
 import com.borqs.information.util.InformationUtils;
 import com.borqs.qiupu.QiupuApplication;
 import com.borqs.qiupu.QiupuConfig;
@@ -46,12 +34,20 @@ import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleCirclesColumns;
 import com.borqs.qiupu.fragment.StreamListFragment;
 import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
-import com.borqs.qiupu.fragment.StreamRightFlipperFragment.StreamRightFlipperCallBack;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import twitter4j.PublicCircleRequestUser;
+import twitter4j.TwitterAdapter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterMethod;
+import twitter4j.UserCircle;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,8 +58,7 @@ import com.borqs.qiupu.util.ToastUtil;
  */
 public class OrganizationHomeActivity extends BasicNavigationActivity implements 
         StreamListFragment.StreamListFragmentCallBack,
-        StreamRightFlipperCallBack,
-        HomePickerActivity.PickerInterface, ActivityFinishListner, CustomViewPagerListenter {
+        HomePickerActivity.PickerInterface, ActivityFinishListner {
 
     private static final String TAG = "OrganizationHomeActivity";
 
@@ -71,26 +66,26 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
 
     private UserCircle mCircle;
 //    private PublicCircleInfoFragment mCircleInfoFragment;
-    private StreamListFragment mHomeFragment;
-    private StreamRightFlipperFragment mRightFragment;
+//    private StreamListFragment mHomeFragment;
+//    private StreamRightFlipperFragment mRightFragment;
 
     StreamListFragment.MetaData mFragmentData = new StreamListFragment.MetaData();
     public static final int in_member_selectcode = 5555;
 
-    private final static int PAGE_STRAM = 0;
-    private final static int PAGE_RIGHT_INFO = 1;
-    private int mCurrentPage = PAGE_STRAM;
+//    private final static int PAGE_STRAM = 0;
+//    private final static int PAGE_RIGHT_INFO = 1;
+//    private int mCurrentPage = PAGE_STRAM;
     private BottomMoreQuickAction mMoreDialog;
     
-    private StreamFilpperFragmentAdapter mAdapter;
-    private CustomViewPager mPager;
+//    private StreamFilpperFragmentAdapter mAdapter;
+//    private CustomViewPager mPager;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         enableLeftNav(true);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.wutong_organization_home_activity);
+//        setContentView(R.layout.wutong_organization_home_activity);
 
         QiupuHelper.registerFinishListner(getClass().getName(), this);
         parseActivityIntent(getIntent());
@@ -118,58 +113,61 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
 
         final View foot = findViewById(R.id.bottom_actions_layout);
         
-        mAdapter = new StreamFilpperFragmentAdapter(getSupportFragmentManager(), this);
-        mPager = (CustomViewPager) findViewById(R.id.pager);
-        mPager.setAdapter(mAdapter);
-        mPager.setCurrentItem(mCurrentPage);
-        mPager.setListener(this);
-        mPager.setIndex(-1);
-        mPager.setOnPageChangeListener(new OnPageChangeListener() {
-			
-			@Override
-			public void onPageSelected(int pos) {
-				hideSearhView();
-				
-				if(pos == PAGE_RIGHT_INFO) {
-					mCurrentPage = PAGE_RIGHT_INFO;
-					mPager.setIndex(0);
-					if(mRightFragment != null) {
-						mRightFragment.setisCurrentScreen(true);
-					}
-					mAdapter.onScrollingBottomView(false, foot);
-				}else {
-					mCurrentPage = PAGE_STRAM;
-					mPager.setIndex(-1);
-					if(mRightFragment != null) {
-						mRightFragment.setisCurrentScreen(false);
-					}
-					
-					mAdapter.onScrollingBottomView(true, foot);
-				}
-			}
-			
-			@Override
-			public void onPageScrolled(int arg0, float arg1, int arg2) {
-			}
-			
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-			}
-		});
+//        mAdapter = new StreamFilpperFragmentAdapter(getSupportFragmentManager(), this);
+//        mPager = (CustomViewPager) findViewById(R.id.pager);
+//        mPager.setAdapter(mAdapter);
+//        mPager.setCurrentItem(mCurrentPage);
+//        mPager.setListener(this);
+//        mPager.setIndex(-1);
+//        mPager.setOnPageChangeListener(new OnPageChangeListener() {
+//
+//			@Override
+//			public void onPageSelected(int pos) {
+//				hideSearhView();
+//
+//				if(pos == PAGE_RIGHT_INFO) {
+//					mCurrentPage = PAGE_RIGHT_INFO;
+//					mPager.setIndex(0);
+//					if(mRightFragment != null) {
+//						mRightFragment.setisCurrentScreen(true);
+//					}
+//					mAdapter.onScrollingBottomView(false, foot);
+//				}else {
+//					mCurrentPage = PAGE_STRAM;
+//					mPager.setIndex(-1);
+//					if(mRightFragment != null) {
+//						mRightFragment.setisCurrentScreen(false);
+//					}
+//
+//					mAdapter.onScrollingBottomView(true, foot);
+//				}
+//			}
+//
+//			@Override
+//			public void onPageScrolled(int arg0, float arg1, int arg2) {
+//			}
+//
+//			@Override
+//			public void onPageScrollStateChanged(int arg0) {
+//			}
+//		});
         
-        View guide = findViewById(R.id.right_move_guide);
-        guide.setVisibility(orm.showRightMoveGuide() ? View.VISIBLE : View.GONE);
-        guide.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				orm.setShowRightMoveGuide(false);
-				v.setVisibility(View.GONE);
-			}
-		});
+//        View guide = findViewById(R.id.right_move_guide);
+//        guide.setVisibility(orm.showRightMoveGuide() ? View.VISIBLE : View.GONE);
+//        guide.setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				orm.setShowRightMoveGuide(false);
+//				v.setVisibility(View.GONE);
+//			}
+//		});
         
         orm.checkExpandCirCle();
-        
+
+        setUpMenu();
+//        changeFragment();
+
         mHandler.postDelayed(new Runnable() {
 			
 			@Override
@@ -219,9 +217,9 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
 
     @Override
     protected void loadRefresh() {
-        if(mHomeFragment != null) {
-        	mHomeFragment.loadRefresh();
-        }
+//        if(mHomeFragment != null) {
+//        	mHomeFragment.loadRefresh();
+//        }
     }
 
 //    @Override
@@ -244,9 +242,9 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
     protected void onDestroy() {
     	QiupuHelper.unregisterFinishListner(getClass().getName());
     	InformationUtils.unregisterNotificationListener(getClass().getName());
-    	if(mRightFragment != null) {
-    		mRightFragment.onDestroy();
-    	}
+//    	if(mRightFragment != null) {
+//    		mRightFragment.onDestroy();
+//    	}
         super.onDestroy();
     }
 
@@ -306,10 +304,10 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
         }
     };
 
-    @Override
-    public UserCircle getCircleInfo() {
-        return mCircle;
-    }
+//    @Override
+//    public UserCircle getCircleInfo() {
+//        return mCircle;
+//    }
 
     private void startComposeActivity() {
         boolean isAdmin = false;
@@ -407,9 +405,10 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
 //                	end();
                 	boolean ret = msg.getData().getBoolean(RESULT, false);
                 	if (ret) {
-                	    if(mRightFragment != null) {
-                	    	mRightFragment.refreshUI(mCircle);
-            			}
+//                	    if(mRightFragment != null) {
+//                	    	mRightFragment.refreshUI(mCircle);
+//            			}
+                        // todo: refresh current fragment?
                     } else {
                         ToastUtil.showShortToast(OrganizationHomeActivity.this, mHandler, R.string.get_info_failed);
                     }
@@ -809,9 +808,10 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
         long circleId = Long.parseLong(id);
         mFragmentData.mCircleId = circleId;
 
-        if (null != mHomeFragment) {
-        	mHomeFragment.switchCircle(circleId);
-        }
+        // todo: switch to target circle
+//        if (null != mHomeFragment) {
+//        	mHomeFragment.switchCircle(circleId);
+//        }
     }
     
     
@@ -855,45 +855,45 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
 
     @Override
     public boolean onQueryTextChange(String newText) {
-		if(mCurrentPage == PAGE_RIGHT_INFO) {
-			if(mRightFragment != null) {
-				mRightFragment.doSearch(newText);
-			}
-		}
+//		if(mCurrentPage == PAGE_RIGHT_INFO) {
+//			if(mRightFragment != null) {
+//				mRightFragment.doSearch(newText);
+//			}
+//		}
     	return super.onQueryTextChange(newText);
     }
     
-	@Override
-	public void getStreamRightFlipperFragment(
-			StreamRightFlipperFragment fragment) {
-		mRightFragment = fragment;
-	}
+//	@Override
+//	public void getStreamRightFlipperFragment(
+//			StreamRightFlipperFragment fragment) {
+//		mRightFragment = fragment;
+//	}
 
-	@Override
-	public CustomViewPager getParentViewPager() {
-		return mPager;
-	}
+//	@Override
+//	public CustomViewPager getParentViewPager() {
+//		return mPager;
+//	}
 
-	@Override
-	public void startSearch() {
-		showSearhView();
-	}
-
-	@Override
-	public void hidSearch() {
-		hideSearhView();
-	}
+//	@Override
+//	public void startSearch() {
+//		showSearhView();
+//	}
+//
+//	@Override
+//	public void hidSearch() {
+//		hideSearhView();
+//	}
 
 	@Override
 	public void finishActivity() {
 		finish();
 	}
 
-	@Override
-	public int getCurentIndex() {
-		if(mRightFragment != null) {
-			return mRightFragment.getCurrentIndex();
-		}
-		return -1;
-	}
+//	@Override
+//	public int getCurentIndex() {
+//		if(mRightFragment != null) {
+//			return mRightFragment.getCurrentIndex();
+//		}
+//		return -1;
+//	}
 }
