@@ -195,24 +195,6 @@
         <item name="bind_bindmany_errormessage">最多只能绑定3个电话或邮箱</item>
         </string-array>
 
-    <!-- left menu -->
-    <string-array name="left_menu_item_title">
-        <item name="dynamic_friends">动态</item>
-        <!-- <item name="personal_infomation">个人信息</item> -->
-        <item name="album">相册</item>
-        <!-- <item name="message_center">消息中心</item> -->
-        <!-- <item name="company">@string/company</item> -->
-        <item name="friends">@string/tab_friends</item>
-        <item name="friends_circle">圈子</item>
-        <item name="event">事件</item>
-        <item name="poll">投票</item>
-        <item name="find_friends">找人</item>
-        <!-- <item name="exchange_card">名片交换</item> -->
-        <!--<item name="dynamic_public">公共动态</item>-->
-        <!-- <item name="application_recomment">应用推荐</item> -->
-        <!-- <item name="options">选项</item> -->
-    </string-array>
-    
     <string-array name="user_detail_action">
         <item name="request_concern">求关注</item>
     	<item name="say_hi">打招呼</item>

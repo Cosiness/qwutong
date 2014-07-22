@@ -396,16 +396,16 @@
 
     <!-- left menu -->
     <string-array name="left_menu_item_title">
-        <item name="dynamic_friends">Feeds</item>
+        <item name="dynamic_friends">@string/tab_feed</item>
         <!-- <item name="personal_infomation">Profile</item> -->
-        <item name="album">Album</item>
+        <item name="album">@string/home_album</item>
         <!-- <item name="message_center">Message Center</item> -->
        <!--  <item name="company">@string/company</item> -->
         <item name="friends">@string/tab_friends</item>
-        <item name="friends_circle">Circles</item>
-        <item name="event">Events</item>
-        <item name="poll">Poll</item>
-        <item name="find_friends">Find Friends</item>
+        <item name="friends_circle">@string/user_circles</item>
+        <item name="event">@string/event</item>
+        <item name="poll">@string/poll</item>
+        <item name="find_friends">@string/find_friends</item>
         <!-- <item name="exchange_card">Exchange vCard</item> -->
         <!--<item name="dynamic_public">Public Feed</item>-->
         <!-- <item name="application_recomment">App Box</item> -->

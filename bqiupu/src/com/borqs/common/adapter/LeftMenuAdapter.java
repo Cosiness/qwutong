@@ -91,7 +91,8 @@ public class LeftMenuAdapter extends BaseAdapter {
             R.drawable.home_screen_photo_icon_default,/*R.drawable.home_screen_menu_request_icon_default,*/
             R.drawable.friend_group_icon,
             R.drawable.home_screen_menu_people_icon_default,
-            R.drawable.home_screen_even_icon, R.drawable.home_screen_voting_icon_default,
+            R.drawable.home_screen_event_icon,
+            R.drawable.home_screen_voting_icon_default,
             R.drawable.home_screen_menu_search_icon_default, /*R.drawable.home_screen_menu_exchange_icon_default,*/
                 /*R.drawable.home_screen_menu_public_icon_default,*/ /*R.drawable.home_screen_menu_app_icon_default,*/
                 /*R.drawable.home_screen_menu_option_icon_default*/};

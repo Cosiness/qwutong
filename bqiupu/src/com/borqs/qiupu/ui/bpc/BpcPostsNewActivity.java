@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import twitter4j.UserCircle;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -43,7 +42,6 @@ import com.borqs.qiupu.fragment.UserProfileMainFragment;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
-import com.borqs.qiupu.util.ToastUtil;
 import com.borqs.wutong.HomePickerActivity;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
@@ -494,16 +492,12 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
     };
 
     // reside menu begin
-
     private ResideMenu resideMenu;
     private BpcPostsNewActivity mContext;
-    private ResideMenuItem itemHome;
-    private ResideMenuItem itemProfile;
     private ResideMenuItem itemCalendar;
     private ResideMenuItem itemSettings;
 
     private void setUpMenu() {
-
         // attach to current activity;
         resideMenu = new ResideMenu(this);
         resideMenu.setBackground(R.drawable.menu_background);
@@ -513,18 +507,14 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         resideMenu.setScaleValue(0.6f);
 
         // create menu items;
-        itemHome     = new ResideMenuItem(this, R.drawable.actionbar_post,     "Home");
-        itemProfile  = new ResideMenuItem(this, R.drawable.default_user_icon,  "Profile");
+        createLeftMenuItems();
+
         itemCalendar = new ResideMenuItem(this, R.drawable.icon_album, "Calendar");
         itemSettings = new ResideMenuItem(this, R.drawable.menu_setting, "Settings");
 
-        itemHome.setOnClickListener(this);
-        itemProfile.setOnClickListener(this);
         itemCalendar.setOnClickListener(this);
         itemSettings.setOnClickListener(this);
 
-        resideMenu.addMenuItem(itemHome, ResideMenu.DIRECTION_LEFT);
-        resideMenu.addMenuItem(itemProfile, ResideMenu.DIRECTION_LEFT);
         resideMenu.addMenuItem(itemCalendar, ResideMenu.DIRECTION_RIGHT);
         resideMenu.addMenuItem(itemSettings, ResideMenu.DIRECTION_RIGHT);
 
@@ -552,11 +542,7 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
 
     @Override
     public void onClick(View view) {
-        if (view == itemHome){
-            changeFragment(new StreamListFragment());
-        }else if (view == itemProfile){
-            changeFragment(new UserProfileMainFragment());
-        }else if (view == itemCalendar){
+        if (view == itemCalendar){
             changeFragment(new FriendsListFragment());
         }else if (view == itemSettings){
             changeFragment(new StreamListFragment());
@@ -565,15 +551,44 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         resideMenu.closeMenu();
     }
 
+    private void createItem(int iconId, int labelId, final Class<?> fragmentClass) {
+        final ResideMenuItem item = new ResideMenuItem(this, iconId, labelId);
+        resideMenu.addMenuItem(item, ResideMenu.DIRECTION_LEFT);
+        item.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v == item) {
+                    try {
+                        changeFragment((Fragment)fragmentClass.newInstance());
+                        resideMenu.closeMenu();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    private void createLeftMenuItems() {
+        createItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, StreamListFragment.class);
+        createItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
+        createItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
+        createItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
+        createItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
+        createItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
+    }
+
     private ResideMenu.OnMenuListener menuListener = new ResideMenu.OnMenuListener() {
         @Override
         public void openMenu() {
-            Toast.makeText(mContext, "Menu is opened!", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext, "Menu is opened!", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void closeMenu() {
-            Toast.makeText(mContext, "Menu is closed!", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext, "Menu is closed!", Toast.LENGTH_SHORT).show();
         }
     };
 
