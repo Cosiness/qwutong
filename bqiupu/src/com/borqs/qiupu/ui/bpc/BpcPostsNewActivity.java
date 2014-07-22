@@ -506,7 +506,7 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
 
         // attach to current activity;
         resideMenu = new ResideMenu(this);
-        resideMenu.setBackground(R.drawable.borqs_wutong);
+        resideMenu.setBackground(R.drawable.menu_background);
         resideMenu.attachToActivity(this);
         resideMenu.setMenuListener(menuListener);
         //valid scale factor is between 0.0f and 1.0f. leftmenu'width is 150dip.
@@ -552,7 +552,6 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
 
     @Override
     public void onClick(View view) {
-
         if (view == itemHome){
             changeFragment(new StreamListFragment());
         }else if (view == itemProfile){
