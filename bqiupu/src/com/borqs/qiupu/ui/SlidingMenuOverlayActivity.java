@@ -375,7 +375,7 @@ public abstract class SlidingMenuOverlayActivity extends BasicActivity
         LayoutInflater factory = LayoutInflater.from(this);
         View convertView = factory.inflate(R.layout.left_menu_header_view, null);
         if (getPosition() == 0) {
-            convertView.setBackgroundResource(R.color.left_menu_press_background);
+            convertView.setBackgroundColor(R.color.left_menu_press_background);
         } else {
             convertView.setBackgroundResource(0);
         }

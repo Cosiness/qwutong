@@ -7155,7 +7155,12 @@ public class QiupuORM {
         ArrayList<ContentValues> bulkInsertList = new ArrayList<ContentValues>();
         String where = null;
         if(StringUtil.isValidString(pollList.get(0).target_id)) {
-        	where = PollColumns.TARGET + " = " + pollList.get(0).target_id;
+            String targets = pollList.get(0).target_id;
+            if (targets.contains(",")) {
+                where = PollColumns.TARGET + " in (" + targets + ")";
+            } else {
+                where = PollColumns.TARGET + " = " + targets;
+            }
         }
         int deleteCount = mContext.getContentResolver().delete(CIRCLE_POLL_URI, where, null);
         Log.d(TAG, "deleteCount = " + deleteCount + ", where = " + where);

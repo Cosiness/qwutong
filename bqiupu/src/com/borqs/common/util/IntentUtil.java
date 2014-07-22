@@ -1101,7 +1101,7 @@ public class IntentUtil {
 
     public static void gotoOrganisationHome(Context context, String cName, long cId) {
         if (null != context) {
-            final Intent intent = new Intent(context, BpcPostsNewActivity.class);
+            final Intent intent = new Intent(context, OrganizationHomeActivity.class);
             Bundle bundle = new Bundle();
             bundle.putString(CircleUtils.CIRCLE_NAME, cName);
             bundle.putLong(CircleUtils.CIRCLE_ID, cId);

@@ -29,7 +29,6 @@
 
     <include
             android:id="@id/bottom_actions_layout"
-            android:layout_alignParentBottom="true"
             layout="@layout/wutong_floating_compose_action_bar" />
     
     <ImageView android:id="@+id/right_move_guide"
