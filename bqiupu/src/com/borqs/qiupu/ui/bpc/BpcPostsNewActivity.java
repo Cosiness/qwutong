@@ -34,6 +34,7 @@ import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleColumns;
 import com.borqs.qiupu.fragment.StreamListFragment;
+import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
@@ -98,8 +99,7 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         });
 
 
-        setUpMenu();
-        changeFragment(new StreamListFragment());
+        setUpMenu(StreamListFragment.class);
     }
 
     @Override
@@ -483,4 +483,17 @@ public class BpcPostsNewActivity extends BasicNavigationActivity implements
         }
     };
 
+    protected void createRightMenuItems() {
+//        createRightItem(R.drawable.menu_setting, R.string.home_settings, StreamRightFlipperFragment.class);
+//        createRightItem(R.drawable.icon_album, R.string.home_others, StreamRightFlipperFragment.class);
+    }
+
+    protected void createLeftMenuItems() {
+        createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
+        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
+    }
 }

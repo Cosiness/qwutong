@@ -6,8 +6,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.borqs.qiupu.R;
-import com.borqs.qiupu.fragment.FriendsListFragment;
 import com.borqs.qiupu.fragment.StreamListFragment;
+import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
 
@@ -23,10 +23,10 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
     // reside menu begin
     private ResideMenu resideMenu;
     //    private BpcPostsNewActivity mContext;
-    private ResideMenuItem itemCalendar;
-    private ResideMenuItem itemSettings;
+//    private ResideMenuItem itemCalendar;
+//    private ResideMenuItem itemSettings;
 
-    protected void setUpMenu() {
+    protected void setUpMenu(Class<?> fragmentClass) {
         // attach to current activity;
         resideMenu = new ResideMenu(this);
         resideMenu.setBackground(R.drawable.menu_background);
@@ -38,14 +38,7 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
         // create menu items;
         createLeftMenuItems();
 
-        itemCalendar = new ResideMenuItem(this, R.drawable.icon_album, "Calendar");
-        itemSettings = new ResideMenuItem(this, R.drawable.menu_setting, "Settings");
-
-        itemCalendar.setOnClickListener(this);
-        itemSettings.setOnClickListener(this);
-
-        resideMenu.addMenuItem(itemCalendar, ResideMenu.DIRECTION_RIGHT);
-        resideMenu.addMenuItem(itemSettings, ResideMenu.DIRECTION_RIGHT);
+        createRightMenuItems();
 
         // You can disable a direction by setting ->
         // resideMenu.setSwipeDirectionDisable(ResideMenu.DIRECTION_RIGHT);
@@ -62,6 +55,13 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
 //                resideMenu.openMenu(ResideMenu.DIRECTION_RIGHT);
 //            }
 //        });
+        try {
+            changeFragment((Fragment)fragmentClass.newInstance());
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -69,20 +69,15 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
         return resideMenu.dispatchTouchEvent(ev);
     }
 
-    @Override
-    public void onClick(View view) {
-        if (view == itemCalendar){
-            changeFragment(new FriendsListFragment());
-        }else if (view == itemSettings){
-            changeFragment(new StreamListFragment());
-        }
-
-        resideMenu.closeMenu();
+    protected void createLeftItem(int iconId, int labelId, final Class<?> fragmentClass) {
+        createItem(iconId, labelId, ResideMenu.DIRECTION_LEFT, fragmentClass);
     }
-
-    private void createItem(int iconId, int labelId, final Class<?> fragmentClass) {
+    protected void createRightItem(int iconId, int labelId, final Class<?> fragmentClass) {
+        createItem(iconId, labelId, ResideMenu.DIRECTION_RIGHT, fragmentClass);
+    }
+    private void createItem(int iconId, int labelId, int type, final Class<?> fragmentClass) {
         final ResideMenuItem item = new ResideMenuItem(this, iconId, labelId);
-        resideMenu.addMenuItem(item, ResideMenu.DIRECTION_LEFT);
+        resideMenu.addMenuItem(item, type);
         item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,24 +95,27 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
         });
     }
 
-    private void createLeftMenuItems() {
-        createItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, StreamListFragment.class);
-        createItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
-        createItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
-        createItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
-        createItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
-        createItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
+    protected void createRightMenuItems() {
+    }
+
+    protected void createLeftMenuItems() {
+    }
+
+    protected void onResideMenuOpen() {
+    }
+
+    protected void onResideMenuClose() {
     }
 
     private ResideMenu.OnMenuListener menuListener = new ResideMenu.OnMenuListener() {
         @Override
         public void openMenu() {
-//            Toast.makeText(mContext, "Menu is opened!", Toast.LENGTH_SHORT).show();
+            onResideMenuOpen();
         }
 
         @Override
         public void closeMenu() {
-//            Toast.makeText(mContext, "Menu is closed!", Toast.LENGTH_SHORT).show();
+            onResideMenuClose();
         }
     };
 
