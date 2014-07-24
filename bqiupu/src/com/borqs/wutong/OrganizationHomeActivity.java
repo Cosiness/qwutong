@@ -33,12 +33,13 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleCirclesColumns;
-import com.borqs.qiupu.fragment.StreamListFragment;
+import com.borqs.qiupu.fragment.SimpleStreamListFragment;
 import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
+import com.borqs.wutong.utils.ServiceHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,7 +58,7 @@ import twitter4j.UserCircle;
  * To change this template use File | Settings | File Templates.
  */
 public class OrganizationHomeActivity extends BaseResideMenuActivity implements
-        StreamListFragment.StreamListFragmentCallBack,
+        SimpleStreamListFragment.StreamListFragmentCallBack,
         StreamRightFlipperFragment.StreamRightFlipperCallBack,
         HomePickerActivity.PickerInterface, ActivityFinishListner {
 
@@ -66,20 +67,11 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     private static final boolean FORCE_SHOW_DROPDOWN = false;
 
     private UserCircle mCircle;
-//    private PublicCircleInfoFragment mCircleInfoFragment;
-//    private StreamListFragment mHomeFragment;
-//    private StreamRightFlipperFragment mRightFragment;
 
-    StreamListFragment.MetaData mFragmentData = new StreamListFragment.MetaData();
+    SimpleStreamListFragment.MetaData mFragmentData = new SimpleStreamListFragment.MetaData();
     public static final int in_member_selectcode = 5555;
 
-//    private final static int PAGE_STRAM = 0;
-//    private final static int PAGE_RIGHT_INFO = 1;
-//    private int mCurrentPage = PAGE_STRAM;
     private BottomMoreQuickAction mMoreDialog;
-    
-//    private StreamFilpperFragmentAdapter mAdapter;
-//    private CustomViewPager mPager;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,61 +84,9 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         parseActivityIntent(getIntent());
         overrideRightActionBtn(R.drawable.home_screen_menu_people_icon_default, editProfileClick);
 
-//        final View foot = findViewById(R.id.bottom_actions_layout);
-        
-//        mAdapter = new StreamFilpperFragmentAdapter(getSupportFragmentManager(), this);
-//        mPager = (CustomViewPager) findViewById(R.id.pager);
-//        mPager.setAdapter(mAdapter);
-//        mPager.setCurrentItem(mCurrentPage);
-//        mPager.setListener(this);
-//        mPager.setIndex(-1);
-//        mPager.setOnPageChangeListener(new OnPageChangeListener() {
-//
-//			@Override
-//			public void onPageSelected(int pos) {
-//				hideSearhView();
-//
-//				if(pos == PAGE_RIGHT_INFO) {
-//					mCurrentPage = PAGE_RIGHT_INFO;
-//					mPager.setIndex(0);
-//					if(mRightFragment != null) {
-//						mRightFragment.setisCurrentScreen(true);
-//					}
-//					mAdapter.onScrollingBottomView(false, foot);
-//				}else {
-//					mCurrentPage = PAGE_STRAM;
-//					mPager.setIndex(-1);
-//					if(mRightFragment != null) {
-//						mRightFragment.setisCurrentScreen(false);
-//					}
-//
-//					mAdapter.onScrollingBottomView(true, foot);
-//				}
-//			}
-//
-//			@Override
-//			public void onPageScrolled(int arg0, float arg1, int arg2) {
-//			}
-//
-//			@Override
-//			public void onPageScrollStateChanged(int arg0) {
-//			}
-//		});
-        
-//        View guide = findViewById(R.id.right_move_guide);
-//        guide.setVisibility(orm.showRightMoveGuide() ? View.VISIBLE : View.GONE);
-//        guide.setOnClickListener(new OnClickListener() {
-//
-//			@Override
-//			public void onClick(View v) {
-//				orm.setShowRightMoveGuide(false);
-//				v.setVisibility(View.GONE);
-//			}
-//		});
-        
         orm.checkExpandCirCle();
 
-        setUpMenu(StreamListFragment.class);
+        setUpMenu(SimpleStreamListFragment.class);
 //        changeFragment();
         setupQuickAction();
 
@@ -188,8 +128,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
             mCircle.circleid = mFragmentData.mCircleId;
             mCircle.name = mFragmentData.mFragmentTitle;
         }
-
-//        showTitleSpinnerIcon(FORCE_SHOW_DROPDOWN || orm.existingChildCircles(mCircle.circleid));
     }
 
     @Override
@@ -204,14 +142,8 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 //        }
     }
 
-//    @Override
-//    protected void uiLoadEnd() {
-//        showLeftActionBtn(true);
-//        showProgressBtn(false);
-//    }
-
     @Override
-    public StreamListFragment.MetaData getFragmentMetaData(int index) {
+    public SimpleStreamListFragment.MetaData getFragmentMetaData(int index) {
         return mFragmentData;
     }
 
@@ -224,16 +156,12 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     protected void onDestroy() {
     	QiupuHelper.unregisterFinishListner(getClass().getName());
     	InformationUtils.unregisterNotificationListener(getClass().getName());
-//    	if(mRightFragment != null) {
-//    		mRightFragment.onDestroy();
-//    	}
         super.onDestroy();
     }
 
     View.OnClickListener editProfileClick = new View.OnClickListener() {
         public void onClick(View v) {
         	ArrayList<SelectionItem> items = new ArrayList<SelectionItem>();
-//        	items.add(new SelectionItem("", getString(R.string.home_label)));
         	items.add(new SelectionItem(String.valueOf(mCircle.circleid), mCircle.name));
             Cursor pOrgazitaionCircles = orm.queryInCircleCircles(mCircle.circleid);
             if(pOrgazitaionCircles != null) {
@@ -257,7 +185,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     View.OnClickListener gotoComposeListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-//        	gotoComposeAcitvity();
             startComposeActivity();
         }
     };
@@ -416,41 +343,28 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     	synchronized (mLockGetPublicInfo) {
     		inGetPublicInfo = true;
     	}
-//    	begin();
-    	
-    	asyncQiupu.syncPublicCirclInfo(AccountServiceUtils.getSessionID(), circleId, with_member, isEvent, new TwitterAdapter() {
-    		public void syncPublicCirclInfo(UserCircle circle) {
-    			Log.d(TAG, "finish syncPublicCirclInfo=" + circle.toString());
-    			
-    			mCircle = circle;
-    			if(mCircle.mGroup != null && PublicCircleRequestUser.isInGroup(mCircle.mGroup.role_in_group)) {
-    			    orm.insertOneCircle(mCircle);
-    			}
-    			
-    			// insert to circle_circles 
-    			if(mCircle.mGroup != null && mCircle.mGroup.parent_id > 0) {
-                	orm.insertOneCircleCircles(mCircle.mGroup.parent_id, mCircle);
+
+        ServiceHelper.syncPublicCirclInfo(AccountServiceUtils.getSessionID(), circleId, with_member, isEvent, new TwitterAdapter() {
+            public void syncPublicCirclInfo(UserCircle circle) {
+                Log.d(TAG, "finish syncPublicCirclInfo=" + circle.toString());
+
+                mCircle = circle;
+                if (mCircle.mGroup != null && PublicCircleRequestUser.isInGroup(mCircle.mGroup.role_in_group)) {
+                    orm.insertOneCircle(mCircle);
                 }
-    			
-    			onLoadingCircleReady("", true);
-//    			Message msg = mHandler.obtainMessage(GET_PUBLIC_CIRCLE_INFO_END);
-//    			msg.getData().putBoolean(RESULT, true);
-//    			msg.sendToTarget();
-//    			synchronized (mLockGetPublicInfo) {
-//    				inGetPublicInfo = false;
-//    			}
-    		}
-    		
-    		public void onException(TwitterException ex, TwitterMethod method) {
-    			onLoadingCircleReady(ex.getMessage(), false);
-//    		    synchronized (mLockGetPublicInfo) {
-//    				inGetPublicInfo = false;
-//    			}
-//    			Message msg = mHandler.obtainMessage(GET_PUBLIC_CIRCLE_INFO_END);
-//    			msg.getData().putBoolean(RESULT, false);
-//    			msg.sendToTarget();
-    		}
-    	});
+
+                // insert to circle_circles
+                if (mCircle.mGroup != null && mCircle.mGroup.parent_id > 0) {
+                    orm.insertOneCircleCircles(mCircle.mGroup.parent_id, mCircle);
+                }
+
+                onLoadingCircleReady("", true);
+            }
+
+            public void onException(TwitterException ex, TwitterMethod method) {
+                onLoadingCircleReady(ex.getMessage(), false);
+            }
+        });
     }
     
     private void onLoadingCircleReady(String promptText, boolean result) {
@@ -477,7 +391,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         }
         showDialog(DIALOG_SET_CIRCLE_PROCESS);
 
-        asyncQiupu.deletePublicCirclePeople(AccountServiceUtils.getSessionID(), circleid, userids, admins, new TwitterAdapter() {
+        ServiceHelper.deletePublicCirclePeople(AccountServiceUtils.getSessionID(), circleid, userids, admins, new TwitterAdapter() {
             public void deletePublicCirclePeople(boolean result) {
                 Log.d(TAG, "finish deletePublicCirclePeople=" + result);
                 if(result) {
@@ -486,8 +400,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
                         public void run() {
                             //delete circle in DB
                             orm.deleteCircleByCricleId(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circleid));
-                            //update user info
-//                            orm.updateUserInfoInCircle(AccountServiceUtils.getBorqsAccountID(), circleid, circleName);
                         }
                     });
                 }
@@ -524,7 +436,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
             inDeleteCircle = true;
         }
         showDialog(DIALOG_DELETE_CIRCLE_PROCESS);
-        asyncQiupu.deleteCircle(AccountServiceUtils.getSessionID(), String.valueOf(circle.circleid), type, new TwitterAdapter() {
+        ServiceHelper.deleteCircle(AccountServiceUtils.getSessionID(), String.valueOf(circle.circleid), type, new TwitterAdapter() {
             public void deleteCircle(boolean suc) {
                 Log.d(TAG, "finish deleteCircle=" + suc);
 
@@ -567,10 +479,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     		try {
     			if(value != null && TextUtils.isDigitsOnly(value)) {
     				long circleid = Long.parseLong(value);
-//    				if(circleid == mCircle.circleid) {
-//    					Log.d(TAG, "select same circle, do nothing.");
-//    					return ;
-//    				}
     				UserCircle uc = orm.queryOneCircleWithGroup(circleid);
     				IntentUtil.startPublicCircleDetailIntent(this, uc);
     				if(uc.mGroup != null && uc.mGroup.formal == UserCircle.circle_top_formal) {
@@ -886,12 +794,12 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     }
 
     protected void createLeftMenuItems() {
-        createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
-        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, SimpleStreamListFragment.class);
     }
 
     private void setupQuickAction() {

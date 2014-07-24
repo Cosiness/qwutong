@@ -134,6 +134,7 @@ import com.borqs.qiupu.util.SimpleCrypt;
 import com.borqs.qiupu.util.StatusNotification;
 import com.borqs.qiupu.util.StringUtil;
 import com.borqs.qiupu.util.ToastUtil;
+import com.borqs.wutong.utils.ServiceHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -172,7 +173,6 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
     protected Handler mBasicHandler;
     protected Handler mHandler;
     protected Application mApp;
-    public AsyncQiupu asyncQiupu;
 
     private TextView mTitle;
     protected TextView mSubTitle;
@@ -319,10 +319,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         orm = QiupuORM.getInstance(mApp);
         QiupuHelper.setORM(orm);//TODO only to test
 
-        asyncQiupu = new AsyncQiupu(ConfigurationContext.getInstance(), null, null);
-        asyncQiupu.attachAccountListener(this);
-
-
+        ServiceHelper.getInstance(this);
 
         createHandler();
 
@@ -1106,7 +1103,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
 
         try {
             final int versionCode = packageManager.getPackageInfo(pkgName, 0).versionCode;
-            asyncQiupu.getApkDetailInformation(ticket, pkgName, false, new TwitterAdapter() {
+            ServiceHelper.getApkDetailInformation(ticket, pkgName, false, new TwitterAdapter() {
                 public void getApkDetailInformation(ApkResponse info) {
                     if (QiupuConfig.LOGD) Log.d(TAG, "finish getApkDetailInformation info:" + info +
                             ", for :" + pkgName + ", version:" + versionCode);
@@ -1836,10 +1833,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
 
             resetActionListUi();
 
-            if (asyncQiupu == null) {
-                asyncQiupu = new AsyncQiupu(ConfigurationContext.getInstance(), null, null);
-                asyncQiupu.attachAccountListener(this);
-            }
+            ServiceHelper.attachAccountListener(this);
 
             loadRefresh();
 
@@ -2909,7 +2903,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
                         .setPositiveButton(getString(R.string.label_ok), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String text = message.getText().toString();
-                                AsyncApiUtils.sendApproveRequest(data.getLong("uid"), text, asyncQiupu,
+                                ServiceHelper.sendApproveRequest(data.getLong("uid"), text,
                                         new AsyncApiUtils.AsyncApiSendRequestCallBackListener() {
                                             @Override
                                             public void sendRequestCallBackBegin() {
@@ -3232,7 +3226,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
     }
 
     public void doRemoveFavorite(final ApkResponse apk) {
-        asyncQiupu.postRemoveFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
+        ServiceHelper.postRemoveFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
             public void postRemoveFavorite(boolean suc) {
                 Log.d(TAG, "finish postRemoveFavorite=" + suc);
 
@@ -3256,7 +3250,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
     }
 
     public void doAddFavorite(final ApkResponse apk) {
-        asyncQiupu.postAddFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
+        ServiceHelper.postAddFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
             public void postAddFavorite(boolean suc) {
                 Log.d(TAG, "finish postAddFavorite=" + suc);
 
@@ -3668,7 +3662,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
 
         showDialog(DIALOG_ADD_LIKE);
 
-        asyncQiupu.postLike(getSavedTicket(), targetId, type, adapter);
+        ServiceHelper.postLike(getSavedTicket(), targetId, type, adapter);
         return false;
     }
 
@@ -3707,7 +3701,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         }
         showDialog(DIALOG_REMOVE_LIKE);
 
-        asyncQiupu.postUnLike(getSavedTicket(), post_id, type, adapter);
+        ServiceHelper.postUnLike(getSavedTicket(), post_id, type, adapter);
         return false;
     }
 
@@ -3716,19 +3710,6 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         TwitterAdapter adapter = new TwitterAdapter() {
             public void postLike(boolean suc) {
                 Log.d(TAG, "createLike, targetId = " + targetId + ", suc = " + suc);
-
-//                comment.iLike = true;
-//                comment.like_count += 1;
-//
-//                if (null != comment.likerList.friends) {
-//                    QiupuSimpleUser user = new QiupuSimpleUser();
-//                    BorqsAccount account = AccountServiceUtils.getBorqsAccount();
-//                    user.uid = account.uid;
-//                    user.nick_name = account.nickname;
-//                    user.profile_image_url = "";
-//                    comment.likerList.friends.add(user);
-//                }
-
                 onLikeCreated(targetId, QiupuConfig.TYPE_COMMENT, suc);
             }
 
@@ -3745,17 +3726,6 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         TwitterAdapter adapter = new TwitterAdapter() {
             public void postUnLike(boolean suc) {
                 Log.d(TAG, "unLikeComment, targetId = " + targetId + ",  suc =" + suc);
-
-//                comment.iLike = false;
-//                comment.like_count -= 1;
-//                final int likerCount = null == comment.likerList.friends ? 0 : comment.likerList.friends.size();
-//                for (int i = 0; i < likerCount; ++i) {
-//                    QiupuSimpleUser user = comment.likerList.friends.get(i);
-//                    if (getSaveUid() == user.uid) {
-//                        comment.likerList.friends.remove(user);
-//                        break;
-//                    }
-//                }
 
                 onLikeRemoved(targetId, QiupuConfig.TYPE_COMMENT, suc);
             }
@@ -3784,14 +3754,10 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
 
         showDialog(DIALOG_SET_CIRCLE_PROCESS);
 
-        asyncQiupu.setTopList(getSavedTicket(), group_id, stream_id, setTop, new TwitterAdapter() {
+        ServiceHelper.setTopList(getSavedTicket(), group_id, stream_id, setTop, new TwitterAdapter() {
             public void setTopList(ArrayList<String> topIdList) {
                 Log.d(TAG, "finish setTopList() topIdList = " + topIdList);
 
-//                boolean result = false;
-//                if (topIdList != null && topIdList.contains(group_id)) {
-//                    result = true;
-//                }
                 synchronized (mLockTopList) {
                     mIsSetTopList = false;
                 }
@@ -3834,7 +3800,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
 
         showDialog(DIALOG_RETWEET);
 
-        asyncQiupu.postRetweet(getSavedTicket(), post_id, tos, addedContent, canComment, canLike,
+        ServiceHelper.postRetweet(getSavedTicket(), post_id, tos, addedContent, canComment, canLike,
                 canShare, privacy, new TwitterAdapter() {
             public void postRetweet(Stream retweet) {
                 Log.d(TAG, "finish post retweet.isPrivacy()=" + retweet.isPrivacy());
@@ -3864,7 +3830,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
 
         showDialog(DIALOG_SEND_EMAIL);
 
-        asyncQiupu.inviteWithMail(getSavedTicket(), phoneNumber, email, name, null, exchange_vcard, new TwitterAdapter() {
+        ServiceHelper.inviteWithMail(getSavedTicket(), phoneNumber, email, name, null, exchange_vcard, new TwitterAdapter() {
             public void inviteWithMail(boolean result) {
                 Log.d(TAG, "finish inviteWithEmail=" + result);
 
@@ -3945,7 +3911,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         }
         showSetCircleProcessDialog();
 
-        asyncQiupu.setCircle(getSavedTicket(), uid, circleid, new TwitterAdapter() {
+        ServiceHelper.setCircle(getSavedTicket(), uid, circleid, new TwitterAdapter() {
             public void setCircle(QiupuUser resultUser) {
                 Log.d(TAG, "finish setCircle=" + resultUser);
 
@@ -3989,7 +3955,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         }
         showSetCircleProcessDialog();
 
-        asyncQiupu.exchangeVcard(getSavedTicket(), uid, send_request, circleid, new TwitterAdapter() {
+        ServiceHelper.exchangeVcard(getSavedTicket(), uid, send_request, circleid, new TwitterAdapter() {
             public void exchangeVcard(QiupuUser resultUser) {
                 Log.d(TAG, "finish exchangeVcard=" + resultUser);
 
@@ -4040,7 +4006,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
             inloadRecommendcategory = true;
         }
 
-        asyncQiupu.getRecommendCategoryList(getSavedTicket(), false, new TwitterAdapter() {
+        ServiceHelper.getRecommendCategoryList(getSavedTicket(), false, new TwitterAdapter() {
             public void getRecommendCategoryList(ArrayList<RecommendHeadViewItemInfo> infolist) {
                 Log.d(TAG, "finish loadRecommendCategory");
 
@@ -4455,7 +4421,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
 
         Log.d(TAG, "mUserid :" + mUserid);
         begin();
-        asyncQiupu.getFriendsListPage(AccountServiceUtils.getSessionID(), mUserid, circles, page, count, isfollowing, new TwitterAdapter() {
+        ServiceHelper.getFriendsListPage(AccountServiceUtils.getSessionID(), mUserid, circles, page, count, isfollowing, new TwitterAdapter() {
             public void getFriendsList(List<QiupuUser> users) {
                 Log.d(TAG, "finish getFriendsList=" + users.size());
 
@@ -4528,7 +4494,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         }
         showDialog(DIALOG_CREATE_CIRCLE_PROCESS);
 
-        asyncQiupu.createCircle(AccountServiceUtils.getSessionID(), circleName,
+        ServiceHelper.createCircle(AccountServiceUtils.getSessionID(), circleName,
                 new TwitterAdapter() {
                     public void createCircle(long circleID) {
                         Log.d(TAG, "finish createCircle=" + circleID);
@@ -4665,7 +4631,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         }
         showDialog(DIALOG_SET_USER_PROCESS);
 
-        asyncQiupu.usersSet(getSavedTicket(), uid, circleid, isadd, new TwitterAdapter() {
+        ServiceHelper.usersSet(getSavedTicket(), uid, circleid, isadd, new TwitterAdapter() {
             public void usersSet(boolean result) {
                 Log.d(TAG, "finish usersSet :" + result);
 
@@ -4745,7 +4711,7 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
         synchronized (mEditInfoLock) {
             inEditProcess = true;
         }
-        asyncQiupu.updateUserInfo(AccountServiceUtils.getSessionID(), coloumsMap,
+        ServiceHelper.updateUserInfo(AccountServiceUtils.getSessionID(), coloumsMap,
                 new TwitterAdapter() {
                     public void updateUserInfo(boolean result) {
                         Log.d(TAG, "finish edit user profile");
@@ -4867,7 +4833,8 @@ public abstract class BaseActivity extends FragmentActivity implements ProgressI
             inloadingCircle = true;
         }
         begin();
-        asyncQiupu.getUserCircle(AccountServiceUtils.getSessionID(), AccountServiceUtils.getBorqsAccountID(), "", false, new TwitterAdapter() {
+        ServiceHelper.getUserCircle(AccountServiceUtils.getSessionID(), AccountServiceUtils.getBorqsAccountID(),
+                "", false, new TwitterAdapter() {
             public void getUserCircle(ArrayList<UserCircle> userCircles) {
                 Log.d(TAG, "finish getUserCircle= " + userCircles.size());
 

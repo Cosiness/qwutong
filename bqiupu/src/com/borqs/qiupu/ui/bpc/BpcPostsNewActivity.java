@@ -33,26 +33,22 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleColumns;
-import com.borqs.qiupu.fragment.StreamListFragment;
-import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
-import com.borqs.qiupu.ui.BasicNavigationActivity;
+import com.borqs.qiupu.fragment.SimpleStreamListFragment;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.wutong.BaseResideMenuActivity;
 import com.borqs.wutong.HomePickerActivity;
 
 public class BpcPostsNewActivity extends BaseResideMenuActivity implements
-        OnListItemClickListener, StreamListFragment.StreamListFragmentCallBack,
+        OnListItemClickListener, SimpleStreamListFragment.StreamListFragmentCallBack,
         HomePickerActivity.PickerInterface, View.OnClickListener {
 
 	private static final String TAG = "Qiupu.BpcPostsNewActivity";
 
     private static final boolean isLowPerformance = false || QiupuConfig.LowPerformance;
 
-    StreamListFragment.MetaData mFragmentData;
+    SimpleStreamListFragment.MetaData mFragmentData;
 
-//    StreamListFragment mStreamListFragment;
-    
     private BottomMoreQuickAction mMoreDialog;
 
     @Override
@@ -66,17 +62,9 @@ public class BpcPostsNewActivity extends BaseResideMenuActivity implements
 //        setContentView(R.layout.stream_fragment_activity);
 
         PushingServiceAgent.bindNotificationService(getApplicationContext());
-        
-     // Create the list fragment and add it as our sole content.
-//        mStreamListFragment = (StreamListFragment) getSupportFragmentManager().findFragmentById(R.id.stream_fragment);
-//        if (mStreamListFragment == null) {
-//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//            mStreamListFragment = new StreamListFragment();
-//            ft.add(R.id.embedded_fragment, mStreamListFragment).commit();
-//        }
-        
+
         if (savedInstanceState == null) {
-            mFragmentData  = new StreamListFragment.MetaData();
+            mFragmentData  = new SimpleStreamListFragment.MetaData();
         } else {
             unpackParcel(savedInstanceState);
         }
@@ -100,7 +88,7 @@ public class BpcPostsNewActivity extends BaseResideMenuActivity implements
         });
 
 
-        setUpMenu(StreamListFragment.class);
+        setUpMenu(SimpleStreamListFragment.class);
     }
 
     @Override
@@ -183,7 +171,7 @@ public class BpcPostsNewActivity extends BaseResideMenuActivity implements
 
     private void unpackParcel(Bundle inState) {
         if (null != inState) {
-            mFragmentData = (StreamListFragment.MetaData)inState.getParcelable(KET_FRAGMENT_DATA);
+            mFragmentData = (SimpleStreamListFragment.MetaData)inState.getParcelable(KET_FRAGMENT_DATA);
         }
     }
 
@@ -202,7 +190,7 @@ public class BpcPostsNewActivity extends BaseResideMenuActivity implements
     }
 
     @Override
-    public StreamListFragment.MetaData getFragmentMetaData(int index) {
+    public SimpleStreamListFragment.MetaData getFragmentMetaData(int index) {
         return mFragmentData;
     }
 
@@ -495,11 +483,11 @@ public class BpcPostsNewActivity extends BaseResideMenuActivity implements
     }
 
     protected void createLeftMenuItems() {
-        createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
-        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, SimpleStreamListFragment.class);
     }
 }
