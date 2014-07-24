@@ -63,7 +63,7 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 	private StreamRightAlbumViewUi mAlbumView;
 	private StreamRightCircleListViewUi mCirclelist;
 	
-	private CustomViewPager mPager;
+//	private CustomViewPager mPager;
 	private int mCurrentIndex = firstTab;
 
 	@Override
@@ -76,7 +76,7 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 			mCallBackListener = (StreamRightFlipperCallBack) activity;
 			mCallBackListener.getStreamRightFlipperFragment(this);
 			mCircle = mCallBackListener.getCircleInfo();
-			mPager = mCallBackListener.getParentViewPager();
+//			mPager = mCallBackListener.getParentViewPager();
 		}
 	}
 
@@ -143,6 +143,7 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 	public void onActivityCreated(Bundle savedInstanceState) {
 		Log.d(TAG, "onActivityCreated");
 		super.onActivityCreated(savedInstanceState);
+        setisCurrentScreen(true);
 	}
 
 	@Override
@@ -326,8 +327,7 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 	}
 
 	public interface StreamRightFlipperCallBack {
-		public void getStreamRightFlipperFragment(
-				StreamRightFlipperFragment fragment);
+		public void getStreamRightFlipperFragment(StreamRightFlipperFragment fragment);
 		public UserCircle getCircleInfo();
 		public CustomViewPager getParentViewPager();
 		public void startSearch();
@@ -391,11 +391,11 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 		if(mCallBackListener != null) {
 			mCallBackListener.hidSearch();
 		}
-		
+
 		mCurrentIndex = index;
-		if(mPager != null ) {
-			mPager.setIndex(index);
-		}
+//		if(mPager != null ) {
+//			mPager.setIndex(index);
+//		}
 	}
 
 	public void refreshUI(UserCircle circle) {

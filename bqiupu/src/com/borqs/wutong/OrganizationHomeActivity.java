@@ -25,6 +25,7 @@ import com.borqs.common.listener.ActivityFinishListner;
 import com.borqs.common.util.DialogUtils;
 import com.borqs.common.util.IntentUtil;
 import com.borqs.common.view.CorpusSelectionItemView;
+import com.borqs.common.view.CustomViewPager;
 import com.borqs.information.util.InformationUtils;
 import com.borqs.qiupu.QiupuApplication;
 import com.borqs.qiupu.QiupuConfig;
@@ -58,6 +59,7 @@ import twitter4j.UserCircle;
  */
 public class OrganizationHomeActivity extends BasicNavigationActivity implements 
         StreamListFragment.StreamListFragmentCallBack,
+        StreamRightFlipperFragment.StreamRightFlipperCallBack,
         HomePickerActivity.PickerInterface, ActivityFinishListner {
 
     private static final String TAG = "OrganizationHomeActivity";
@@ -90,26 +92,6 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
         QiupuHelper.registerFinishListner(getClass().getName(), this);
         parseActivityIntent(getIntent());
         overrideRightActionBtn(R.drawable.home_screen_menu_people_icon_default, editProfileClick);
-        
-        View actionView;
-        actionView = findViewById(R.id.toggle_search);
-        if (null != actionView) {
-            actionView.setVisibility(View.VISIBLE);
-            actionView.setOnClickListener(searchClickListener);
-        }
-        actionView = findViewById(R.id.toggle_photo);
-        if (null != actionView) {
-            actionView.setOnClickListener(mTogglePhotoListener);
-        }
-        actionView = findViewById(R.id.toggle_composer);
-        if (null != actionView) {
-            actionView.setOnClickListener(gotoComposeListener);
-        }
-        
-        actionView = findViewById(R.id.toggle_more);
-        if (null != actionView) {
-            actionView.setOnClickListener(showMoreActionListener);
-        }
 
 //        final View foot = findViewById(R.id.bottom_actions_layout);
         
@@ -167,6 +149,7 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
 
         setUpMenu(StreamListFragment.class);
 //        changeFragment();
+        setupQuickAction();
 
         mHandler.postDelayed(new Runnable() {
 			
@@ -177,7 +160,7 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
 			}
 		}, 1000);
     }
-	
+
     @Override
     protected void createHandler() {
         mHandler = new MainHandler();
@@ -304,10 +287,10 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
         }
     };
 
-//    @Override
-//    public UserCircle getCircleInfo() {
-//        return mCircle;
-//    }
+    @Override
+    public UserCircle getCircleInfo() {
+        return mCircle;
+    }
 
     private void startComposeActivity() {
         boolean isAdmin = false;
@@ -863,26 +846,26 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
     	return super.onQueryTextChange(newText);
     }
     
-//	@Override
-//	public void getStreamRightFlipperFragment(
-//			StreamRightFlipperFragment fragment) {
+	@Override
+	public void getStreamRightFlipperFragment(StreamRightFlipperFragment fragment) {
 //		mRightFragment = fragment;
-//	}
+	}
 
-//	@Override
-//	public CustomViewPager getParentViewPager() {
+	@Override
+	public CustomViewPager getParentViewPager() {
 //		return mPager;
-//	}
+        return null;
+	}
 
-//	@Override
-//	public void startSearch() {
+	@Override
+	public void startSearch() {
 //		showSearhView();
-//	}
-//
-//	@Override
-//	public void hidSearch() {
+	}
+
+	@Override
+	public void hidSearch() {
 //		hideSearhView();
-//	}
+	}
 
 	@Override
 	public void finishActivity() {
@@ -910,5 +893,27 @@ public class OrganizationHomeActivity extends BasicNavigationActivity implements
         createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
         createLeftItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
         createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
+    }
+
+    private void setupQuickAction() {
+        View actionView;
+        actionView = findViewById(R.id.toggle_search);
+        if (null != actionView) {
+            actionView.setVisibility(View.VISIBLE);
+            actionView.setOnClickListener(searchClickListener);
+        }
+        actionView = findViewById(R.id.toggle_photo);
+        if (null != actionView) {
+            actionView.setOnClickListener(mTogglePhotoListener);
+        }
+        actionView = findViewById(R.id.toggle_composer);
+        if (null != actionView) {
+            actionView.setOnClickListener(gotoComposeListener);
+        }
+
+        actionView = findViewById(R.id.toggle_more);
+        if (null != actionView) {
+            actionView.setOnClickListener(showMoreActionListener);
+        }
     }
 }

@@ -6,8 +6,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.borqs.qiupu.R;
-import com.borqs.qiupu.fragment.StreamListFragment;
-import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
 
@@ -29,7 +27,7 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
     protected void setUpMenu(Class<?> fragmentClass) {
         // attach to current activity;
         resideMenu = new ResideMenu(this);
-        resideMenu.setBackground(R.drawable.menu_background);
+        resideMenu.setBackground(R.drawable.img1);
         resideMenu.attachToActivity(this, R.layout.stream_fragment_activity);
         resideMenu.setMenuListener(menuListener);
         //valid scale factor is between 0.0f and 1.0f. leftmenu'width is 150dip.
@@ -83,7 +81,8 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
             public void onClick(View v) {
                 if (v == item) {
                     try {
-                        changeFragment((Fragment)fragmentClass.newInstance());
+                        Fragment fragment = (Fragment)fragmentClass.newInstance();
+                        changeFragment(fragment);
                         resideMenu.closeMenu();
                     } catch (InstantiationException e) {
                         e.printStackTrace();
