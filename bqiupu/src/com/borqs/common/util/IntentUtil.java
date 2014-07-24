@@ -1148,7 +1148,7 @@ public class IntentUtil {
             try {
                 context.startActivity(i);
             } catch (Exception e) {
-                Toast.makeText(context, e.toString(), 3500).show();
+                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
             }
         }
     }

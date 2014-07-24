@@ -6,9 +6,12 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.borqs.qiupu.R;
+import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
+
+import twitter4j.AsyncQiupu;
 
 /**
  * Created with IntelliJ IDEA.
@@ -129,9 +132,14 @@ public abstract class BaseResideMenuActivity extends BasicActivity {
     }
 
     // What good method is to access resideMenu？
-    public ResideMenu getResideMenu(){
-        return resideMenu;
-    }
+//    public ResideMenu getResideMenu(){
+//        return resideMenu;
+//    }
     // reside menu end
+
+    // hide the scope of parent's members that shuld be isolate, begin
+    private QiupuORM orm;
+    private AsyncQiupu asyncQiupu;
+    // hidden code end.
 }
 
