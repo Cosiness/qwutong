@@ -1,19 +1,6 @@
 package com.borqs.qiupu.fragment;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
-import twitter4j.Stream;
-import twitter4j.TwitterAdapter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterMethod;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +29,21 @@ import com.borqs.qiupu.cache.StreamCacheManager;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.bpc.BpcPostsFilterActivity;
 import com.borqs.qiupu.util.ToastUtil;
+import com.borqs.wutong.utils.ServiceHelper;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import twitter4j.Stream;
+import twitter4j.TwitterAdapter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterMethod;
 
 public class StreamListFragment extends AbstractStreamListFragment implements
         OlderPostsLoader,
@@ -70,8 +72,8 @@ public class StreamListFragment extends AbstractStreamListFragment implements
             out.writeInt(mFromHome);
         }
 
-        public static final Parcelable.Creator<MetaData> CREATOR
-                = new Parcelable.Creator<MetaData>() {
+        public static final Creator<MetaData> CREATOR
+                = new Creator<MetaData>() {
             public MetaData createFromParcel(Parcel in) {
                 return new MetaData(in);
             }
@@ -481,11 +483,6 @@ public class StreamListFragment extends AbstractStreamListFragment implements
             Log.d(TAG, "getStream, in loading stream");
             return;
         }
-        
-        if(((BasicActivity)getActivity()).asyncQiupu == null)
-        {
-        	return;
-        }
 
         begin();
         Log.d(TAG, "getStream, time = " + prelasttime + ", flag = " + newpost);
@@ -498,49 +495,50 @@ public class StreamListFragment extends AbstractStreamListFragment implements
         mergeLoadingIdBeforeGetStream();
 
         final String appKey = mMetaData.mSourceAppKey > 0 ? String.valueOf(mMetaData.mSourceAppKey) : "";
-        ((BasicActivity)getActivity()).asyncQiupu.getPostTimeLine(AccountServiceUtils.getSessionID(), mMetaData.mUserId,
+        ServiceHelper.getPostTimeLine(AccountServiceUtils.getSessionID(), mMetaData.mUserId,
                 mLoadingCircleId, pagesize, String.valueOf(prelasttime), newpost, appKey,
-                mFilterType,mLoadingCategoryId,mMetaData.mFromHome, new TwitterAdapter() {
-            public void getPostTimeLine(final List<Stream> posts) {
-                if (QiupuConfig.LOGD) Log.d(TAG, "finish getStream posts:");
-                boolean outdated = true;
-                int updatedCount = 0;
-                if (isLoadingIdEqualPendingId()) {
-                    if (posts != null) {
-                        updatedCount = posts.size();
-                        if (updatedCount == 0 && !newpost) {
-                            mOldestLoaded = true;
-                        } else if (mForceRefresh && newpost) {
-                            mOldestLoaded = false;
+                mFilterType, mLoadingCategoryId, mMetaData.mFromHome, new TwitterAdapter() {
+                    public void getPostTimeLine(final List<Stream> posts) {
+                        if (QiupuConfig.LOGD) Log.d(TAG, "finish getStream posts:");
+                        boolean outdated = true;
+                        int updatedCount = 0;
+                        if (isLoadingIdEqualPendingId()) {
+                            if (posts != null) {
+                                updatedCount = posts.size();
+                                if (updatedCount == 0 && !newpost) {
+                                    mOldestLoaded = true;
+                                } else if (mForceRefresh && newpost) {
+                                    mOldestLoaded = false;
+                                }
+
+                                //TODO temp fix
+                                if (newpost) {
+                                    outdated = getLastViewCount(posts, mForceRefresh);
+                                } else {
+                                    outdated = getPreviousViewCount(posts);
+                                }
+                            }
+                            mForceRefresh = false;
+                            if (outdated) {
+                                mIsDirty = true;
+                                InformationReadCache.ReadStreamCache.cache(posts);
+                            }
                         }
 
-                        //TODO temp fix
-                        if (newpost) {
-                            outdated = getLastViewCount(posts, mForceRefresh);
-                        } else {
-                            outdated = getPreviousViewCount(posts);
+
+                        onLoadingReady("", outdated);
+                    }
+
+                    public void onException(TwitterException ex, TwitterMethod method) {
+                        TwitterExceptionUtils.printException(TAG, "getStream, server exception:", ex, method);
+
+                        if (mForceRefresh) {
+                            getLastViewCount(new ArrayList<Stream>(), mForceRefresh);
                         }
-                    }
-                    mForceRefresh = false;
-                    if (outdated) {
-                    	mIsDirty = true;
-                        InformationReadCache.ReadStreamCache.cache(posts);
+                        onLoadingReady(ex.getMessage(), false);
                     }
                 }
-
-
-                onLoadingReady("", outdated);
-            }
-
-            public void onException(TwitterException ex, TwitterMethod method) {
-                TwitterExceptionUtils.printException(TAG, "getStream, server exception:", ex, method);
-
-                if (mForceRefresh) {
-                    getLastViewCount(new ArrayList<Stream>(), mForceRefresh);
-                }
-                onLoadingReady(ex.getMessage(), false);
-            }
-        });
+        );
     }
 
     private boolean getPreviousViewCount(final List<Stream> streams) {

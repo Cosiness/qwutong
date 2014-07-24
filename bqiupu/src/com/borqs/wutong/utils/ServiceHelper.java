@@ -30,6 +30,9 @@ public class ServiceHelper {
     }
 
     private AsyncQiupu asyncQiupu;
+    public static AsyncQiupu getAsyncHandle() {
+        return getInstance().asyncQiupu;
+    }
 
     public static ServiceHelper getInstance(AccountListener listener) {
         getInstance();
@@ -158,5 +161,9 @@ public class ServiceHelper {
 
     public static void deleteCircle(String sessionID, String circleId, int type, TwitterAdapter twitterAdapter) {
         getInstance().asyncQiupu.deleteCircle(sessionID, circleId, type, twitterAdapter);
+    }
+
+    public static void getPostTop(String sessionID, long id, TwitterAdapter twitterAdapter) {
+        getInstance().asyncQiupu.getPostTop(sessionID, id, twitterAdapter);
     }
 }

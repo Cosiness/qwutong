@@ -1,29 +1,5 @@
 package com.borqs.qiupu.ui;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import com.borqs.qiupu.util.*;
-
-import twitter4j.ApkResponse;
-import twitter4j.AsyncQiupu;
-import twitter4j.ErrorResponse;
-import twitter4j.QiupuUser;
-import twitter4j.RecommendHeadViewItemInfo;
-import twitter4j.Stream;
-import twitter4j.TwitterAdapter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterMethod;
-import twitter4j.UserCircle;
-import twitter4j.conf.ConfigurationBase;
-import twitter4j.conf.ConfigurationContext;
-import twitter4j.internal.http.HttpClientImpl;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.ActionBar;
@@ -57,7 +33,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.preference.PreferenceActivity;
-import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.PhoneLookup;
@@ -130,7 +105,6 @@ import com.borqs.qiupu.QiupuConfig;
 import com.borqs.qiupu.QiupuMessage;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.UserAccountObserver;
-import com.borqs.qiupu.cache.AnimationImageRun;
 import com.borqs.qiupu.cache.ImageCacheManager;
 import com.borqs.qiupu.cache.ImageRun;
 import com.borqs.qiupu.cache.QiupuHelper;
@@ -151,7 +125,36 @@ import com.borqs.qiupu.ui.bpc.UserCircleDetailActivity;
 import com.borqs.qiupu.ui.bpc.UserProfileFragmentActivity;
 import com.borqs.qiupu.ui.bpc.UsersArrayListActivity;
 import com.borqs.qiupu.ui.bpc.UsersCursorListActivity;
+import com.borqs.qiupu.util.BaiduLocationProxy;
+import com.borqs.qiupu.util.LocationUtils;
+import com.borqs.qiupu.util.SimpleCrypt;
+import com.borqs.qiupu.util.StatusNotification;
+import com.borqs.qiupu.util.StringUtil;
+import com.borqs.qiupu.util.ToastUtil;
 import com.borqs.wutong.OrganizationHomeActivity;
+import com.borqs.wutong.utils.ServiceHelper;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import twitter4j.ApkResponse;
+import twitter4j.AsyncQiupu;
+import twitter4j.ErrorResponse;
+import twitter4j.QiupuUser;
+import twitter4j.RecommendHeadViewItemInfo;
+import twitter4j.Stream;
+import twitter4j.TwitterAdapter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterMethod;
+import twitter4j.UserCircle;
+import twitter4j.conf.ConfigurationBase;
+import twitter4j.internal.http.HttpClientImpl;
 
 public abstract class BasicActivity extends FragmentActivity implements ProgressInterface,
         OnClickListener, LocationRequest.IFLocationListener,
@@ -159,7 +162,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         FriendsActionListner, AccountService.IOnAccountLogin,
         LeftNavigationView.LeftNavigationListener, LikeListener,
         BaiduLocationProxy.LocationListener,
-        com.borqs.common.view.SearchView.OnQueryTextListener,
+        SearchView.OnQueryTextListener,
         AbstractStreamRowView.SetTopInterface {
     private static final String TAG = "Qiupu.BasicActivity";
 
@@ -167,11 +170,10 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected Handler mBasicHandler;
     protected Handler mHandler;
     protected Application mApp;
-    public AsyncQiupu asyncQiupu;
 
     private TextView mTitle;
     protected TextView mSubTitle;
-    
+
     private TextView mTitleActionText;
 
 
@@ -179,7 +181,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected ImageView mLeftActionBtn;
     protected ImageView mRightActionBtn;
     protected ImageView mMiddleActionBtn;
-    
+
     protected MenuItem mLeftActionBtnMenu;
     protected MenuItem mRightActionBtnMenu;
     protected MenuItem mMiddleActionBtnMenu;
@@ -265,14 +267,14 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     {
     	supportLeftNavigation = enable;
     }
-    
+
     protected void enableTitleNtf(boolean enable) {
     	mIsShowNtf = enable;
     }
 
     private static HandlerThread sWorkerThread = null;
 	public static Handler sWorker = null;
-	
+
 	private synchronized void initUIThread()
 	{
 		if(sWorkerThread == null)
@@ -288,8 +290,8 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 	//
 	protected boolean isUsingActionBar()
 	{
-		return false && supportLeftNavigation == false && fromtab == false && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;			
-	}   
+		return false && supportLeftNavigation == false && fromtab == false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+	}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -297,9 +299,9 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         QiupuConfig.enableStrictMode();
 
         super.onCreate(savedInstanceState);
-        
+
         //QiupuORM.setIsSupportLeftNavigativon(this, supportLeftNavigation);
-        
+
         fromtab = getIntent().getBooleanExtra("fromtab", false);
         fromHome = getIntent().getBooleanExtra("from_home", false);
 
@@ -310,14 +312,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         if (!QiupuService.verifyAccountLogin(mApp)) {
             AccountServiceConnectObserver.registerAccountServiceConnectListener(getClass().getName(), this);
         }
-        
+
         orm = QiupuORM.getInstance(mApp);
         QiupuHelper.setORM(orm);//TODO only to test
 
-        asyncQiupu = new AsyncQiupu(ConfigurationContext.getInstance(), null, null);
-        asyncQiupu.attachAccountListener(this);
-        
-       
+        ServiceHelper.getInstance(this);
 
         createHandler();
 
@@ -346,10 +345,12 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         UserAccountObserver.registerAccountListener(getClass().getName(), this);
 
         notify = new StatusNotification(this);
-        
+
         if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
             mLeftNavigationCallBack.get().onCreate();
         }
+
+        setupLetencyStaff();
     }
 
     protected void setupLocationListener() {
@@ -388,7 +389,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     protected void getPoiFailed() {
-        
+
     }
 
     @Override
@@ -397,7 +398,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     protected void updatePoi(final String poiJson) {
-        
+
     }
 
     public void updateLocationWithBaiduApi(final BDLocation loc, final String address, final String locString) {
@@ -478,11 +479,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     protected void getGLocationFailed() {
-        
+
     }
 
     protected void getGLocationSucceed() {
-        
+
     }
 
     protected void locationUpdated(String mapUrl, String locString) {
@@ -490,7 +491,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     protected void getLocationSucceed(String locString) {
-        
+
     }
 
     protected void getLocationFailed(int errorType) {
@@ -548,17 +549,17 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     public QiupuORM getORM() {
         return orm;
     }
-    
+
     @Override
     public boolean onSearchRequested() {
     	return super.onSearchRequested();
     }
-    
+
     @Override
     public boolean onQueryTextChange(String newText) {
     	return true;
     }
-    
+
     @Override
     public boolean onQueryTextSubmit(String query, int searchType) {
     	if(searchType == BpcSearchActivity.SEARCH_TYPE_CIRCLE) {
@@ -568,9 +569,9 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     	}else if(searchType == BpcSearchActivity.SEARCH_TYPE_STREAM) {
     		IntentUtil.startSearchActivity(this, query, BpcSearchActivity.SEARCH_TYPE_STREAM, -1);
     	}else {
-    		Log.d(TAG, "search no type , IntentUtil onQueryTextSubmit: " + query + " searchtype: " + searchType);    		
+    		Log.d(TAG, "search no type , IntentUtil onQueryTextSubmit: " + query + " searchtype: " + searchType);
     	}
-    	
+
     	return false;
     }
 
@@ -589,7 +590,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         switch (action) {
             case MotionEvent.ACTION_MOVE:
-//            	float span = ev.getX() -  mDownMotionX;            	  
+//            	float span = ev.getX() -  mDownMotionX;
 //            	if(Math.abs(span) > 100)
 //            	{
 //            		if(span < 0)
@@ -740,7 +741,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 menu.findItem(R.id.bpc_item_delete).setVisible(false);
             }
 
-            
+
             if (needShow) {
                 menu.setHeaderIcon(R.drawable.main_stream);
                 final String titleText = String.format(getString(R.string.context_menu_comment_title),
@@ -926,7 +927,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         mLeftActionBtnMenu   = menu.findItem(R.id.menu_left);
         mMiddleActionBtnMenu = menu.findItem(R.id.menu_middle);
         mRightActionBtnMenu  = menu.findItem(R.id.menu_right);
-        
+
         return true;
     }
 
@@ -937,7 +938,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         mLeftActionBtnMenu   = menu.findItem(R.id.menu_left);
         mMiddleActionBtnMenu = menu.findItem(R.id.menu_middle);
         mRightActionBtnMenu  = menu.findItem(R.id.menu_right);
-        
+
         // process main UI activity
         if (BpcFriendsActivity.class.isInstance(this)
                 || BpcFriendsFragmentActivity.class.isInstance(this)) {
@@ -968,7 +969,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             menu.findItem(R.id.menu_share_qiupu).setVisible(false);
             menu.findItem(R.id.menu_feedback).setVisible(false);
             menu.findItem(R.id.menu_version_check).setVisible(false);
-        } else if (BpcPostsNewActivity.class.isInstance(this) 
+        } else if (BpcPostsNewActivity.class.isInstance(this)
         		|| OrganizationHomeActivity.class.isInstance(this)) {
 
             if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
@@ -1016,7 +1017,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 return performGoHomeAction();
         	}
         }
-        
+
         if (i == R.id.menu_refresh) {
             loadRefresh();
 
@@ -1101,7 +1102,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         try {
             final int versionCode = packageManager.getPackageInfo(pkgName, 0).versionCode;
-            asyncQiupu.getApkDetailInformation(ticket, pkgName, false, new TwitterAdapter() {
+            ServiceHelper.getApkDetailInformation(ticket, pkgName, false, new TwitterAdapter() {
                 public void getApkDetailInformation(ApkResponse info) {
                     if (QiupuConfig.LOGD) Log.d(TAG, "finish getApkDetailInformation info:" + info +
                             ", for :" + pkgName + ", version:" + versionCode);
@@ -1123,7 +1124,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                     } else {
                         haveNewVersion = false;
                     }
-                    
+
                     Message msg = mBasicHandler.obtainMessage(QiupuMessage.MESSAGE_CHECK_UPDATE_QIUPU_END);
                     msg.getData().putBoolean(RESULT, true);
                     msg.getData().putBoolean(INIT_CHECKED, initCheck);
@@ -1184,7 +1185,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     protected boolean isFromTabView() {
         return fromtab;
-    }   
+    }
 
     protected static boolean isEmpty(String msg) {
         return msg == null || msg.length() == 0;
@@ -1257,7 +1258,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     protected void setCommentSettingListener() {
-        
+
     }
 
     protected void shareAction() {
@@ -1302,7 +1303,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         QiupuHelper.updateDropDownDialogUI(newConfig);
-        boolean isUsingActionBar = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;
+        boolean isUsingActionBar = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
         if (isUsingActionBar) {
             invalidateOptionsMenu();
             return;
@@ -1326,7 +1327,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                         }
                 }
         }
-        
+
     }
 
 	@Override
@@ -1340,9 +1341,9 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 skip = inflateNavigatingContentView(layoutResID);
             }
         }
-        
+
         if(mIsShowNtf) {
-        	overrideSlideIcon(R.drawable.ic_back_holo_dark, new View.OnClickListener() {
+        	overrideSlideIcon(R.drawable.ic_back_holo_dark, new OnClickListener() {
                 public void onClick(View v) {
                     finish();
                 }
@@ -1358,7 +1359,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             initActionBarContent();
 
             if (fromtab == false) {
-                showSlideToggle(parent, new View.OnClickListener() {
+                showSlideToggle(parent, new OnClickListener() {
                     public void onClick(View v) {
                         finish();
                     }
@@ -1382,7 +1383,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         return false;
     }
 
-    protected void showSlideToggle(View.OnClickListener listener) {
+    protected void showSlideToggle(OnClickListener listener) {
         showSlideToggle(getWindow().getDecorView(), listener);
     }
 
@@ -1398,7 +1399,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             }
         }
     }
-    
+
     protected void overrideSlideIcon(int resId, OnClickListener listener) {
     	ImageView slideToggle = (ImageView) findViewById(R.id.img_slide);
     	if(null != slideToggle) {
@@ -1485,26 +1486,26 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         Intent abouttent = new Intent(this, AboutActivity.class);
         startActivity(abouttent);
     }
-    
+
     public void closeSlider() {
 //        View scrollView = findViewById(R.id.myScrollView);
 //        if (scrollView != null) {
 //            ((AllScrolllScreen) scrollView).CloseSlider();
 //        }
     }
-    
+
     public void openSlider() {
 //        View scrollView = findViewById(R.id.myScrollView);
 //        if (scrollView != null) {
 //            ((AllScrolllScreen) scrollView).OpenSlider();
 //        }
     }
-    
+
     public void finishCurrentActivity()
     {
     	finish();
     }
-    
+
     public boolean isShowNotification()
     {
     	return true;
@@ -1549,7 +1550,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 } else {
 
                     if (StringUtil.isValidEmail(dataArray[i])) {
-                        info.display_name_primary = getContactNameByPrimaryColumn(dataArray[i], ContactsContract.CommonDataKinds.Email._ID);
+                        info.display_name_primary = getContactNameByPrimaryColumn(dataArray[i], Email._ID);
                         info.email = dataArray[i];
                         emailList.add(info);
                     } else {
@@ -1595,11 +1596,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         if (mRightActionBtn != null) mRightActionBtn.setOnClickListener(this);
     }
 
-    protected void overrideRightActionBtn(int drawableid, final View.OnClickListener click) {
+    protected void overrideRightActionBtn(int drawableid, final OnClickListener click) {
         if(isUsingActionBar() && getActionBar() != null)
         {
             mRightActionBtnMenu.setIcon(drawableid);
-            mRightActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {                
+            mRightActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
                     click.onClick(null);
                     return false;
@@ -1614,12 +1615,12 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             }
         }
     }
-    
-    protected void overrideMiddleActionBtn(int drawableid, final View.OnClickListener click) {
+
+    protected void overrideMiddleActionBtn(int drawableid, final OnClickListener click) {
         if(isUsingActionBar() && getActionBar() != null)
         {
             mMiddleActionBtnMenu.setIcon(drawableid);
-            mMiddleActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {                
+            mMiddleActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
                     click.onClick(null);
                     return false;
@@ -1641,14 +1642,14 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     protected void setToggleClickListener(View slideToggle) {
-        
+
     }
 
-    protected void overrideEditTitleActionBtn(int drawableid, final View.OnClickListener click) {
+    protected void overrideEditTitleActionBtn(int drawableid, final OnClickListener click) {
         if(isUsingActionBar() && getActionBar() != null)
         {
 //            mLeftActionBtnMenu.setIcon(drawableid);
-//            mLeftActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {                
+//            mLeftActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
 //                public boolean onMenuItemClick(MenuItem item) {
 //                    click.onClick(null);
 //                    return false;
@@ -1662,11 +1663,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
     }
 
-    protected void overrideLeftActionBtn(int drawableid, final View.OnClickListener click) {
+    protected void overrideLeftActionBtn(int drawableid, final OnClickListener click) {
         if(isUsingActionBar() && getActionBar() != null)
         {
             mLeftActionBtnMenu.setIcon(drawableid);
-            mLeftActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {                
+            mLeftActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
                     click.onClick(null);
                     return false;
@@ -1680,13 +1681,13 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
     }
 
-    protected void overrideRightTextActionBtn(int textid, final View.OnClickListener click) {
+    protected void overrideRightTextActionBtn(int textid, final OnClickListener click) {
         if (mTitleActionText != null) {
             mTitleActionText.setText(textid);
             mTitleActionText.setOnClickListener(click);
         }
     }
-    
+
     protected void setHeadTitle(final String title) {
         mBasicHandler.post(new Runnable() {
             public void run() {
@@ -1700,7 +1701,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 	                    mTitle.setText(title);
 	                else
 	                	setTitle(title);
-            	}                
+            	}
             }
         });
     }
@@ -1722,7 +1723,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     		}
     	});
     }
-    
+
     protected void setSubTitle(final String title) {
     	mBasicHandler.post(new Runnable() {
     		public void run() {
@@ -1733,7 +1734,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     		}
     	});
     }
-    
+
     protected void setSubTitle(final int resid) {
         mBasicHandler.post(new Runnable() {
             public void run() {
@@ -1744,7 +1745,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             }
         });
     }
-    
+
     protected void showTitleSpinnerIcon(boolean flag) {
         if(flag) {
 //            mTitle.setCompoundDrawablesWithIntrinsicBounds(null, null, getResources().getDrawable(R.drawable.spinner_ab_default_holo_light), null);
@@ -1761,7 +1762,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         AccountServiceConnectObserver.unregisterAccountServiceConnectListener(getClass().getName());
         UserAccountObserver.unregisterAccountListener(getClass().getName());
-        
+
         if (QiupuConfig.IS_USE_BAIDU_LOCATION_API == false) {
             LocationRequest.instance().setLocationListener(null);
         }
@@ -1782,17 +1783,17 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         // comment out while it might be crash from sub class.
         // asyncQiupu = null;
         notify     = null;
-        
+
         //
         //no remove will crash
         //orm = null;
         //mBasicHandler = null;
         //mHandler = null;
-        
+
         mApp = null;
         mTitle = null;
         mSubTitle = null;
-        
+
         mLeftActionBtn = null;
         mRightActionBtn = null;
         mMiddleActionBtn = null;
@@ -1831,10 +1832,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
             resetActionListUi();
 
-            if (asyncQiupu == null) {
-                asyncQiupu = new AsyncQiupu(ConfigurationContext.getInstance(), null, null);
-                asyncQiupu.attachAccountListener(this);
-            }
+            ServiceHelper.attachAccountListener(this);
 
             loadRefresh();
 
@@ -2190,7 +2188,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected void uiLoadBegin() {
         showProgressBtn(true);
         showLeftActionBtn(false);
-        
+
         if(isUsingActionBar() && getActionBar() != null)
         {
         	setProgress(500);
@@ -2200,7 +2198,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected void uiLoadEnd() {
         showProgressBtn(false);
         showLeftActionBtn(true);
-        
+
         if(isUsingActionBar() && getActionBar() != null)
         {
         	setProgress(10000);
@@ -2224,13 +2222,13 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         } else if(id == R.id.head_title) {
             onPrepareTitleDropDown();
             showCorpusSelectionDialog(mTitle);
-        } 
+        }
     }
 
     protected void headRightTextAction() {
-        
+
     }
-    
+
     protected void backtoPreActivity() {
         finish();
     }
@@ -2240,7 +2238,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     protected void showCorpusSelectionDialog(View view) {
     }
-    
+
     protected void loadSearch() {
     }
 
@@ -2372,21 +2370,21 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 break;
         }
     }
-    
-    
+
+
     protected boolean isWifiActive() {
     	ConnectivityManager connMag = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-    	if (connMag != null) {      
-            NetworkInfo[] infos = connMag.getAllNetworkInfo();      
-            if (infos != null) {      
-                for(NetworkInfo ni : infos){  
-                    if(ni.getTypeName().equals("WIFI") && ni.isConnected()){  
-                        return true;  
-                    }  
-                }  
-            }      
-        }      
-        return false; 
+    	if (connMag != null) {
+            NetworkInfo[] infos = connMag.getAllNetworkInfo();
+            if (infos != null) {
+                for(NetworkInfo ni : infos){
+                    if(ni.getTypeName().equals("WIFI") && ni.isConnected()){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     protected Dialog onCreateDialog(final int id) {
@@ -2706,7 +2704,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                             Toast.makeText(BasicActivity.this, getString(R.string.invite_dialog_toast), Toast.LENGTH_SHORT).show();
                         } else {
                             removeDialog(DIALOG_INVITE_USERINFO);
-//						builder.dismiss();		
+//						builder.dismiss();
                             inviteUserDialogCallBack(nameString, typeString);
                         }
                     }
@@ -2715,7 +2713,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
                 cancelbtn.setOnClickListener(new OnClickListener() {
                     public void onClick(View arg0) {
-//					builder.dismiss();			
+//					builder.dismiss();
                         removeDialog(DIALOG_INVITE_USERINFO);
                     }
                 });
@@ -2904,7 +2902,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                         .setPositiveButton(getString(R.string.label_ok), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 String text = message.getText().toString();
-                                AsyncApiUtils.sendApproveRequest(data.getLong("uid"), text, asyncQiupu,
+                                ServiceHelper.sendApproveRequest(data.getLong("uid"), text,
                                         new AsyncApiUtils.AsyncApiSendRequestCallBackListener() {
                                             @Override
                                             public void sendRequestCallBackBegin() {
@@ -3157,7 +3155,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             final String curCircleId = orm.queryOneUserCircleIds(user.uid);
             ArrayList<Long> oldids = getCirlceOrUserIds(curCircleId, true);
             tmpids.addAll(oldids);
-            
+
             oldids.removeAll(newids);
             newids.removeAll(tmpids);
             UserCircle tmpcircle;
@@ -3171,8 +3169,8 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                     orm.updateCircleInfo(tmpcircle);
                 }
             }
-            
-         // need add 
+
+         // need add
             for (int i = 0; i < newids.size(); i++) {
                 tmpcircle = orm.queryOneCircle(AccountServiceUtils.getBorqsAccountID(), newids.get(i));
                 if (tmpcircle != null) {
@@ -3181,7 +3179,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 }
             }
         }else {
-         // need add 
+         // need add
             for (int i = 0; i < newids.size(); i++) {
                 UserCircle tmpcircle = orm.queryOneCircle(AccountServiceUtils.getBorqsAccountID(), newids.get(i));
                 if (tmpcircle != null) {
@@ -3227,7 +3225,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     public void doRemoveFavorite(final ApkResponse apk) {
-        asyncQiupu.postRemoveFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
+        ServiceHelper.postRemoveFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
             public void postRemoveFavorite(boolean suc) {
                 Log.d(TAG, "finish postRemoveFavorite=" + suc);
 
@@ -3251,7 +3249,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     public void doAddFavorite(final ApkResponse apk) {
-        asyncQiupu.postAddFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
+        ServiceHelper.postAddFavorite(getSavedTicket(), String.valueOf(apk.apk_server_id), new TwitterAdapter() {
             public void postAddFavorite(boolean suc) {
                 Log.d(TAG, "finish postAddFavorite=" + suc);
 
@@ -3336,7 +3334,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected void showSearhView() {
     	showSearhViewWithHint("");
     }
-    
+
     protected void showSearhViewWithHint(String hint) {
     	View searchStub = ((ViewStub) getWindow().getDecorView().findViewById(R.id.search_stub));
     	if(searchStub != null) {
@@ -3359,7 +3357,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     		}
     	}
     }
-    
+
     protected boolean hideSearhView() {
     	boolean flag = false;
 //    	View searchStub = ((ViewStub) getWindow().getDecorView().findViewById(R.id.search_stub));
@@ -3369,7 +3367,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 //    	}else {
 //    		Log.d(TAG, "search stub is null");
 //    	}
-    	
+
     	SearchView view = (SearchView) getWindow().getDecorView().findViewById(R.id.panel_import);
     	if(view != null && view.getVisibility() == View.VISIBLE) {
     		flag = true;
@@ -3378,7 +3376,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     	}
     	return flag;
     }
-    
+
     private void tryShowMoreBackKeyClick() {
         if (KeyEvent.KEYCODE_BACK == lastDownKeyCode) {
             Toast.makeText(this, R.string.string_click_onemore_exit, Toast.LENGTH_SHORT).show();
@@ -3543,12 +3541,12 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                     .query(Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
                             Uri.encode(number)),
                             new String[]{primaryColumn,
-                                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME},
+                                    Phone.DISPLAY_NAME},
                             null, null, null);
             if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
                 cn = cursor
                         .getString(cursor
-                                .getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                                .getColumnIndexOrThrow(Phone.DISPLAY_NAME));
             }
         } catch (Exception e) {
         } finally {
@@ -3560,7 +3558,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     public String getContactNameByPhoneNumber(String number) {
-        return getContactNameByPrimaryColumn(number, ContactsContract.CommonDataKinds.Phone._ID);
+        return getContactNameByPrimaryColumn(number, Phone._ID);
         /*if (number == null || number.length() <= 0) {
             return null;
         }
@@ -3568,7 +3566,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         // Context context = getContext();
         Cursor  cursor  = null;
         String cn  = "";
-        
+
 		try {
 			cursor = getContentResolver()
 					.query(Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI,
@@ -3585,7 +3583,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 		} catch(Exception e) {
         } finally {
         	if (cursor != null) {
-                cursor.close(); 
+                cursor.close();
         	}
         }
         return cn;*/
@@ -3593,7 +3591,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     public void pickRecipients() {
         Intent intent = new Intent("oms.android.intent.action.MULTIPLE_PICK",
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                Phone.CONTENT_URI);
         String[] projection = new String[]{
                 Email.CONTENT_ITEM_TYPE,
                 Phone.CONTENT_ITEM_TYPE};
@@ -3663,7 +3661,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         showDialog(DIALOG_ADD_LIKE);
 
-        asyncQiupu.postLike(getSavedTicket(), targetId, type, adapter);
+        ServiceHelper.postLike(getSavedTicket(), targetId, type, adapter);
         return false;
     }
 
@@ -3702,7 +3700,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
         showDialog(DIALOG_REMOVE_LIKE);
 
-        asyncQiupu.postUnLike(getSavedTicket(), post_id, type, adapter);
+        ServiceHelper.postUnLike(getSavedTicket(), post_id, type, adapter);
         return false;
     }
 
@@ -3711,19 +3709,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         TwitterAdapter adapter = new TwitterAdapter() {
             public void postLike(boolean suc) {
                 Log.d(TAG, "createLike, targetId = " + targetId + ", suc = " + suc);
-
-//                comment.iLike = true;
-//                comment.like_count += 1;
-//
-//                if (null != comment.likerList.friends) {
-//                    QiupuSimpleUser user = new QiupuSimpleUser();
-//                    BorqsAccount account = AccountServiceUtils.getBorqsAccount();
-//                    user.uid = account.uid;
-//                    user.nick_name = account.nickname;
-//                    user.profile_image_url = "";
-//                    comment.likerList.friends.add(user);
-//                }
-
                 onLikeCreated(targetId, QiupuConfig.TYPE_COMMENT, suc);
             }
 
@@ -3740,17 +3725,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         TwitterAdapter adapter = new TwitterAdapter() {
             public void postUnLike(boolean suc) {
                 Log.d(TAG, "unLikeComment, targetId = " + targetId + ",  suc =" + suc);
-
-//                comment.iLike = false;
-//                comment.like_count -= 1;
-//                final int likerCount = null == comment.likerList.friends ? 0 : comment.likerList.friends.size();
-//                for (int i = 0; i < likerCount; ++i) {
-//                    QiupuSimpleUser user = comment.likerList.friends.get(i);
-//                    if (getSaveUid() == user.uid) {
-//                        comment.likerList.friends.remove(user);
-//                        break;
-//                    }
-//                }
 
                 onLikeRemoved(targetId, QiupuConfig.TYPE_COMMENT, suc);
             }
@@ -3779,14 +3753,10 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         showDialog(DIALOG_SET_CIRCLE_PROCESS);
 
-        asyncQiupu.setTopList(getSavedTicket(), group_id, stream_id, setTop, new TwitterAdapter() {
+        ServiceHelper.setTopList(getSavedTicket(), group_id, stream_id, setTop, new TwitterAdapter() {
             public void setTopList(ArrayList<String> topIdList) {
                 Log.d(TAG, "finish setTopList() topIdList = " + topIdList);
 
-//                boolean result = false;
-//                if (topIdList != null && topIdList.contains(group_id)) {
-//                    result = true;
-//                }
                 synchronized (mLockTopList) {
                     mIsSetTopList = false;
                 }
@@ -3829,7 +3799,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         showDialog(DIALOG_RETWEET);
 
-        asyncQiupu.postRetweet(getSavedTicket(), post_id, tos, addedContent, canComment, canLike,
+        ServiceHelper.postRetweet(getSavedTicket(), post_id, tos, addedContent, canComment, canLike,
                 canShare, privacy, new TwitterAdapter() {
             public void postRetweet(Stream retweet) {
                 Log.d(TAG, "finish post retweet.isPrivacy()=" + retweet.isPrivacy());
@@ -3859,7 +3829,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         showDialog(DIALOG_SEND_EMAIL);
 
-        asyncQiupu.inviteWithMail(getSavedTicket(), phoneNumber, email, name, null, exchange_vcard, new TwitterAdapter() {
+        ServiceHelper.inviteWithMail(getSavedTicket(), phoneNumber, email, name, null, exchange_vcard, new TwitterAdapter() {
             public void inviteWithMail(boolean result) {
                 Log.d(TAG, "finish inviteWithEmail=" + result);
 
@@ -3921,11 +3891,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected void setInviteType(int type) {
         minviteType = type;
     }
-    
+
     protected void showSetCircleProcessDialog() {
         showDialog(DIALOG_SET_CIRCLE_PROCESS);
     }
-    
+
     boolean inSetCircle;
     Object mLocksetCircle = new Object();
 
@@ -3940,7 +3910,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
         showSetCircleProcessDialog();
 
-        asyncQiupu.setCircle(getSavedTicket(), uid, circleid, new TwitterAdapter() {
+        ServiceHelper.setCircle(getSavedTicket(), uid, circleid, new TwitterAdapter() {
             public void setCircle(QiupuUser resultUser) {
                 Log.d(TAG, "finish setCircle=" + resultUser);
 
@@ -3984,7 +3954,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
         showSetCircleProcessDialog();
 
-        asyncQiupu.exchangeVcard(getSavedTicket(), uid, send_request, circleid, new TwitterAdapter() {
+        ServiceHelper.exchangeVcard(getSavedTicket(), uid, send_request, circleid, new TwitterAdapter() {
             public void exchangeVcard(QiupuUser resultUser) {
                 Log.d(TAG, "finish exchangeVcard=" + resultUser);
 
@@ -4035,7 +4005,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             inloadRecommendcategory = true;
         }
 
-        asyncQiupu.getRecommendCategoryList(getSavedTicket(), false, new TwitterAdapter() {
+        ServiceHelper.getRecommendCategoryList(getSavedTicket(), false, new TwitterAdapter() {
             public void getRecommendCategoryList(ArrayList<RecommendHeadViewItemInfo> infolist) {
                 Log.d(TAG, "finish loadRecommendCategory");
 
@@ -4084,7 +4054,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     protected final void initTutorial(LinearLayout tutorial) {
         //set LinerLayout params.
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);
 
         View content = createTutorialView();
@@ -4152,10 +4122,10 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         Log.d(TAG, "showUpdateVersionDialog, versionFeatures: " + versionFeatures);
         View infoView = LayoutInflater.from(this).inflate(R.layout.new_versioninfo_view, null);
         TextView view = (TextView) infoView.findViewById(R.id.version_info);
-        
+
         TextView outDateView = (TextView)infoView.findViewById(R.id.version_outdate_msg);
         outDateView.setVisibility(forceUpdate ? View.VISIBLE : View.GONE);
-        
+
         TextView version_size = (TextView)infoView.findViewById(R.id.version_size_info);
         version_size.setText(String.format(getString(R.string.update_version_info_size), version, FileUtils.formatPackageFileSize(this, size)));
         if(versionFeatures != null) {
@@ -4165,9 +4135,9 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
         view.setText(Html.fromHtml(versionFeatures));
         AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(this);
-        
+
         if(forceUpdate) dlgBuilder.setCancelable(false);
-        
+
         dlgBuilder
                 .setTitle(forceUpdate ? R.string.version_outdate : R.string.version_update)
                 .setView(infoView)
@@ -4178,7 +4148,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                                 ApkResponse currentApk = null; //orm.getApkInfoByComponentName(getPackageName());
                                 if (currentApk == null) {
                                     currentApk = new ApkResponse();
-                                    //build for qiupu                   
+                                    //build for qiupu
                                     parseQiupuApkInfo(currentApk, BasicActivity.this.getApplicationInfo());
                                     currentApk.apksize = size;
                                 }
@@ -4275,21 +4245,21 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     //show
     protected void showRightActionBtn(boolean show) {
-        
+
         if(isUsingActionBar() && getActionBar() != null)
         {
-            mRightActionBtnMenu.setVisible(show ? true : false);          
+            mRightActionBtnMenu.setVisible(show ? true : false);
         }
         else
-        {   
+        {
             if (mRightActionBtn != null && mRightActionBtn.isEnabled()) {
                 mRightActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         }
     }
-    
+
     protected void showRightTextActionBtn(boolean show) {
-        
+
         if (mTitleActionText != null && mTitleActionText.isEnabled()) {
             mTitleActionText.setVisibility(show ? View.VISIBLE : View.GONE);
         }
@@ -4300,7 +4270,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         {
         }
         else
-        {   
+        {
             if (mEditTitleBtn != null && mEditTitleBtn.isEnabled()) {
                 mEditTitleBtn.setVisibility(show ? View.VISIBLE : View.GONE);
             }
@@ -4310,45 +4280,45 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected void showLeftActionBtn(boolean show) {
         if(isUsingActionBar() && getActionBar() != null)
         {
-            mLeftActionBtnMenu.setVisible(show ? true : false);          
+            mLeftActionBtnMenu.setVisible(show ? true : false);
         }
         else
-        {   
+        {
             if (mLeftActionBtn != null && mLeftActionBtn.isEnabled()) {
                 mLeftActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         }
     }
-    
+
     protected void showMiddleActionBtn(boolean show) {
         if(isUsingActionBar() && getActionBar() != null)
         {
-            mMiddleActionBtnMenu.setVisible(show ? true : false);          
+            mMiddleActionBtnMenu.setVisible(show ? true : false);
         }
         else
-        {  
+        {
             if (mMiddleActionBtn != null)
                 mMiddleActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
-    
-    
+
+
     protected void setLeftActionImageRes(int res) {
         showLeftActionBtn(true);
-        
+
         if(isUsingActionBar() && getActionBar() != null)
         {
-            mLeftActionBtnMenu.setIcon(res);          
+            mLeftActionBtnMenu.setIcon(res);
         }
         else
-        { 
+        {
             if (mLeftActionBtn != null) {
                 mLeftActionBtn.setImageResource(res);
             }
         }
     }
 
-    protected void alterMiddleActionBtnByComposer(int favRes, View.OnClickListener composeClick) {
+    protected void alterMiddleActionBtnByComposer(int favRes, OnClickListener composeClick) {
         showMiddleActionBtn(true);
         overrideMiddleActionBtn(favRes, composeClick);
     }
@@ -4379,7 +4349,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             mMiddleActionBtnMenu.setVisible(enable);
         }
         else
-        {  
+        {
             if (null != mMiddleActionBtn) {
                 if (enable && !mMiddleActionBtn.isEnabled()) {
                     mMiddleActionBtn.setEnabled(true);
@@ -4412,7 +4382,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             }
         }
     }
-   
+
 
     boolean inloadingFollower = false;
     Object mFollowerLock = new Object();
@@ -4450,7 +4420,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         Log.d(TAG, "mUserid :" + mUserid);
         begin();
-        asyncQiupu.getFriendsListPage(AccountServiceUtils.getSessionID(), mUserid, circles, page, count, isfollowing, new TwitterAdapter() {
+        ServiceHelper.getFriendsListPage(AccountServiceUtils.getSessionID(), mUserid, circles, page, count, isfollowing, new TwitterAdapter() {
             public void getFriendsList(List<QiupuUser> users) {
                 Log.d(TAG, "finish getFriendsList=" + users.size());
 
@@ -4505,7 +4475,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     protected void getUserInfoEndCallBack(List<QiupuUser> users, boolean isfollowing) {
     }
-    
+
     protected void createCircleCallBack(UserCircle circle) {
     }
 
@@ -4523,7 +4493,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
         showDialog(DIALOG_CREATE_CIRCLE_PROCESS);
 
-        asyncQiupu.createCircle(AccountServiceUtils.getSessionID(), circleName,
+        ServiceHelper.createCircle(AccountServiceUtils.getSessionID(), circleName,
                 new TwitterAdapter() {
                     public void createCircle(long circleID) {
                         Log.d(TAG, "finish createCircle=" + circleID);
@@ -4660,7 +4630,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
         showDialog(DIALOG_SET_USER_PROCESS);
 
-        asyncQiupu.usersSet(getSavedTicket(), uid, circleid, isadd, new TwitterAdapter() {
+        ServiceHelper.usersSet(getSavedTicket(), uid, circleid, isadd, new TwitterAdapter() {
             public void usersSet(boolean result) {
                 Log.d(TAG, "finish usersSet :" + result);
 
@@ -4740,7 +4710,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         synchronized (mEditInfoLock) {
             inEditProcess = true;
         }
-        asyncQiupu.updateUserInfo(AccountServiceUtils.getSessionID(), coloumsMap,
+        ServiceHelper.updateUserInfo(AccountServiceUtils.getSessionID(), coloumsMap,
                 new TwitterAdapter() {
                     public void updateUserInfo(boolean result) {
                         Log.d(TAG, "finish edit user profile");
@@ -4862,7 +4832,8 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             inloadingCircle = true;
         }
         begin();
-        asyncQiupu.getUserCircle(AccountServiceUtils.getSessionID(), AccountServiceUtils.getBorqsAccountID(), "", false, new TwitterAdapter() {
+        ServiceHelper.getUserCircle(AccountServiceUtils.getSessionID(), AccountServiceUtils.getBorqsAccountID(),
+                "", false, new TwitterAdapter() {
             public void getUserCircle(ArrayList<UserCircle> userCircles) {
                 Log.d(TAG, "finish getUserCircle= " + userCircles.size());
 
@@ -4942,7 +4913,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             }
         }
     }
-    
+
 
     // Query valid nick name from local database first, then possible get
     // from Account field.
@@ -4970,13 +4941,13 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     			Toast.makeText(BasicActivity.this, resId, Toast.LENGTH_SHORT).show();
     		}
     	});
-        
+
     }
 
     public void showCustomToast(int resId,int title_bar_id) {
     	showCustomToast(getString(resId),title_bar_id);
     }
-    
+
     public void showCustomToast(int resId) {
         showCustomToast(getString(resId),0);
     }
@@ -4984,7 +4955,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     public void showCustomToast(int resId, Handler handler) {
         showCustomToast(getString(resId),0, handler);
     }
-    
+
     public void showCustomToast(final String textMsg) {
     	showCustomToast(textMsg, 0);
     }
@@ -4992,11 +4963,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     public void showCustomToast(final String textMsg, Handler handler) {
     	showCustomToast(textMsg, 0, handler);
     }
-    
+
     public void showCustomToast(final String textMsg,final int title_bar_id) {
     	showCustomToast(textMsg, title_bar_id, mHandler);
     }
-    
+
     public void showCustomToast(final String textMsg,final int title_bar_id, Handler handler) {
         if (null == handler) {
             return;
@@ -5017,7 +4988,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             		tv.getBackground().setAlpha(220);
             		tv.setText(textMsg);
             		tv.setLayoutParams(new LayoutParams(title.getWidth() - 8, title.getHeight() - 8));
-            		
+
             		Toast toast = new Toast(getApplicationContext());
             		toast.setView(layout);
             		toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, title.getHeight() + 4);
@@ -5147,7 +5118,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     // start override super methods in order to force using system action bar for
     // android system later than api level 11.
     public ActionBar getActionBar() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             return super.getActionBar();
         }
 
@@ -5201,4 +5172,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
     }
     // End of statical base classes
+
+    // latency compatible begin (should be replaced and removed later
+    public AsyncQiupu asyncQiupu;
+    private void setupLetencyStaff() {
+        asyncQiupu = ServiceHelper.getAsyncHandle();
+    }
+    // legancy compatible end
 }

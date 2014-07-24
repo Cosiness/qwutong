@@ -33,7 +33,7 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleCirclesColumns;
-import com.borqs.qiupu.fragment.SimpleStreamListFragment;
+import com.borqs.qiupu.fragment.StreamListFragment;
 import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
@@ -58,7 +58,7 @@ import twitter4j.UserCircle;
  * To change this template use File | Settings | File Templates.
  */
 public class OrganizationHomeActivity extends BaseResideMenuActivity implements
-        SimpleStreamListFragment.StreamListFragmentCallBack,
+        StreamListFragment.StreamListFragmentCallBack,
         StreamRightFlipperFragment.StreamRightFlipperCallBack,
         HomePickerActivity.PickerInterface, ActivityFinishListner {
 
@@ -68,7 +68,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
     private UserCircle mCircle;
 
-    SimpleStreamListFragment.MetaData mFragmentData = new SimpleStreamListFragment.MetaData();
+    StreamListFragment.MetaData mFragmentData = new StreamListFragment.MetaData();
     public static final int in_member_selectcode = 5555;
 
     private BottomMoreQuickAction mMoreDialog;
@@ -86,7 +86,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
         orm.checkExpandCirCle();
 
-        setUpMenu(SimpleStreamListFragment.class);
+        setUpMenu(StreamListFragment.class);
 //        changeFragment();
         setupQuickAction();
 
@@ -143,7 +143,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     }
 
     @Override
-    public SimpleStreamListFragment.MetaData getFragmentMetaData(int index) {
+    public StreamListFragment.MetaData getFragmentMetaData(int index) {
         return mFragmentData;
     }
 
@@ -794,12 +794,12 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     }
 
     protected void createLeftMenuItems() {
-        createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, SimpleStreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, SimpleStreamListFragment.class);
-        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, SimpleStreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, SimpleStreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, SimpleStreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, SimpleStreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
+        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
     }
 
     private void setupQuickAction() {

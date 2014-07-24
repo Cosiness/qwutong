@@ -35,6 +35,7 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.util.ToastUtil;
+import com.borqs.wutong.utils.ServiceHelper;
 
 public class TopPostListFragment extends AbstractStreamListFragment {
     private static final String TAG = "TopPostListFragment";
@@ -332,11 +333,6 @@ public class TopPostListFragment extends AbstractStreamListFragment {
             Log.d(TAG, "getTopPost, in loading post");
             return;
         }
-        
-        if(((BasicActivity)getActivity()).asyncQiupu == null)
-        {
-        	return;
-        }
 
         begin();
 
@@ -351,21 +347,21 @@ public class TopPostListFragment extends AbstractStreamListFragment {
 
         mPendingToLoadCircleId = mLoadingCircleId;
 
-        ((BasicActivity)getActivity()).asyncQiupu.getPostTop(AccountServiceUtils.getSessionID(), id, new TwitterAdapter() {
-            
+        ServiceHelper.getPostTop(AccountServiceUtils.getSessionID(), id, new TwitterAdapter() {
+
             @Override
             public void getPostTop(List<Stream> posts) {
                 Log.d(TAG, "getPostTop() posts = " + posts);
                 Collections.sort(posts);
                 mPosts.clear();
                 mPosts = posts;
-                onLoadingReady(null,true);
+                onLoadingReady(null, true);
             }
 
             public void onException(TwitterException ex, TwitterMethod method) {
                 TwitterExceptionUtils.printException(TAG, "getPostTop, server exception:", ex, method);
-                
-                onLoadingReady(ex.getMessage(),false);
+
+                onLoadingReady(ex.getMessage(), false);
             }
         });
     }

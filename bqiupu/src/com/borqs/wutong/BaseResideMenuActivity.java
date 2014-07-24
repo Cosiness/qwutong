@@ -7,7 +7,6 @@ import android.view.View;
 
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.ui.BasicActivity;
-import com.borqs.qiupu.ui.SlidingMenuOverlayActivity;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
 
@@ -19,7 +18,7 @@ import com.special.ResideMenu.ResideMenuItem;
  * To change this template use File | Settings | File Templates.
  */
 
-public abstract class BaseResideMenuActivity extends BaseActivity {
+public abstract class BaseResideMenuActivity extends BasicActivity {
     // reside menu begin
     private ResideMenu resideMenu;
     //    private BpcPostsNewActivity mContext;
