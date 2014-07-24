@@ -19,7 +19,7 @@ import com.special.ResideMenu.ResideMenuItem;
  * To change this template use File | Settings | File Templates.
  */
 
-public abstract class BaseResideMenuActivity extends BasicActivity {
+public abstract class BaseResideMenuActivity extends BaseActivity {
     // reside menu begin
     private ResideMenu resideMenu;
     //    private BpcPostsNewActivity mContext;
