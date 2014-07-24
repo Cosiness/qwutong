@@ -57,7 +57,7 @@ import twitter4j.UserCircle;
  * Time: 下午4:42
  * To change this template use File | Settings | File Templates.
  */
-public class OrganizationHomeActivity extends BasicNavigationActivity implements 
+public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         StreamListFragment.StreamListFragmentCallBack,
         StreamRightFlipperFragment.StreamRightFlipperCallBack,
         HomePickerActivity.PickerInterface, ActivityFinishListner {

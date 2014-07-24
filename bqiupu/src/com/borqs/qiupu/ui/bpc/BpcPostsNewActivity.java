@@ -38,9 +38,10 @@ import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
+import com.borqs.wutong.BaseResideMenuActivity;
 import com.borqs.wutong.HomePickerActivity;
 
-public class BpcPostsNewActivity extends BasicNavigationActivity implements
+public class BpcPostsNewActivity extends BaseResideMenuActivity implements
         OnListItemClickListener, StreamListFragment.StreamListFragmentCallBack,
         HomePickerActivity.PickerInterface, View.OnClickListener {
 
