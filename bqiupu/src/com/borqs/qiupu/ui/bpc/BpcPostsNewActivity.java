@@ -34,12 +34,13 @@ import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleColumns;
 import com.borqs.qiupu.fragment.StreamListFragment;
+import com.borqs.qiupu.ui.BasicNavigationActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.wutong.BaseResideMenuActivity;
 import com.borqs.wutong.HomePickerActivity;
 
-public class BpcPostsNewActivity extends BaseResideMenuActivity implements
+public class BpcPostsNewActivity extends BasicNavigationActivity implements
         OnListItemClickListener, StreamListFragment.StreamListFragmentCallBack,
         HomePickerActivity.PickerInterface, View.OnClickListener {
 

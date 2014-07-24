@@ -138,7 +138,7 @@ public abstract class BaseResideMenuActivity extends BasicActivity {
     // reside menu end
 
     // hide the scope of parent's members that shuld be isolate, begin
-    private QiupuORM orm;
+//    private QiupuORM orm;
     private AsyncQiupu asyncQiupu;
     // hidden code end.
 }

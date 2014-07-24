@@ -18,5 +18,12 @@ import com.special.ResideMenu.ResideMenuItem;
  */
 
 public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity {
+    // mock for BpcNewPostActivity to compatible with BaseResideMenuActivity
+    protected void setUpMenu(Class<?> fragmentClass) {
+        setContentView(R.layout.stream_fragment_activity);
+    }
+
+    protected void createLeftItem(int home_screen_menu_loop_icon_default, int tab_feed, Class<?> fragmentClass) {
+    }
 }
 
