@@ -333,7 +333,12 @@ public class BpcPostsNewActivity extends BaseResideMenuActivity implements
 
         View composingBtn = findViewById(R.id.toggle_composer);
         if (null != composingBtn) {
-            composingBtn.setOnClickListener(composeStreamListener);
+            composingBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    IntentUtil.startComposeIntent(getBaseContext());
+                }
+            });
         }
 
         View photoBtn = findViewById(R.id.toggle_photo);

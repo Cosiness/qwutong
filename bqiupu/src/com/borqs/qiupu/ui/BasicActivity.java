@@ -32,7 +32,6 @@ import android.app.Application;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
-import android.app.TabActivity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -235,7 +234,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     private View mTutortialView;
 
     private static boolean mIsInitVersionChecked = false;
-
     public boolean isInProcess() {
         synchronized (mLock) {
             return inProcess == true;
@@ -4090,14 +4088,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 LayoutParams.MATCH_PARENT);
 
         View content = createTutorialView();
-//    	View content = LayoutInflater.from(this).inflate(R.layout.base_tutorial_bar, null);
-//    	content.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT,	LayoutParams.WRAP_CONTENT));
-//    	TextView gotologin = (TextView)content.findViewById(R.id.login_ok_btn);
-//    	gotologin.setOnClickListener(new OnClickListener() {
-//			public void onClick(View arg0) {
-//				gotoLogin();
-//			}
-//		});
         tutorial.removeAllViews();
         tutorial.addView(content, params);
         mTutortialView = tutorial;
@@ -4135,10 +4125,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         ToastUtil.showOperationOk(this, mHandler, isShort);
     }
 
-    protected void updateAccountServiceValue(String newValue) {
-        AccountServiceUtils.updateValue(newValue);
-    }
-
     void resolveAccountServiceConflict() {
         if (AccountServiceUtils.isExternalAccountServiceInvalid()) {
             return;
@@ -4151,20 +4137,12 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,
                                                 int whichButton) {
-//                                installApp(pkgName);
                             }
                         })
-//                .setNegativeButton(R.string.label_cancel,
-//                        new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog,
-//                                                int whichButton) {
-//                            }
-//                        })
         ;
         dlgBuilder.create().show();
 
         if (AccountServiceAdapter.isAccountPreloaded(getApplicationContext())) {
-//            AccountServiceAdapter.removeAccount(getApplicationContext());
         }
 
         AccountServiceUtils.setExternalAccountServiceInvalid(true);
@@ -4193,7 +4171,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         dlgBuilder
                 .setTitle(forceUpdate ? R.string.version_outdate : R.string.version_update)
                 .setView(infoView)
-//                .setMessage(forceUpdate ? R.string.version_outdate_msg : R.string.version_update_msg)
                 .setPositiveButton(R.string.update_version_ok,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog,
@@ -4293,18 +4270,8 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     private String[] speechList;
 
-    protected void setVoiceString(String[] speechlist) {
-        speechList = speechlist;
-    }
-
     protected void doClickVoiceDialogCallBack(String backString) {
     }
-
-    protected void updateActivityFavoriteUI(boolean isadd, String apkid) {
-//        QiupuHelper.updateActivityFavoriteUI(isadd, apkid);
-        // TODO : update favoriate.
-    }
-
 
     //show
     protected void showRightActionBtn(boolean show) {
@@ -4331,7 +4298,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected void showEditTitleActionBtn(boolean show) {
         if(isUsingActionBar() && getActionBar() != null)
         {
-//            mLeftActionBtnMenu.setVisible(show ? true : false);          
         }
         else
         {   
@@ -4378,30 +4344,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         { 
             if (mLeftActionBtn != null) {
                 mLeftActionBtn.setImageResource(res);
-            }
-        }
-    }
-    protected void alterRightActionBtnByFavorites(int favRes) {
-    	if(isUsingActionBar() && getActionBar() != null)
-    	{
-    		mRightActionBtnMenu.setIcon(favRes);          
-    	}
-    	else
-    	{ 
-    		if (mRightActionBtn != null) {
-    			mRightActionBtn.setImageResource(favRes);
-    		}
-    	}
-    }
-    protected void alterMiddleActionBtnByFavorites(int favRes) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mMiddleActionBtnMenu.setIcon(favRes);          
-        }
-        else
-        { 
-            if (mMiddleActionBtn != null) {
-            	mMiddleActionBtn.setImageResource(favRes);
             }
         }
     }
@@ -4513,13 +4455,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 Log.d(TAG, "finish getFriendsList=" + users.size());
 
                 if (mUserid == AccountServiceUtils.getBorqsAccountID() && isfollowing) {
-                    //remove circle users, firstly			 
-//                    if (page == 0) {
-//                        orm.clearCircleUsers(circles);
-//                    }
-
-                    //update circle users
-//                    orm.updateCircleUsers(circles, users);
                     orm.insertFriendsList(users);//add friends to DB
                 }
 
@@ -4598,7 +4533,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                         backCircle.name = circleName;
                         backCircle.uid = AccountServiceUtils.getBorqsAccountID();
                         backCircle.type = UserCircle.CIRCLE_TYPE_LOCAL;
-//						backCircle.memberCount = 0;
                         orm.insertCircleInfo(backCircle);
                         createCircleCallBack(backCircle);
 
@@ -4633,38 +4567,12 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     protected void doCircleActionCallBack(boolean isdelete) {
     }
 
-//    protected void doDeletePostCallBack() {
-//    }
-
-    protected static boolean isValidAccountSession() {
-        return !StringUtil.isEmpty(AccountServiceUtils.getSessionID());
-    }
-
     public void onAccountServiceConnected() {
         AccountServiceUtils.refreshBorqsAccount();
     }
 
     public void onAccountServiceDisconnected() {
     }
-
-//    private String getCircleName(long circleId, String circleName) {
-//        Resources res = getResources();
-//        if (circleId == QiupuConfig.BLOCKED_CIRCLE) {
-//            return res.getString(R.string.bolcked_circle);
-//        } else if (circleId == QiupuConfig.ADDRESS_BOOK_CIRCLE) {
-//            return res.getString(R.string.address_book_circle);
-//        } else if (circleId == QiupuConfig.DEFAULT_CIRCLE) {
-//            return res.getString(R.string.default_circle);
-//        } else if (circleId == QiupuConfig.FAMILY_CIRCLE) {
-//            return res.getString(R.string.family_circle);
-//        } else if (circleId == QiupuConfig.CLOSE_FRIENDS_CIRCLE) {
-//            return res.getString(R.string.close_friends_circle);
-//        } else if (circleId == QiupuConfig.ACQUAINTANCE_CIRCLE) {
-//            return res.getString(R.string.acquaintance_circle);
-//        } else {
-//            return circleName;
-//        }
-//    }
 
     protected void circleUpdateCallBack(String multiuids, String circleid, boolean isadd) {
         String[] uids = multiuids.split(",");
@@ -4696,89 +4604,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         }
     }
 
-//    private void updateUserInfoToDb(String uid, String circleid, boolean isadd) {
-//        QiupuUser dbUser = orm.queryOneUserInfo(Long.parseLong(uid));
-//        if (dbUser != null) {
-//            String circleids = "";
-//            String circlenames = "";
-//            if (isadd) {
-//                circleids = parseUserCircleIdIsadd(dbUser.circleId, circleid);
-//                circlenames = parseUserCircleNameIsadd(dbUser.circleName, circleid);
-//            } else {
-//                circleids = parseUserCircleIdIsDelete(dbUser.circleId, circleid);
-//                circlenames = parseUserCircleNameIsDelete(dbUser.circleName, circleid);
-//            }
-//            dbUser.circleId = circleids;
-//            dbUser.circleName = circlenames;
-//            if (circleids.length() <= 0 || circleids.equals(String.valueOf(QiupuConfig.ADDRESS_BOOK_CIRCLE))) {
-//                orm.deleteFriendsinfo(dbUser.uid);
-//                // update privacy circle count;
-//                UserCircle tmpcircle = orm.queryOneCircle(AccountServiceUtils.getBorqsAccountID(), QiupuConfig.ADDRESS_BOOK_CIRCLE);
-//                tmpcircle.memberCount = tmpcircle.memberCount - 1;
-//                orm.updateCircleInfo(tmpcircle);
-//            } else {
-//                orm.updateFriendsInfo(dbUser);
-//            }
-//        }
-//    }
-
-//    private String parseUserCircleNameIsadd(String dbcircleName, String circleid) {
-//        String localName = CircleUtils.getLocalCircleName(this, Long.parseLong(circleid), "");
-//        if (localName.length() <= 0) {
-//            UserCircle circleinfo = orm.queryOneCricleInfo(circleid);
-//            if (dbcircleName.length() > 0) {
-//                if (circleinfo != null)
-//                    return dbcircleName + "," + circleinfo.name;
-//            } else {
-//                if (circleinfo != null)
-//                    return circleinfo.name;
-//            }
-//        }
-//        return dbcircleName;
-//    }
-//
-//    private String parseUserCircleNameIsDelete(String circleName, String circleid) {
-//        StringBuilder namebuilder = new StringBuilder();
-//        UserCircle cricleinfo = orm.queryOneCricleInfo(circleid);
-//        if (cricleinfo != null) {
-//            String[] names = circleName.split(",");
-//            for (int i = 0; i < names.length; i++) {
-//                if (!cricleinfo.name.equals(names[i])) {
-//                    if (namebuilder.length() > 0) {
-//                        namebuilder.append(",");
-//                    }
-//                    namebuilder.append(names[i]);
-//                }
-//            }
-//        } else {
-//            namebuilder.append(circleName);
-//        }
-//
-//        return namebuilder.toString();
-//    }
-//
-//    private String parseUserCircleIdIsadd(String circleId, String circleid) {
-//        if (circleId != null && circleId.length() > 0) {
-//            return circleId + "," + circleid;
-//        } else {
-//            return circleid;
-//        }
-//    }
-//
-//    private String parseUserCircleIdIsDelete(String circleId, String circleid) {
-//        StringBuilder idbuilder = new StringBuilder();
-//        String[] ids = circleId.split(",");
-//        for (int i = 0; i < ids.length; i++) {
-//            if (!ids[i].equals(circleid)) {
-//                if (idbuilder.length() > 0) {
-//                    idbuilder.append(",");
-//                }
-//                idbuilder.append(ids[i]);
-//            }
-//        }
-//        return idbuilder.toString();
-//    }
-
     protected boolean testValidConnectivity() {
         final boolean isConnectivityActive = DataConnectionUtils.testValidConnection(this);
 
@@ -4789,16 +4614,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         return isConnectivityActive;
     }
 
-    protected boolean isLoadingFollower() {
-        return inloadingFollower == true;
-    }
-
-    protected boolean isLoadingFollowing() {
-        return inloadingFollowing == true;
-    }
-
-    //    private QiupuUser mdeleteUser;
-//    private String mdeleteCircleid;
     public void deleteUser(String uid, String circleid) {
         Message msg = mBasicHandler.obtainMessage(BasicHandler.DELETE_USER);
         msg.getData().putString("userid", uid);
@@ -4897,49 +4712,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     protected void doUsersSetCallBack(String uid, boolean isadd) {
     }
-
-//    //	boolean inSendRequest;
-////	Object mLockSendRequest = new Object();
-//    public void sendApproveRequest(final String uid, final String message) {
-////		if (inSendRequest == true) {
-////			Toast.makeText(this, R.string.string_in_processing,Toast.LENGTH_SHORT).show();
-////			return;
-////		}
-//
-////		synchronized (mLockSendRequest) {
-////			inSendRequest = true;
-////		}
-//        showDialog(DIALOG_PROFILE_REQUEST_PROCESS);
-//        asyncQiupu.sendApproveRequest(getSavedTicket(), uid, message, new TwitterAdapter() {
-//            public void sendApproveRequest(boolean result) {
-//                Log.d(TAG, "finish sendApproveRequest :" + result);
-//
-//                if (result) {
-//                    // update user info in DB
-////					updateUserInfoAfterParse(uid, circleid);//TODO need Optimization
-//                }
-//
-////				orm.setRequestUser(Long.parseLong(uid), true);
-//
-//                Message msg = mBasicHandler.obtainMessage(BasicHandler.REQUEST_PROFIEL_END);
-//                msg.getData().putBoolean(RESULT, result);
-//                msg.getData().putLong("uid", Long.parseLong(uid));
-//                msg.sendToTarget();
-////				synchronized (mLockSendRequest) {
-////					inSendRequest = false;
-////				}
-//            }
-//
-//            public void onException(TwitterException ex, TwitterMethod method) {
-////				synchronized (mLockSendRequest) {
-////					inSendRequest = false;
-////				}
-//                Message msg = mBasicHandler.obtainMessage(BasicHandler.REQUEST_PROFIEL_END);
-//                msg.getData().putBoolean(RESULT, false);
-//                msg.sendToTarget();
-//            }
-//        });
-//    }
 
     protected void showProgressBtn(boolean show) {
         View head_progress = findViewById(R.id.head_progress);
@@ -5201,34 +4973,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         
     }
 
-    private void showShortToast(final CharSequence message) {
-        mBasicHandler.post(new Runnable(){
-    		public void run()
-    		{
-    			Toast.makeText(BasicActivity.this, message, Toast.LENGTH_SHORT).show();
-    		}
-    	});
-        
-    }
-
-    private void showLongToast(final int resId) {
-    	mBasicHandler.post(new Runnable(){
-    		public void run()
-    		{
-    			Toast.makeText(BasicActivity.this, resId, Toast.LENGTH_LONG).show();
-    		}
-    	});
-    }
-
-    private void showLongToast(final CharSequence message) {
-        mBasicHandler.post(new Runnable(){
-    		public void run()
-    		{
-    			Toast.makeText(BasicActivity.this, message, Toast.LENGTH_LONG).show();
-    		}
-    	});
-    }
-
     public void showCustomToast(int resId,int title_bar_id) {
     	showCustomToast(getString(resId),title_bar_id);
     }
@@ -5347,58 +5091,21 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     /**
      * Helper for examples with a HSV that should be scrolled by a menu View's width.
      */
-    
-    interface AccountChecker {
-        public boolean preCheckForScrollingCondition();
-    };
-
-    private void shootProfileActivity() {
-        if (ensureAccountLogin()) {
-            IntentUtil.startUserDetailIntent(this, getSaveUid(), getUserNickname());
-        }
-    }
-
-    private void shootFriendActivity(int current_type) {
-        if (ensureAccountLogin()) {
-            Intent intent = new Intent(this, BpcFriendsFragmentActivity.class);
-            Bundle bundle = BpcApiUtils.getUserBundle(Long.valueOf(getSaveUid()));
-            bundle.putString(BasicActivity.USER_NICKNAME, getUserNickname());
-            intent.putExtras(bundle);
-            startActivity(intent);
-        }
-    }
 
     protected void shootNotificationActivity() {
         if (ensureAccountLogin()) {
             Intent intent = new Intent(BasicActivity.this, BpcInformationActivity.class);
-            
-//            Intent intent = new Intent(BasicActivity.this, BpcNtfCenterActivity.class);
             startActivity(intent);
         }
     }
 
     protected void gotoSearchActivity() {
-//        IntentUtil.startPeopleSearchIntent(this);
         onSearchRequested();
-    }
-
-    protected View.OnClickListener composeStreamListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            IntentUtil.startComposeIntent(BasicActivity.this);
-        }
-    };
-
-    protected void bindBorqsAccountService() {
-        QiupuService.bindBorqsAccountService(mApp);
     }
 
     @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         return super.onKeyLongPress(keyCode, event);
-    }
-    protected void gotoStreamActivity() {
-        IntentUtil.startStreamListIntent(this, false);
     }
 
     /**
