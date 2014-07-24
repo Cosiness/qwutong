@@ -23,7 +23,7 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
         setContentView(R.layout.stream_fragment_activity);
     }
 
-    protected void createLeftItem(int home_screen_menu_loop_icon_default, int tab_feed, Class<?> fragmentClass) {
+    protected void createLeftItem(int icon, int label, Class<?> targetFragmentClass) {
     }
 }
 
