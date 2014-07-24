@@ -40,7 +40,6 @@ public class EditProfileActivity extends BasicActivity implements
 //	private static final int FRAGMENT_CONTACT = 1;
 //	private static final int FRAGMENT_WORK_EXPERIENCE = 2;
 //	private static final int FRAGMENT_EDUCATION = 3;
-	private QiupuORM orm;
 	ViewPager mViewPager;
 	TitlePageIndicator mIndicator;
 	private QiupuUser mUser;
@@ -91,9 +90,6 @@ public class EditProfileActivity extends BasicActivity implements
 		mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
 		mIndicator.setVisibility(View.GONE);
 		mIndicator.setViewPager(mViewPager);
-		ProfilesAdapter ad = (ProfilesAdapter) mViewPager.getAdapter();
-		orm = QiupuORM.getInstance(mApp);
-		QiupuHelper.setORM(orm);
 
 	}
 

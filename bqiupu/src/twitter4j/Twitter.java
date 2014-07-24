@@ -87,6 +87,7 @@ import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.util.Base64;
 import com.borqs.qiupu.util.StringUtil;
+import com.borqs.wutong.utils.CacheHelper;
 
 /**
  * A java representation of the <a href="http://apiwiki.twitter.com/">Twitter API</a><br>
@@ -3306,7 +3307,7 @@ public class Twitter extends TwitterOAuthSupportBaseImpl
     	map.put("with_members", String.valueOf(with_users));
     	map.put("circles", circles);
     	//TODO used to sync public circle
-    	map.put("with_public_circles", String.valueOf(QiupuHelper.isOpenPublicCircle()));
+    	map.put("with_public_circles", String.valueOf(CacheHelper.isOpenPublicCircle()));
     	map.put("columns", UserCircle.getExpendCircleColumns());
     	
     	HttpResponse response = call(API_CIRCLE_SHOW, map, null, ticket, true);
@@ -3820,7 +3821,7 @@ public class Twitter extends TwitterOAuthSupportBaseImpl
         params.put(HttpParameter.CALL_ID, Long.toString(System.currentTimeMillis()));
 
         //add scene
-        final String homeid = QiupuHelper.getSceneId();
+        final String homeid = CacheHelper.getSceneId();
         if(!TextUtils.isEmpty(homeid)) {
         	params.put("scene", homeid);
         }

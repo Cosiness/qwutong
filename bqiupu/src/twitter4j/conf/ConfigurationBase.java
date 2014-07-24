@@ -33,6 +33,7 @@ import android.text.TextUtils;
 import twitter4j.Version;
 
 import com.borqs.qiupu.cache.QiupuHelper;
+import com.borqs.wutong.utils.CacheHelper;
 
 /**
  * Configuration base class with default settings.
@@ -639,11 +640,7 @@ public class ConfigurationBase implements Configuration, java.io.Serializable {
 
     public static String getAPIURL()
 	{
-		if(QiupuHelper.getORM() == null)
-		{
-			return DEFAULT_BORQS_URL;
-		}
-		if(QiupuHelper.getORM().isUsingTestURL())
+		if(CacheHelper.isUsingTestURL())
 		{
 			return DEFAULT_BORQS_URL_TEST;
 		}

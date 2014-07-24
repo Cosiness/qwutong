@@ -52,6 +52,7 @@ import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.util.MD5;
 import com.borqs.qiupu.util.StatusNotification;
+import com.borqs.wutong.utils.CacheHelper;
 
 public class QiupuService extends Service implements AccountListener, AccountServiceConnectListener, LocationRequest.IFLocationListener{
 	private static final String TAG="Qiupu.QiupuService";
@@ -143,10 +144,9 @@ public class QiupuService extends Service implements AccountListener, AccountSer
         MessageManager.getInstance().setSilentTime(getApplicationContext(), 23, 8);
         MessageManager.getInstance().setHeartbeatInterval(getApplicationContext(), 7);
         */
-        
-        
-        orm = QiupuORM.getInstance(getApplicationContext());
-        QiupuHelper.setORM(orm);
+
+
+        orm = CacheHelper.getOrm(this);
         
         //may not receiver, because the applicatiion bind return very fast, so need check the account
         AccountServiceConnectObserver.registerAccountServiceConnectListener(getClass().getName(), this);

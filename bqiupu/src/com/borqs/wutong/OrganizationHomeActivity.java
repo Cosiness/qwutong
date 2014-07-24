@@ -39,6 +39,7 @@ import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
+import com.borqs.wutong.utils.CacheHelper;
 import com.borqs.wutong.utils.ServiceHelper;
 
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         parseActivityIntent(getIntent());
         overrideRightActionBtn(R.drawable.home_screen_menu_people_icon_default, editProfileClick);
 
-        orm.checkExpandCirCle();
+        CacheHelper.checkExpandCirCle();
 
         setUpMenu(StreamListFragment.class);
 //        changeFragment();
@@ -122,7 +123,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
             mFragmentData.mFromHome = QiupuConfig.FROM_HOME;
         }
 
-        mCircle = orm.queryOneCircleWithGroup(mFragmentData.mCircleId);
+        mCircle = CacheHelper.queryOneCircleWithGroup(mFragmentData.mCircleId);
         if (mCircle == null){
             mCircle = new UserCircle();
             mCircle.circleid = mFragmentData.mCircleId;
@@ -163,7 +164,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         public void onClick(View v) {
         	ArrayList<SelectionItem> items = new ArrayList<SelectionItem>();
         	items.add(new SelectionItem(String.valueOf(mCircle.circleid), mCircle.name));
-            Cursor pOrgazitaionCircles = orm.queryInCircleCircles(mCircle.circleid);
+            Cursor pOrgazitaionCircles = CacheHelper.queryInCircleCircles(mCircle.circleid);
             if(pOrgazitaionCircles != null) {
             	if(pOrgazitaionCircles.getCount() > 0) {
             		if(pOrgazitaionCircles.moveToFirst()) {
@@ -350,12 +351,12 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
                 mCircle = circle;
                 if (mCircle.mGroup != null && PublicCircleRequestUser.isInGroup(mCircle.mGroup.role_in_group)) {
-                    orm.insertOneCircle(mCircle);
+                    CacheHelper.insertOneCircle(mCircle);
                 }
 
                 // insert to circle_circles
                 if (mCircle.mGroup != null && mCircle.mGroup.parent_id > 0) {
-                    orm.insertOneCircleCircles(mCircle.mGroup.parent_id, mCircle);
+                    CacheHelper.insertOneCircleCircles(mCircle.mGroup.parent_id, mCircle);
                 }
 
                 onLoadingCircleReady("", true);
@@ -399,7 +400,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
                         @Override
                         public void run() {
                             //delete circle in DB
-                            orm.deleteCircleByCricleId(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circleid));
+                            CacheHelper.deleteCircleByCricleId(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circleid));
                         }
                     });
                 }
@@ -442,12 +443,12 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
                 if(suc) {
                     //delete circle in DB
-                    orm.deleteCircleByCricleId(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circle.circleid));
+                    CacheHelper.deleteCircleByCricleId(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circle.circleid));
                     //update user info
-                    orm.updateUserInfoInCircle(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circle.circleid), circleName);
+                    CacheHelper.updateUserInfoInCircle(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circle.circleid), circleName);
 
                     //update circle_circle table
-                    orm.deleteCacheCircleCircle(circle);
+                    CacheHelper.deleteCacheCircleCircle(circle);
                     
                     updatePageInfoAfterRemoveCircle(circle);
                 }
@@ -479,7 +480,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     		try {
     			if(value != null && TextUtils.isDigitsOnly(value)) {
     				long circleid = Long.parseLong(value);
-    				UserCircle uc = orm.queryOneCircleWithGroup(circleid);
+    				UserCircle uc = CacheHelper.queryOneCircleWithGroup(circleid);
     				IntentUtil.startPublicCircleDetailIntent(this, uc);
     				if(uc.mGroup != null && uc.mGroup.formal == UserCircle.circle_top_formal) {
     					IntentUtil.loadCircleDirectoryFromServer(this, circleid);
@@ -556,7 +557,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
             } else if(circle.mGroup.formal == UserCircle.circle_top_formal) {
                 cv.put(QiupuORM.PageColumns.ASSOCIATED_ID, -1);
             }
-            orm.updatePageInfo(circle.mGroup.pageid, cv);
+            CacheHelper.updatePageInfo(circle.mGroup.pageid, cv);
         }
     }
 
@@ -606,7 +607,8 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     private View.OnClickListener mTogglePhotoListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            DialogUtils.ShowPhotoPickDialog(OrganizationHomeActivity.this, R.string.share_photo_title, new DialogUtils.PhotoPickInterface() {
+            DialogUtils.ShowPhotoPickDialog(OrganizationHomeActivity.this, R.string.share_photo_title,
+                    new DialogUtils.PhotoPickInterface() {
                 @Override
                 public void doTakePhotoCallback() {
                 	if(mCircle != null) {
@@ -676,7 +678,8 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         	SelectionItem item = new SelectionItem(String.valueOf(QiupuApplication.mTopOrganizationId.circleid), QiupuApplication.mTopOrganizationId.name);
         	circleNames.add(item);
         }
-        Cursor cursor = FORCE_SHOW_DROPDOWN ? orm.queryAllCircleList() : orm.queryChildCircleList(QiupuApplication.mTopOrganizationId.circleid);
+        Cursor cursor = FORCE_SHOW_DROPDOWN ? CacheHelper.queryAllCircleList() :
+                CacheHelper.queryChildCircleList(QiupuApplication.mTopOrganizationId.circleid);
         if (null != cursor && cursor.moveToFirst()) {
             String name;
             String cid;

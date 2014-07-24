@@ -132,6 +132,7 @@ import com.borqs.qiupu.util.StatusNotification;
 import com.borqs.qiupu.util.StringUtil;
 import com.borqs.qiupu.util.ToastUtil;
 import com.borqs.wutong.OrganizationHomeActivity;
+import com.borqs.wutong.utils.CacheHelper;
 import com.borqs.wutong.utils.ServiceHelper;
 
 import java.io.File;
@@ -313,8 +314,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             AccountServiceConnectObserver.registerAccountServiceConnectListener(getClass().getName(), this);
         }
 
-        orm = QiupuORM.getInstance(mApp);
-        QiupuHelper.setORM(orm);//TODO only to test
+        orm = CacheHelper.getOrm(this);
 
         ServiceHelper.getInstance(this);
 

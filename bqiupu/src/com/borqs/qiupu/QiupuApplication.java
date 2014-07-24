@@ -46,6 +46,7 @@ import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.service.QiupuService;
 import com.borqs.qiupu.util.BaiduLocationProxy;
 import com.borqs.qiupu.util.QiupuFileNameGenerator;
+import com.borqs.wutong.utils.CacheHelper;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
 import com.nostra13.universalimageloader.cache.memory.MemoryCacheAware;
 import com.nostra13.universalimageloader.cache.memory.impl.LRULimitedMemoryCache;
@@ -79,8 +80,8 @@ public class QiupuApplication extends Application implements QiupuService.BorqsA
         }
 
         AccountServiceUtils.onCreate();
-        
-        QiupuHelper.setORM(QiupuORM.getInstance(getApplicationContext()));
+
+        CacheHelper.attach(getApplicationContext());
 
 		//start account service
 //		try{

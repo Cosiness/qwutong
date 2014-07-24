@@ -1,13 +1,6 @@
 package com.borqs.qiupu.ui;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.view.MotionEvent;
-import android.view.View;
-
 import com.borqs.qiupu.R;
-import com.special.ResideMenu.ResideMenu;
-import com.special.ResideMenu.ResideMenuItem;
 
 /**
  * Created with IntelliJ IDEA.

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.borqs.common.util.DataConnectionUtils;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
+import com.borqs.wutong.utils.CacheHelper;
 
 public class InformationConstant {
 	public static final String USERAGENT = "borqs/notification/1.0";
@@ -15,17 +16,12 @@ public class InformationConstant {
 	private static final String NOTIFICATION_KEY = "notification_uri";
 		
 	public static String getBorqsURL() {
-		QiupuORM orm = QiupuHelper.getORM();
-		if (orm == null) {
-			return ConfigurationBase.DEFAULT_BORQS_URL;
-		}
-
 		// Should this always query db be cached for performance.
-		final String apiUrl = orm.getCurrentApiUrl();
+		final String apiUrl = CacheHelper.getCurrentApiUrl();
 		if (!TextUtils.isEmpty(apiUrl)) {
 			return apiUrl;
 		} else {
-            if(orm.isUsingTestURL())
+            if(CacheHelper.isUsingTestURL())
             {
                 return ConfigurationBase.DEFAULT_BORQS_URL_TEST;
             }

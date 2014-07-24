@@ -74,6 +74,7 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.PhoneEmailColumns;
 import com.borqs.qiupu.fragment.RequestFragment.UpdateRequestCountListener;
+import com.borqs.wutong.utils.CacheHelper;
 
 public class QiupuHelper {
 	private static final String TAG="QiupuHelper";
@@ -116,7 +117,6 @@ public class QiupuHelper {
 
     public static final int MAX_FILE_NAME_LEN = 255;
 
-	private static QiupuORM orm ;
 	static StatFs stat = null;
 
     public static int mVersionCode;
@@ -1535,17 +1535,6 @@ public static String getTmpCachePath() {
 //		}
 //		return result;
 	}
-	
-	
-	//TODO only to test
-	public static void setORM(QiupuORM qiupuorm)
-	{
-		orm = qiupuorm;
-	}
-	public static QiupuORM getORM()
-	{
-		return orm;
-	}
 
     /**
      * if the SD card is ready, verify is the target icon folder.
@@ -1563,6 +1552,7 @@ public static String getTmpCachePath() {
     }
 
     private static void ensureAppIconPath(boolean external, int versionCode) {
+        QiupuORM orm = CacheHelper.getOrm();
         if (null != orm) {
             final int lastVersion = orm.getLastUsedIconVersion(external);
             final String targetPath = external ? QiupuConfig.APP_ICON_SDCARD_PATH :
@@ -1692,22 +1682,12 @@ public static String getTmpCachePath() {
 
     public static String getBorqsURL()
 	{
-		if(orm == null)
-		{
-			return ConfigurationBase.DEFAULT_BORQS_URL;
-		}
-
-		// used by new platform
-//		if(orm.isUserNewPlatform()) {
-//		    return ConfigurationBase.NEW_PLATFORM_URL;
-//		}
-
         // Should this always query db be cached for performance.
-        final String apiUrl = orm.getCurrentApiUrl();
+        final String apiUrl = CacheHelper.getCurrentApiUrl();
         if (!TextUtils.isEmpty(apiUrl)) {
             return apiUrl;
         } else {
-            if(orm.isUsingTestURL())
+            if(CacheHelper.isUsingTestURL())
             {
                 return ConfigurationBase.DEFAULT_BORQS_URL_TEST;
             }
@@ -1726,22 +1706,6 @@ public static String getTmpCachePath() {
 //   	    }
 //   	}
 
-    public static boolean isOpenPublicCircle() {
-           if(orm == null) {
-               return false;
-           }else {
-               return orm.isOpenPublicCircle();
-           }
-       }
-    
-    public static String getSceneId() {
-        if(orm == null) {
-            return "";
-        }else {
-            return orm.getSettingValue(QiupuORM.HOME_ACTIVITY_ID);
-        }
-    }
-    
     public static final HashMap<String,WeakReference<ActivityFinishListner>> finishListener = 
     		new HashMap<String,WeakReference<ActivityFinishListner>>();
     

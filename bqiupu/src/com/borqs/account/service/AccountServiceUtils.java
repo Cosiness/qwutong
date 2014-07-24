@@ -8,6 +8,7 @@ import android.util.Log;
 import com.borqs.account.commons.AccountServiceAdapter;
 import com.borqs.qiupu.QiupuConfig;
 import com.borqs.qiupu.cache.QiupuHelper;
+import com.borqs.wutong.utils.CacheHelper;
 
 import twitter4j.QiupuSimpleUser;
 
@@ -230,9 +231,7 @@ public class AccountServiceUtils {
             user.uid = account.uid;
             user.nick_name = account.nickname;
             user.name = account.username;
-            if(null != QiupuHelper.getORM()){
-                user.profile_image_url = QiupuHelper.getORM().getUserProfileImageUrl(account.uid);
-            }
+            user.profile_image_url = CacheHelper.getUserProfileImageUrl(account.uid);
             return user;
         }
         return null;
