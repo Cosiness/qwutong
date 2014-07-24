@@ -17,6 +17,9 @@ import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.service.QiupuService;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.bpc.QiupuComposeActivity;
+import com.borqs.wutong.utils.CacheHelper;
+import com.borqs.wutong.utils.ServiceHelper;
+
 import twitter4j.ApkBasicInfo;
 import twitter4j.ApkResponse;
 
@@ -59,7 +62,7 @@ public class QuickLauncher {
 	    	showapk.setOnClickListener(new View.OnClickListener() {			
 				public void onClick(View v) {
 					
-					if(mLauncher.getORM().isShowMarketAppPage())
+					if(CacheHelper.getOrm().isShowMarketAppPage())
 					{
 						Intent intent = new Intent(Intent.ACTION_VIEW);						
 						intent.setData(Uri.parse("http://market.android.com/details?id="+apk.packagename));

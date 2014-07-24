@@ -167,7 +167,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         AbstractStreamRowView.SetTopInterface {
     private static final String TAG = "Qiupu.BasicActivity";
 
-    protected QiupuORM orm;
     protected Handler mBasicHandler;
     protected Handler mHandler;
     protected Application mApp;
@@ -314,8 +313,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             AccountServiceConnectObserver.registerAccountServiceConnectListener(getClass().getName(), this);
         }
 
-        orm = CacheHelper.getOrm(this);
-
         ServiceHelper.getInstance(this);
 
         createHandler();
@@ -350,7 +347,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             mLeftNavigationCallBack.get().onCreate();
         }
 
-        setupLetencyStaff();
+        setupLatencyStaff();
     }
 
     protected void setupLocationListener() {
@@ -544,10 +541,6 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     			Log.e(TAG, "why I am null, *****************");
     		}
     	}
-    }
-
-    public QiupuORM getORM() {
-        return orm;
     }
 
     @Override
@@ -5175,8 +5168,11 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     // latency compatible begin (should be replaced and removed later
     public AsyncQiupu asyncQiupu;
-    private void setupLetencyStaff() {
+    protected QiupuORM orm;
+
+    private void setupLatencyStaff() {
         asyncQiupu = ServiceHelper.getAsyncHandle();
+        orm = CacheHelper.getOrm(this);
     }
     // legancy compatible end
 }
