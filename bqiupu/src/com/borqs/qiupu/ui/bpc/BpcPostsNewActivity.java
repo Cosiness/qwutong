@@ -317,10 +317,10 @@ public class BpcPostsNewActivity extends BaseResideMenuActivity implements
      * Override and set itself as persist activity.
      * @return true to keep while navigating to other activities from navigation panel.
      */
-    @Override
-    protected boolean isPersistActivity() {
-        return true;
-    }
+//    @Override
+//    protected boolean isPersistActivity() {
+//        return true;
+//    }
 
     private void setupActionButtons (boolean forApp) {
     	overrideRightActionBtn(R.drawable.ic_menu_moreoverflow, editProfileClick);

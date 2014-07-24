@@ -36,7 +36,6 @@ import com.borqs.qiupu.db.QiupuORM.CircleCirclesColumns;
 import com.borqs.qiupu.fragment.StreamListFragment;
 import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.borqs.qiupu.ui.BasicActivity;
-import com.borqs.qiupu.ui.BasicNavigationActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
@@ -678,10 +677,10 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         return super.onKeyUp(keyCode, event);
     }
 
-    @Override
-    protected boolean isPersistActivity() {
-        return true;
-    }
+//    @Override
+//    protected boolean isPersistActivity() {
+//        return true;
+//    }
 
     @Override
     public boolean onCancelled() {
