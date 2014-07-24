@@ -16,6 +16,9 @@ public abstract class BasicNavigationActivity extends SlidingMenuOverlayActivity
         setContentView(R.layout.stream_fragment_activity);
     }
 
+    protected void createRightItem(int icon, int label, Class<?> targetFragmentClass) {
+    }
+
     protected void createLeftItem(int icon, int label, Class<?> targetFragmentClass) {
     }
 }

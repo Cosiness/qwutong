@@ -1,17 +1,26 @@
 package com.borqs.wutong;
 
+import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 
+import com.borqs.common.adapter.InformationAdapter;
+import com.borqs.common.adapter.RequestsAdapter;
+import com.borqs.information.db.Notification;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.ui.BasicActivity;
+import com.borqs.qiupu.ui.circle.quickAction.NtfQuickAction;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
 
+import java.util.ArrayList;
+
 import twitter4j.AsyncQiupu;
+import twitter4j.Requests;
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,6 +51,7 @@ public abstract class BaseResideMenuActivity extends BasicActivity {
 
         createRightMenuItems();
 
+        initCustomizedHeader(resideMenu);
         // You can disable a direction by setting ->
         // resideMenu.setSwipeDirectionDisable(ResideMenu.DIRECTION_RIGHT);
 
@@ -141,5 +151,126 @@ public abstract class BaseResideMenuActivity extends BasicActivity {
     private QiupuORM orm;
     private AsyncQiupu asyncQiupu;
     // hidden code end.
+
+    @Override
+    protected void initCustomizedHeader(View parent) {
+//        getPluginItemInfo();
+        initHeadViews(parent);
+        showSlideToggle(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resideMenu.openMenu(resideMenu.DIRECTION_LEFT);
+            }
+        });
+        tryUpdateInitialDetect();
+
+//        refreshRequestNtf();
+//        refreshToMeNtf();
+//        refreshOtherNtf();
+    }
+
+//    private void refreshRequestNtf() {
+//        final long sceneId = getSceneId();
+//        ImageView requestView = (ImageView) findViewById(R.id.head_request);
+//        ArrayList<Requests> requeslist = orm.buildRequestList("", sceneId);
+//        if(requeslist != null && requeslist.size() > 0) {
+//            Drawable requestIcon = getResources().getDrawable(R.drawable.request_icon_light);
+//            requestView.setImageBitmap(generatorTargetCountIcon(requestIcon, requeslist.size()));
+//        }else {
+//            requestView.setImageResource(R.drawable.request_icon);
+//        }
+//        requestView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(mRequestQuickDialog == null ) {
+//                    mRequestQuickDialog = new NtfQuickAction(SlidingMenuOverlayActivity.this,NtfQuickAction.VERTICAL, Notification.ntf_type_request);
+//                    mRequestAdapter = new RequestsAdapter(SlidingMenuOverlayActivity.this);
+//                    mRequestAdapter.setRequestActionListener(SlidingMenuOverlayActivity.this);
+//                    mRequestQuickDialog.setListAdapter(mRequestAdapter);
+//                    mRequestAdapter.alterRequests(orm.buildRequestList("", sceneId));
+//                    mRequestQuickDialog.setOnDismissListener(SlidingMenuOverlayActivity.this);
+//                    mRequestQuickDialog.show(v);
+//                }else {
+//                    if(mRequestAdapter == null) {
+//                        mRequestAdapter = new RequestsAdapter(SlidingMenuOverlayActivity.this);
+//                    }
+//                    mRequestAdapter.alterRequests(orm.buildRequestList("", sceneId));
+//                    mRequestQuickDialog.setListAdapter(mRequestAdapter);
+//                    mRequestQuickDialog.show(v);
+//                }
+//            }
+//        });
+//    }
+//
+//    private void refreshToMeNtf() {
+//        ImageView tomeView = (ImageView) findViewById(R.id.head_send_me);
+//        int count = mOperator.loadUnReadToMeNtfCount();
+//        if(count > 0) {
+//            Drawable tomeicon = getResources().getDrawable(R.drawable.letter_icon_light);
+//            tomeView.setImageBitmap(generatorTargetCountIcon(tomeicon, count));
+//        }else {
+//            tomeView.setImageResource(R.drawable.letter_icon);
+//        }
+//        tomeView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(mToMeQuickDialog == null ) {
+//                    mToMeQuickDialog = new NtfQuickAction(SlidingMenuOverlayActivity.this,NtfQuickAction.VERTICAL, Notification.ntf_type_tome);
+//                    mInfomationAdapter = new InformationAdapter(SlidingMenuOverlayActivity.this, SlidingMenuOverlayActivity.this);
+//                    mToMeQuickDialog.setListAdapter(mInfomationAdapter);
+//                    mToMeQuickDialog.setListItemClickListener(infomationItemClickListenter);
+//                    mInfomationAdapter.alterDataList(mOperator.loadNtfToMe(""));
+//                    mToMeQuickDialog.setOnDismissListener(SlidingMenuOverlayActivity.this);
+//                    mToMeQuickDialog.show(v);
+//                    //refresh title ToMe ntf icon
+////					onNotificationDownloadCallBack(true, 0);
+//
+//                }else {
+//                    if(mInfomationAdapter == null) {
+//                        mInfomationAdapter = new InformationAdapter(SlidingMenuOverlayActivity.this);
+//                    }
+//                    mInfomationAdapter.alterDataList(mOperator.loadNtfToMe(""));
+//                    mToMeQuickDialog.setListAdapter(mInfomationAdapter);
+//                    mToMeQuickDialog.show(v);
+//                }
+//            }
+//        });
+//    }
+//    private void refreshOtherNtf() {
+//        ImageView otherNtfView = (ImageView) findViewById(R.id.head_ntf);
+//        int count = mOperator.loadUnReadOtherNtfCount();
+//        if(count > 0) {
+//            Drawable otherntfIcon = getResources().getDrawable(R.drawable.notice_icon_light);
+//            otherNtfView.setImageBitmap(generatorTargetCountIcon(otherntfIcon, count));
+//        }else {
+//            otherNtfView.setImageResource(R.drawable.notice_icon);
+//        }
+//        otherNtfView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // show quick dialog
+//                if (mOtherNtfQuickDialog == null) {
+//                    mOtherNtfQuickDialog = new NtfQuickAction(SlidingMenuOverlayActivity.this, NtfQuickAction.VERTICAL, Notification.ntf_type_other);
+//                    mInfomationAdapter = new InformationAdapter(SlidingMenuOverlayActivity.this, SlidingMenuOverlayActivity.this);
+//                    mOtherNtfQuickDialog.setListAdapter(mInfomationAdapter);
+//                    mOtherNtfQuickDialog.setListItemClickListener(infomationItemClickListenter);
+//                    mInfomationAdapter.alterDataList(mOperator.loadNtfWithOutToMe(""));
+//                    mOtherNtfQuickDialog.setOnDismissListener(SlidingMenuOverlayActivity.this);
+//                    mOtherNtfQuickDialog.show(v);
+//
+//                    //refresh title other ntf icon
+////					onNotificationDownloadCallBack(false, 0);
+//
+//                } else {
+//                    if (mInfomationAdapter == null) {
+//                        mInfomationAdapter = new InformationAdapter(SlidingMenuOverlayActivity.this);
+//                    }
+//                    mInfomationAdapter.alterDataList(mOperator.loadNtfWithOutToMe(""));
+//                    mOtherNtfQuickDialog.setListAdapter(mInfomationAdapter);
+//                    mOtherNtfQuickDialog.show(v);
+//                }
+//            }
+//        });
+//    }
 }
 

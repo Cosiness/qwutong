@@ -12,7 +12,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical"
             >
-        <include layout="@layout/title_bar_base"
+        <include layout="@layout/title_bar_base_ntf"
             android:id="@+id/title_bar"/>
 
         <FrameLayout

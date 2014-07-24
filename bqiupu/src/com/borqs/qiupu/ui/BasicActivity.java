@@ -1351,20 +1351,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
             initActionBarContent();
 
-            if (fromtab == false) {
-                showSlideToggle(parent, new OnClickListener() {
-                    public void onClick(View v) {
-                        finish();
-                    }
-                });
-            } else {
-                View headTitle = findViewById(R.id.layout_title);
-                if (null != headTitle) {
-                    headTitle.setPadding((int)getResources().getDimension(R.dimen.title_bar_title_left_padding), 0, 0, 0);
-                }
-            }
-
-            initHeadViews(parent);
+            initCustomizedHeader(parent);
         }
     }
 
@@ -5175,4 +5162,22 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         orm = CacheHelper.getOrm(this);
     }
     // legancy compatible end
+
+
+    protected void initCustomizedHeader(View parent) {
+        if (fromtab == false) {
+            showSlideToggle(parent, new OnClickListener() {
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        } else {
+            View headTitle = findViewById(R.id.layout_title);
+            if (null != headTitle) {
+                headTitle.setPadding((int)getResources().getDimension(R.dimen.title_bar_title_left_padding), 0, 0, 0);
+            }
+        }
+
+        initHeadViews(parent);
+    }
 }

@@ -2,12 +2,8 @@ package com.borqs.wutong;
 
 import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -83,13 +79,13 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
         QiupuHelper.registerFinishListner(getClass().getName(), this);
         parseActivityIntent(getIntent());
-        overrideRightActionBtn(R.drawable.home_screen_menu_people_icon_default, editProfileClick);
 
         CacheHelper.checkExpandCirCle();
 
         setUpMenu(StreamListFragment.class);
 //        changeFragment();
         setupQuickAction();
+        overrideRightActionBtn(R.drawable.home_screen_menu_people_icon_default, editProfileClick);
 
         mHandler.postDelayed(new Runnable() {
 			
@@ -424,54 +420,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
             }
         });
     }
-    boolean inDeleteCircle;
-    Object mLockdeleteCircle = new Object();
-
-    public void deleteCircleFromServer(final UserCircle circle, final String circleName, final int type) {
-        if (inDeleteCircle == true) {
-            Toast.makeText(this, R.string.string_in_processing,Toast.LENGTH_SHORT).show();
-            return ;
-        }
-
-        synchronized (mLockdeleteCircle) {
-            inDeleteCircle = true;
-        }
-        showDialog(DIALOG_DELETE_CIRCLE_PROCESS);
-        ServiceHelper.deleteCircle(AccountServiceUtils.getSessionID(), String.valueOf(circle.circleid), type, new TwitterAdapter() {
-            public void deleteCircle(boolean suc) {
-                Log.d(TAG, "finish deleteCircle=" + suc);
-
-                if(suc) {
-                    //delete circle in DB
-                    CacheHelper.deleteCircleByCricleId(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circle.circleid));
-                    //update user info
-                    CacheHelper.updateUserInfoInCircle(AccountServiceUtils.getBorqsAccountID(), String.valueOf(circle.circleid), circleName);
-
-                    //update circle_circle table
-                    CacheHelper.deleteCacheCircleCircle(circle);
-                    
-                    updatePageInfoAfterRemoveCircle(circle);
-                }
-                Message msg = mHandler.obtainMessage(CIRCLE_DELETE_END);
-                msg.getData().putBoolean(RESULT, suc);
-                msg.sendToTarget();
-
-                synchronized (mLockdeleteCircle) {
-                    inDeleteCircle = false;
-                }
-            }
-
-            public void onException(TwitterException ex,TwitterMethod method) {
-                synchronized (mLockdeleteCircle) {
-                    inDeleteCircle = false;
-                }
-
-                Message msg = mHandler.obtainMessage(CIRCLE_DELETE_END);
-                msg.getData().putBoolean(RESULT, false);
-                msg.sendToTarget();
-            }
-        });
-    }
 
     public void onCorpusSelected(String value) {
     	if(getString(R.string.home_label).equals(value)) {
@@ -490,27 +438,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     		} catch (Exception e) {
     		}
     	}
-    }
-
-    static Bitmap centerToFit(Bitmap bitmap, int width, int height, Context context) {
-        final int bitmapWidth = bitmap.getWidth();
-        final int bitmapHeight = bitmap.getHeight();
-
-        if (bitmapWidth < width || bitmapHeight < height) {
-            int color = context.getResources().getColor(R.color.light_blue);
-
-            Bitmap centered = Bitmap.createBitmap(bitmapWidth < width ? width : bitmapWidth,
-                    bitmapHeight < height ? height : bitmapHeight, Bitmap.Config.RGB_565);
-            centered.setDensity(bitmap.getDensity());
-            Canvas canvas = new Canvas(centered);
-            canvas.drawColor(color);
-            canvas.drawBitmap(bitmap, new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()), new Rect(2,2,centered.getWidth()-2, centered.getHeight()-2),
-                    null);
-
-            bitmap = centered;
-        }
-
-        return bitmap;
     }
 
     @Override
