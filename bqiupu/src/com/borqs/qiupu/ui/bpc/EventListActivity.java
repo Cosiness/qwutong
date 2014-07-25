@@ -43,7 +43,8 @@ import com.borqs.qiupu.ui.circle.EventDetailActivity;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
 
-public class EventListActivity extends BasicNavigationActivity implements UsersActionListner, OnItemClickListener, FriendsManager.FriendsServiceListener {
+public class EventListActivity extends BasicNavigationActivity implements UsersActionListner,
+        OnItemClickListener, FriendsManager.FriendsServiceListener {
 
     private final static String TAG = "EventListActivity";
     private TwoWayGridView mListView;
@@ -59,11 +60,7 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
         super.onCreate(savedInstanceState);
         setContentView(R.layout.event_list_main);
         setHeadTitle(R.string.event_title_upcoming);
-//        showLeftActionBtn(true);
-//        showRightActionBtn(true);
-//        showTitleSpinnerIcon(true);
         overrideRightActionBtn(R.drawable.ic_menu_moreoverflow, editProfileClick);
-//        overrideRightActionBtn(R.drawable.home_screen_create_event_icon, addEventListener);
         mListView  = (TwoWayGridView) findViewById(R.id.gridview);
         mToastTextView = (TextView) findViewById(R.id.toast_tv);
         mEventAdapter = new EventListAdapter(this);
@@ -168,7 +165,6 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
     			Log.d(TAG, "finish syncEventInfo=" + circles.size());
     			
     			if (circles.size() > 0) {
-//    				orm.insertEventList(circles);
     				orm.insertEventsList(EventListActivity.this, circles);
                 }
     			
@@ -191,12 +187,6 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
     	});
     }
 
-//    @Override
-//    public void setLeftMenuPosition() {
-//        mPosition = LeftMenuMapping.getPositionForActivity(this);
-//        mTitle = getString(R.string.event);
-//    }
-    
 	private void refreshCircleList(int currenttype) {
 		Cursor events = null;
 		if(currenttype == TYPE_UPCOMING) {
@@ -240,13 +230,7 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
 	@Override
 	public void sendRequest(QiupuUser user) {
 	}
-	
-//	 View.OnClickListener addEventListener = new OnClickListener() {
-//	        public void onClick(View v) {
-//	        	//TODO start create event
-//	        	IntentUtil.gotoCreateEventActivity(EventListActivity.this, EditPublicCircleActivity.type_create_event, null, null);
-//	        }
-//	    };
+
 	@Override
 	public void onItemClick(TwoWayAdapterView<?> parent, View view,
 			int position, long id) {
@@ -262,7 +246,6 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
                 bundle.putLong(CircleUtils.CIRCLE_ID, circle.circleid);
                 intent.putExtras(bundle);
                 startActivity(intent);
-//            	IntentUtil.startPublicCircleDetailIntent(EventListActivity.this, circle);
                 }
             }else {
                 Log.d(TAG, "get circle is null.");

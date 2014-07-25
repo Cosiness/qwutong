@@ -36,7 +36,6 @@
         app:scrollDirectionPortrait="vertical"
         app:stretchMode="columnWidth"
         app:verticalSpacing="1dp" />
-    <!-- <include layout="@layout/default_listview" android:id="@+id/default_listview"/> -->
 
     <TextView
         android:id="@+id/toast_tv"
