@@ -73,7 +73,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
-        enableLeftNav(true);
+//        enableLeftNav(true);
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.wutong_organization_home_activity);
 
@@ -473,18 +473,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
             return mCircle.circleid;
         }else {
             return 0;
-        }
-    }
-
-    private void updatePageInfoAfterRemoveCircle(UserCircle circle) {
-        if(circle.mGroup != null && circle.mGroup.pageid > 0) {
-            ContentValues cv = new ContentValues();
-            if(circle.mGroup.formal == UserCircle.circle_free) {
-                cv.put(QiupuORM.PageColumns.FREE_CIRCLE_IDS, "");
-            } else if(circle.mGroup.formal == UserCircle.circle_top_formal) {
-                cv.put(QiupuORM.PageColumns.ASSOCIATED_ID, -1);
-            }
-            CacheHelper.updatePageInfo(circle.mGroup.pageid, cv);
         }
     }
 
