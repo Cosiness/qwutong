@@ -1,12 +1,12 @@
 package com.borqs.wutong;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -21,7 +21,6 @@ import com.borqs.common.listener.ActivityFinishListner;
 import com.borqs.common.util.DialogUtils;
 import com.borqs.common.util.IntentUtil;
 import com.borqs.common.view.CorpusSelectionItemView;
-import com.borqs.common.view.CustomViewPager;
 import com.borqs.information.util.InformationUtils;
 import com.borqs.qiupu.QiupuApplication;
 import com.borqs.qiupu.QiupuConfig;
@@ -29,6 +28,8 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.db.QiupuORM.CircleCirclesColumns;
+import com.borqs.qiupu.fragment.OrganizationExtraCallBack;
+import com.borqs.qiupu.fragment.OrganizationExtraFragment;
 import com.borqs.qiupu.fragment.StreamListFragment;
 import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.borqs.qiupu.ui.BasicActivity;
@@ -56,7 +57,7 @@ import twitter4j.UserCircle;
  */
 public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         StreamListFragment.StreamListFragmentCallBack,
-        StreamRightFlipperFragment.StreamRightFlipperCallBack,
+        OrganizationExtraCallBack,
         HomePickerActivity.PickerInterface, ActivityFinishListner {
 
     private static final String TAG = "OrganizationHomeActivity";
@@ -672,7 +673,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     }
     
 	@Override
-	public void getStreamRightFlipperFragment(StreamRightFlipperFragment fragment) {
+	public void getStreamRightFlipperFragment(Fragment fragment) {
 //		mRightFragment = fragment;
 	}
 
@@ -710,8 +711,8 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
         createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
         createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, StreamListFragment.class);
+        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, OrganizationExtraFragment.class);
+        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, OrganizationExtraFragment.class);
     }
 
     private void setupQuickAction() {

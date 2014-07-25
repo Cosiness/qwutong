@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -58,22 +59,21 @@ import com.borqs.qiupu.fragment.PublicCircleMainFragment.CircleMainFragmentCallB
 import com.borqs.qiupu.fragment.StreamListFragment;
 import com.borqs.qiupu.fragment.StreamListFragment.StreamListFragmentCallBack;
 import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
-import com.borqs.qiupu.fragment.StreamRightFlipperFragment.StreamRightFlipperCallBack;
+import com.borqs.qiupu.fragment.OrganizationExtraCallBack;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
-import com.borqs.qiupu.ui.bpc.BpcSearchActivity;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
 
 public class UserPublicCircleDetailActivity extends BasicNavigationActivity  implements  
-StreamListFragmentCallBack, CircleMainFragmentCallBack, StreamRightFlipperCallBack, CustomViewPagerListenter{
+StreamListFragmentCallBack, CircleMainFragmentCallBack, OrganizationExtraCallBack, CustomViewPagerListenter{
 
 	private static final String TAG = "UserPublicCircleDetailActivity";
 
     private UserCircle mCircle;
     private PublicCircleMainFragment mCircleMainFragment;
-    private StreamRightFlipperFragment mRightFragment;
+    private Fragment mRightFragment;
     
     
     StreamListFragment.MetaData mFragmentData = new StreamListFragment.MetaData();
@@ -151,7 +151,7 @@ StreamListFragmentCallBack, CircleMainFragmentCallBack, StreamRightFlipperCallBa
 					mCurrentPage = PAGE_RIGHT_INFO;
 					mPager.setIndex(0);
 					if(mRightFragment != null) {
-						mRightFragment.setisCurrentScreen(true);
+                        ((StreamRightFlipperFragment)mRightFragment).setisCurrentScreen(true);
 					}
 					if(mCircleMainFragment != null) {
 						mCircleMainFragment.onScrollingBottomView(false, foot);
@@ -160,7 +160,7 @@ StreamListFragmentCallBack, CircleMainFragmentCallBack, StreamRightFlipperCallBa
 					mCurrentPage = PAGE_STRAM;
 					mPager.setIndex(-1);
 					if(mRightFragment != null) {
-						mRightFragment.setisCurrentScreen(false);
+                        ((StreamRightFlipperFragment)mRightFragment).setisCurrentScreen(false);
 					}
 					if(mCircleMainFragment != null) {
 						mCircleMainFragment.onScrollingBottomView(true, foot);
@@ -1069,22 +1069,21 @@ StreamListFragmentCallBack, CircleMainFragmentCallBack, StreamRightFlipperCallBa
     public boolean onQueryTextChange(String newText) {
 		if(mCurrentPage == PAGE_RIGHT_INFO) {
 			if(mRightFragment != null) {
-				mRightFragment.doSearch(newText);
+                ((StreamRightFlipperFragment)mRightFragment).doSearch(newText);
 			}
 		}
     	return super.onQueryTextChange(newText);
     }
     
 	@Override
-	public void getStreamRightFlipperFragment(
-			StreamRightFlipperFragment fragment) {
+	public void getStreamRightFlipperFragment(Fragment fragment) {
 		mRightFragment = fragment;
 	}
 
 	@Override
 	public void refreshRightFragmentUi(UserCircle circle) {
 		if(mRightFragment != null) {
-			mRightFragment.refreshUI(circle);
+            ((StreamRightFlipperFragment)mRightFragment).refreshUI(circle);
 		}
 	}
 
@@ -1143,7 +1142,7 @@ StreamListFragmentCallBack, CircleMainFragmentCallBack, StreamRightFlipperCallBa
 	@Override
 	public int getCurentIndex() {
 		if(mRightFragment != null) {
-			return mRightFragment.getCurrentIndex();
+			return ((StreamRightFlipperFragment)mRightFragment).getCurrentIndex();
 		}
 		return -1;
 	}

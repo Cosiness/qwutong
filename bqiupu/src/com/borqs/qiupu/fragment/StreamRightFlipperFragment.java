@@ -37,7 +37,7 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 	private final static String TAG = "StreamRightFlipperFragment";
 	private Activity mActivity;
 
-	private StreamRightFlipperCallBack mCallBackListener;
+	private OrganizationExtraCallBack mCallBackListener;
 
 	private UserCircle mCircle;
 
@@ -66,8 +66,8 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 		super.onAttach(activity);
 		mActivity = activity;
 
-		if (mActivity instanceof StreamRightFlipperCallBack) {
-			mCallBackListener = (StreamRightFlipperCallBack) activity;
+		if (mActivity instanceof OrganizationExtraCallBack) {
+			mCallBackListener = (OrganizationExtraCallBack) activity;
 			mCallBackListener.getStreamRightFlipperFragment(this);
 			mCircle = mCallBackListener.getCircleInfo();
 		}
@@ -303,13 +303,6 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 		return eventListView;
 	}
 
-	public interface StreamRightFlipperCallBack {
-		public void getStreamRightFlipperFragment(StreamRightFlipperFragment fragment);
-		public UserCircle getCircleInfo();
-		public void startSearch();
-		public void hidSearch();
-	}
-
 	private void showSearchbtn(boolean isShow) {
 		if(mSearch != null) {
 			mSearch.setVisibility(isShow ? View.VISIBLE : View.GONE);
@@ -428,3 +421,4 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 		return -1;
 	}
 }
+
