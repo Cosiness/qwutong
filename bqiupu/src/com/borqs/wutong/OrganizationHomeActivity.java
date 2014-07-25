@@ -708,10 +708,10 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
     protected void createLeftMenuItems() {
         createLeftItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_feed, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, StreamListFragment.class);
-        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
-        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, OrganizationExtraFragment.class);
+        createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, OrganizationExtraFragment.Album.class);
+        createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, OrganizationExtraFragment.Member.class);
+        createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, OrganizationExtraFragment.Circle.class);
+        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, OrganizationExtraFragment.Event.class);
         createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, OrganizationExtraFragment.Poll.class);
     }
 

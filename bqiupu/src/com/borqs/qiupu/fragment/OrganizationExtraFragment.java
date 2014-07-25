@@ -9,10 +9,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.TextView;
 
 import com.borqs.common.view.AllAppsScreen.LoadDataActionListener;
+import com.borqs.common.view.StreamRightAlbumViewUi;
+import com.borqs.common.view.StreamRightCircleListViewUi;
+import com.borqs.common.view.StreamRightEventListViewUi;
+import com.borqs.common.view.StreamRightMemberListViewUi;
 import com.borqs.common.view.StreamRightPollListViewUi;
+import com.borqs.common.view.pullRefreshGridView.PullToRefreshExpandableListView;
+import com.borqs.common.view.pullRefreshGridView.PullToRefreshGridView;
 import com.borqs.common.view.pullRefreshGridView.PullToRefreshListView;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.util.CircleUtils;
@@ -152,7 +159,7 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 //				createPollPage();
 				// album
 //				createAlbumPage(maxTab, fiveTab);
-                createContentPage(mActivity, addContentListView(), mCircle.circleid);
+                createContentPage(mActivity, mCircle);
 
             }else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_sub_formal){
 //				maxTab = 1;
@@ -165,7 +172,7 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 //				createEventPage(maxTab, secondTab);
 				// poll list
 //				createAlbumPage(maxTab, fiveTab);
-                createContentPage(mActivity, addContentListView(), mCircle.circleid);
+                createContentPage(mActivity, mCircle);
 				// album 
 //				createAlbumPage(maxTab, fourTab);
 				
@@ -180,7 +187,7 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 //				createEventPage(maxTab, secondTab);
 				// poll list
 //				createAlbumPage(maxTab, fiveTab);
-                createContentPage(mActivity, addContentListView(), mCircle.circleid);
+                createContentPage(mActivity, mCircle);
 				// album 
 //				createAlbumPage(maxTab, fourTab);
 			}else {
@@ -192,13 +199,13 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 //	private void createMemberPage(int maxTab, int tab) {
 //		mMemberList = new StreamRightMemberListViewUi();
 //		mTabTitle.addView(createTabTitleView(R.string.circle_member_label, maxTab, tab));
-//		mMemberList.init(mActivity, addContentListView(tab), mCircle);
+//		mMemberList.init(mActivity, ensureContentListView(tab), mCircle);
 //	}
 	
 //	private void createEventPage(int maxTab, int tab) {
 //		mEventList = new StreamRightEventListViewUi();
 //		mTabTitle.addView(createTabTitleView(R.string.event, maxTab, tab));
-//		mEventList.init(mActivity, addContentListView(tab), mCircle.circleid);
+//		mEventList.init(mActivity, ensureContentListView(tab), mCircle.circleid);
 //	}
 
 //	private void createAlbumPage(int maxTab, int tab) {
@@ -209,12 +216,6 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 //		vg4.addView(albumGridView);
 //		mAlbumView.init(mActivity, albumGridView, mCircle);
 //	}
-
-	private PullToRefreshListView createContentList() {
-		PullToRefreshListView listview = (PullToRefreshListView) LayoutInflater.from(mActivity).inflate(R.layout.default_refreshable_listview, null);
-		listview.setLayoutParams(new android.widget.AbsListView.LayoutParams(android.widget.AbsListView.LayoutParams.MATCH_PARENT, android.widget.AbsListView.LayoutParams.MATCH_PARENT));
-		return listview;
-	}
 	
 //	private PullToRefreshGridView createContentGridView() {
 //		PullToRefreshGridView pullGridView = (PullToRefreshGridView) LayoutInflater.from(mActivity).inflate(R.layout.pull_to_refresh_grid, null);
@@ -222,11 +223,27 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 //		return pullGridView;
 //	}
 
-	private PullToRefreshListView addContentListView() {
-		PullToRefreshListView listView = createContentList();
+	protected PullToRefreshListView ensureContentListView() {
+        PullToRefreshListView listView = (PullToRefreshListView) LayoutInflater.from(mActivity).inflate(R.layout.default_refreshable_listview, null);
+        listView.setLayoutParams(new android.widget.AbsListView.LayoutParams(android.widget.AbsListView.LayoutParams.MATCH_PARENT, android.widget.AbsListView.LayoutParams.MATCH_PARENT));
+        workspace.removeAllViews();
         workspace.addView(listView);
 		return listView;
 	}
+
+    protected PullToRefreshGridView ensureContentGridView() {
+        PullToRefreshGridView pullGridView = (PullToRefreshGridView) LayoutInflater.from(mActivity).inflate(R.layout.pull_to_refresh_grid, null);
+		pullGridView.setLayoutParams(new android.widget.AbsListView.LayoutParams(android.widget.AbsListView.LayoutParams.MATCH_PARENT, android.widget.AbsListView.LayoutParams.MATCH_PARENT));
+		workspace.removeAllViews();
+        workspace.addView(pullGridView);
+        return pullGridView;
+    }
+
+    protected PullToRefreshExpandableListView ensureContentExpandListView() {
+        PullToRefreshExpandableListView listView = (PullToRefreshExpandableListView) LayoutInflater.from(mActivity).inflate(R.layout.pull_to_refresh_expandable_list, null);
+        listView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        return listView;
+    }
 
 	protected void showSearchbtn(boolean isShow) {
 		if(mSearch != null) {
@@ -242,15 +259,6 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 			mCircle = circle;
 			initUI();
 		}
-	}
-	
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-		
-//		if(mAlbumView != null) {
-//			mAlbumView.onConfigurationChanged(newConfig);
-//		}
 	}
 
 	public void doSearch(String newText) {
@@ -277,9 +285,215 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
 		}
 	}
 
-    protected abstract void createContentPage(Activity context, PullToRefreshListView listView, long circleId);
+    protected abstract void createContentPage(Activity context, UserCircle circle);
 
     // sub class begin
+    public static class Member extends OrganizationExtraFragment {
+        private StreamRightMemberListViewUi mMemberList;
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            if(mMemberList != null) {
+                mMemberList.onDestory();
+            }
+        }
+
+        @Override
+        public void doSearch(String newText) {
+            if (mMemberList != null) {
+                mMemberList.doSearch(newText);
+            }
+//            if(mCircle == null) {
+//            }else {
+//			if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_top_formal) {
+//				if(mCurrentIndex == firstTab && mCirclelist != null) {
+//					mCirclelist.doSearch(newText);
+//				}else if(mCurrentIndex == secondTab && mMemberList != null) {
+//					mMemberList.doSearch(newText);
+//				}
+//			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_sub_formal){
+//				if(mCurrentIndex == firstTab && mMemberList != null) {
+//					mMemberList.doSearch(newText);
+//				}
+//
+//			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_free) {
+//				if(mCurrentIndex == firstTab && mMemberList != null) {
+//					mMemberList.doSearch(newText);
+//				}
+//			}else {
+//				Log.d(TAG, "initUI: have no circle type. don't know how to create view");
+//			}
+//            }
+        }
+
+        @Override
+        public void loaddata(int index) {
+            // why it was test mCircle.mGroup.formal == UserCircle.circle_top_formal, bug or spec?
+            if (null != mMemberList) {
+                showSearchbtn(true);
+                mMemberList.loadDataOnMove();
+            }
+//            if(mCircle == null) {
+//            }else {
+//                if (null != mPollList) {
+//                    showSearchbtn(false);
+//                    mPollList.loadDataOnMove();
+//                }
+//			if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_top_formal) {
+//				if(index == firstTab && mMemberList != null) {
+//					showSearchbtn(true);
+//					mMemberList.loadDataOnMove();
+//				}else if(index == secondTab && mEventList != null) {
+//					showSearchbtn(true);
+//					mEventList.loadDataOnMove();
+//				}else if(index == thirdTab && mPollList != null) {
+//					showSearchbtn(false);
+//					mPollList.loadDataOnMove();
+//				}else if(index == fourTab && mAlbumView != null) {
+//					showSearchbtn(false);
+//					mAlbumView.loadDataOnMove();
+//				}
+//			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_sub_formal){
+//				if(index == firstTab && mEventList != null) {
+//					showSearchbtn(true);
+//					mEventList.loadDataOnMove();
+//				}else if(index == secondTab && mPollList != null) {
+//					showSearchbtn(false);
+//					mPollList.loadDataOnMove();
+//				}else if(index == fourTab && mAlbumView != null) {
+//					showSearchbtn(false);
+//					mAlbumView.loadDataOnMove();
+//				}
+//
+//			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_free) {
+//				if(index == firstTab && mEventList != null) {
+//					showSearchbtn(true);
+//					mEventList.loadDataOnMove();
+//				}else if(index == secondTab && mPollList != null) {
+//					showSearchbtn(false);
+//					mPollList.loadDataOnMove();
+//				}else if(index == fourTab && mAlbumView != null) {
+//					showSearchbtn(false);
+//					mAlbumView.loadDataOnMove();
+//				}
+//			}else {
+//				Log.d(TAG, "initUI: have no circle type. don't know how to create view");
+//			}
+//            }
+        }
+
+        @Override
+        protected void createContentPage(Activity activity, UserCircle circle) {
+            mMemberList = new StreamRightMemberListViewUi();
+            mMemberList.init(activity, ensureContentListView(), circle);
+        }
+    }
+
+    public static class Album extends OrganizationExtraFragment {
+        private StreamRightAlbumViewUi mAlbumView;
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+            super.onConfigurationChanged(newConfig);
+
+		if(mAlbumView != null) {
+			mAlbumView.onConfigurationChanged(newConfig);
+		}
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+        }
+
+        @Override
+        public void loaddata(int index) {
+            if (null != mAlbumView) {
+                showSearchbtn(false);
+                mAlbumView.loadDataOnMove();
+            }
+        }
+
+        @Override
+        protected void createContentPage(Activity activity, UserCircle circle) {
+            mAlbumView = new StreamRightAlbumViewUi();
+            mAlbumView.init(activity, ensureContentGridView(), circle);
+        }
+    }
+
+    public static class Circle extends OrganizationExtraFragment {
+        private StreamRightCircleListViewUi mCirclelist;
+
+        public void doSearch(String newText) {
+            if (mCirclelist != null) {
+                mCirclelist.doSearch(newText);
+            }
+//            if(mCircle == null) {
+//            }else {
+//			if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_top_formal) {
+//				if(mCurrentIndex == firstTab && mCirclelist != null) {
+//					mCirclelist.doSearch(newText);
+//				}else if(mCurrentIndex == secondTab && mMemberList != null) {
+//					mMemberList.doSearch(newText);
+//				}
+//			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_sub_formal){
+//				if(mCurrentIndex == firstTab && mMemberList != null) {
+//					mMemberList.doSearch(newText);
+//				}
+//
+//			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_free) {
+//				if(mCurrentIndex == firstTab && mMemberList != null) {
+//					mMemberList.doSearch(newText);
+//				}
+//			}else {
+//				Log.d(TAG, "initUI: have no circle type. don't know how to create view");
+//			}
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+		if(mCirclelist != null) {
+			mCirclelist.onDestory();
+		}
+        }
+
+        @Override
+        public void loaddata(int index) {
+        }
+
+        @Override
+        protected void createContentPage(Activity activity, UserCircle circle) {
+            mCirclelist = new StreamRightCircleListViewUi();
+            mCirclelist.init(activity, ensureContentExpandListView(), circle);
+        }
+    }
+
+    public static class Event extends OrganizationExtraFragment {
+        private StreamRightEventListViewUi mEventList;
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            if(mEventList != null) {
+                mEventList.onDestory();
+            }
+        }
+
+        @Override
+        public void loaddata(int index) {
+            if (null != mEventList) {
+                showSearchbtn(true);
+                mEventList.loadDataOnMove();
+            }
+        }
+
+        @Override
+        protected void createContentPage(Activity activity, UserCircle circle) {
+            mEventList = new StreamRightEventListViewUi();
+            mEventList.init(activity, ensureContentListView(), circle.circleid);
+        }
+    }
 
     public static class Poll extends OrganizationExtraFragment {
         private StreamRightPollListViewUi mPollList;
@@ -357,9 +571,9 @@ abstract public class OrganizationExtraFragment extends BasicFragment implements
         }
 
         @Override
-        protected void createContentPage(Activity activity, PullToRefreshListView listView, long circleId) {
+        protected void createContentPage(Activity activity, UserCircle circle) {
             mPollList = new StreamRightPollListViewUi();
-            mPollList.init(activity, listView, circleId);
+            mPollList.init(activity, ensureContentListView(), circle.circleid);
         }
     }
     // sub class end
