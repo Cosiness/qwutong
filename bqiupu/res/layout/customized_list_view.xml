@@ -43,5 +43,7 @@
         android:text="@string/no_top_stream"
         android:textSize="@dimen/event_name_text_size"
         android:visibility="gone" />
-
+    <include
+        android:id="@+id/bottom_actions_layout"
+        layout="@layout/wutong_floating_compose_action_bar" />
 </FrameLayout>
