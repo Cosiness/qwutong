@@ -495,10 +495,10 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 //                return true;
 //            }
 //        }
-//        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-//			showSearhView();
-//			return true;
-//		}
+        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+			showSearhView();
+			return true;
+		}
         return super.onKeyUp(keyCode, event);
     }
 
@@ -679,12 +679,12 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
 	@Override
 	public void startSearch() {
-//		showSearhView();
+		showSearhView();
 	}
 
 	@Override
 	public void hidSearch() {
-//		hideSearhView();
+		hideSearhView();
 	}
 
 	@Override
