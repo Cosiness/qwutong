@@ -712,7 +712,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, StreamListFragment.class);
         createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, StreamListFragment.class);
         createLeftItem(R.drawable.home_screen_event_icon, R.string.event, OrganizationExtraFragment.class);
-        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, OrganizationExtraFragment.class);
+        createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, OrganizationExtraFragment.Poll.class);
     }
 
     private void setupQuickAction() {
