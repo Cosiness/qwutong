@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +17,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.borqs.common.util.IntentUtil;
 import com.borqs.common.view.AllAppsScreen;
 import com.borqs.common.view.AllAppsScreen.LoadDataActionListener;
 import com.borqs.common.view.AllAppsScreen.TitleActionListener;
-import com.borqs.common.view.CustomViewPager;
 import com.borqs.common.view.PageIndicatorLineStyleView;
 import com.borqs.common.view.StreamRightAlbumViewUi;
 import com.borqs.common.view.StreamRightCircleListViewUi;
@@ -33,7 +30,6 @@ import com.borqs.common.view.pullRefreshGridView.PullToRefreshExpandableListView
 import com.borqs.common.view.pullRefreshGridView.PullToRefreshGridView;
 import com.borqs.common.view.pullRefreshGridView.PullToRefreshListView;
 import com.borqs.qiupu.R;
-import com.borqs.qiupu.ui.bpc.BpcSearchActivity;
 import com.borqs.qiupu.util.CircleUtils;
 
 public class StreamRightFlipperFragment extends BasicFragment implements
@@ -55,15 +51,13 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 	private final int thirdTab = secondTab + 1;
 	private final int fourTab = thirdTab + 1;
 	private final int fiveTab = fourTab + 1;
-	private final int sixTab = fiveTab + 1;
-	
+
 	private StreamRightMemberListViewUi mMemberList;
 	private StreamRightEventListViewUi mEventList;
 	private StreamRightPollListViewUi mPollList;
 	private StreamRightAlbumViewUi mAlbumView;
 	private StreamRightCircleListViewUi mCirclelist;
 	
-//	private CustomViewPager mPager;
 	private int mCurrentIndex = firstTab;
 
 	@Override
@@ -76,7 +70,6 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 			mCallBackListener = (StreamRightFlipperCallBack) activity;
 			mCallBackListener.getStreamRightFlipperFragment(this);
 			mCircle = mCallBackListener.getCircleInfo();
-//			mPager = mCallBackListener.getParentViewPager();
 		}
 	}
 
@@ -196,14 +189,8 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 				// circle list
 				mCirclelist = new StreamRightCircleListViewUi();
 				mTabTitle.addView(createTabTitleView(R.string.user_circles, maxTab, firstTab));
-				
-//				PullToRefreshListView circleListView = createContentList();
-//				ViewGroup vg = (ViewGroup) workspace.getChildAt(firstTab);
-//				vg.addView(circleListView);
-				
-//				PullToRefreshGridView circleGridView = createContentGridView();
+
 				PullToRefreshExpandableListView listview = (PullToRefreshExpandableListView) LayoutInflater.from(mActivity).inflate(R.layout.pull_to_refresh_expandable_list, null);
-//				PullToRefreshExpandableListView listview = (PullToRefreshExpandableListView) expandableview.findViewById(R.id.pull_refresh_expandable_list);
 				listview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 				mCirclelist.init(mActivity, listview, mCircle);
 				ViewGroup vg0 = (ViewGroup) workspace.getChildAt(firstTab);
@@ -315,21 +302,10 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 		vg.addView(eventListView);
 		return eventListView;
 	}
-	private class MainHandler extends Handler {
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case 0: {
-				// updateStatus();
-				break;
-			}
-			}
-		}
-	}
 
 	public interface StreamRightFlipperCallBack {
 		public void getStreamRightFlipperFragment(StreamRightFlipperFragment fragment);
 		public UserCircle getCircleInfo();
-		public CustomViewPager getParentViewPager();
 		public void startSearch();
 		public void hidSearch();
 	}
@@ -393,9 +369,6 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 		}
 
 		mCurrentIndex = index;
-//		if(mPager != null ) {
-//			mPager.setIndex(index);
-//		}
 	}
 
 	public void refreshUI(UserCircle circle) {
@@ -424,29 +397,6 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 		
 	}
 
-	public void onQueryTextSubmit(String query) {
-		if(mCircle == null) {
-		}else {
-			if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_top_formal) {
-				if(mCurrentIndex == firstTab) {
-					IntentUtil.startSearchActivity(mActivity, query, BpcSearchActivity.SEARCH_TYPE_CIRCLE);
-				}else if(mCurrentIndex == secondTab){ 
-					IntentUtil.startPeopleSearchIntent(mActivity, query);
-				}
-			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_sub_formal){
-				if(mCurrentIndex == firstTab) {
-					IntentUtil.startPeopleSearchIntent(mActivity, query);
-				}
-			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_free) {
-				if(mCurrentIndex == firstTab) {
-					IntentUtil.startPeopleSearchIntent(mActivity, query);
-				}
-			}else {
-				Log.d(TAG, "initUI: have no circle type. don't know how to create view");
-			}
-		}
-	}
-
 	public void doSearch(String newText) {
 		if(mCircle == null) {
 		}else {
@@ -455,29 +405,15 @@ public class StreamRightFlipperFragment extends BasicFragment implements
 					mCirclelist.doSearch(newText);
 				}else if(mCurrentIndex == secondTab && mMemberList != null) {
 					mMemberList.doSearch(newText);
-//				}else if(mCurrentIndex == secondTab && mEventList != null) {
-//					mEventList.loadDataOnMove();
-//				}else if(mCurrentIndex == thirdTab && mPollList != null) {
-//					mPollList.loadDataOnMove();
-//				}else if(mCurrentIndex == fourTab && mAlbumView != null) {
-//					mAlbumView.loadDataOnMove();
 				}
 			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_sub_formal){
 				if(mCurrentIndex == firstTab && mMemberList != null) {
 					mMemberList.doSearch(newText);
-//				}else if(index == secondTab && mPollList != null) {
-//					mPollList.loadDataOnMove();
-//				}else if(index == fourTab && mAlbumView != null) {
-//					mAlbumView.loadDataOnMove();
 				}
 				
 			}else if(mCircle.mGroup != null && mCircle.mGroup.formal == UserCircle.circle_free) {
 				if(mCurrentIndex == firstTab && mMemberList != null) {
 					mMemberList.doSearch(newText);
-//				}else if(index == secondTab && mPollList != null) {
-//					mPollList.loadDataOnMove();
-//				}else if(index == fourTab && mAlbumView != null) {
-//					mAlbumView.loadDataOnMove();
 				}
 			}else {
 				Log.d(TAG, "initUI: have no circle type. don't know how to create view");

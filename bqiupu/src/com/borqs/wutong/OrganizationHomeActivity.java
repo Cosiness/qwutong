@@ -677,12 +677,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 	}
 
 	@Override
-	public CustomViewPager getParentViewPager() {
-//		return mPager;
-        return null;
-	}
-
-	@Override
 	public void startSearch() {
 //		showSearhView();
 	}

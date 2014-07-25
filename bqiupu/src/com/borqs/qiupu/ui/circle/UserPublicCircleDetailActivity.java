@@ -1082,11 +1082,6 @@ StreamListFragmentCallBack, CircleMainFragmentCallBack, StreamRightFlipperCallBa
 	}
 
 	@Override
-	public CustomViewPager getParentViewPager() {
-		return mPager;
-	}
-
-	@Override
 	public void refreshRightFragmentUi(UserCircle circle) {
 		if(mRightFragment != null) {
 			mRightFragment.refreshUI(circle);
