@@ -1018,7 +1018,6 @@
                 <data android:mimeType="vnd.android.cursor.item/vnd.borqsplus.openface"/>
             </intent-filter>
         </activity>
-        <!-- 
         <receiver android:name="com.borqs.sync.client.download.AppDownloadReceiver"
                   android:label="com.borqs.service.accountsync"
                   android:process="com.borqs.service.accountsync">
@@ -1027,7 +1026,6 @@
                 <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
             </intent-filter>
         </receiver>
-        -->
         <!-- end borqsPlus -->
         
         <!-- End Account & Sync -->
