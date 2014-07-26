@@ -1,26 +1,17 @@
 package com.borqs.wutong;
 
-import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 
-import com.borqs.common.adapter.InformationAdapter;
-import com.borqs.common.adapter.RequestsAdapter;
-import com.borqs.information.db.Notification;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.ui.BasicActivity;
-import com.borqs.qiupu.ui.circle.quickAction.NtfQuickAction;
 import com.special.ResideMenu.ResideMenu;
 import com.special.ResideMenu.ResideMenuItem;
 
-import java.util.ArrayList;
-
 import twitter4j.AsyncQiupu;
-import twitter4j.Requests;
 
 /**
  * Created with IntelliJ IDEA.

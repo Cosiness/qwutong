@@ -157,7 +157,7 @@ import twitter4j.UserCircle;
 import twitter4j.conf.ConfigurationBase;
 import twitter4j.internal.http.HttpClientImpl;
 
-public abstract class BasicActivity extends FragmentActivity implements ProgressInterface,
+abstract class AbstractBaseActivity extends FragmentActivity implements ProgressInterface,
         OnClickListener, LocationRequest.IFLocationListener,
         AccountListener, AccountServiceConnectListener,
         FriendsActionListner, AccountService.IOnAccountLogin,
@@ -165,7 +165,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         BaiduLocationProxy.LocationListener,
         SearchView.OnQueryTextListener,
         AbstractStreamRowView.SetTopInterface {
-    private static final String TAG = "Qiupu.BasicActivity";
+    private static final String TAG = AbstractBaseActivity.class.getSimpleName();
 
     protected Handler mBasicHandler;
     protected Handler mHandler;
@@ -402,8 +402,8 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         if (mHandler != null)
             mHandler.post(new Runnable() {
                 public void run() {
-                    String mapUrl = String.format("<a href='%1$s'>%2$s</a>", BaiduLocationProxy.getInstance(BasicActivity.this).getPureMapsSearchString(
-                            BasicActivity.this, loc), address);
+                    String mapUrl = String.format("<a href='%1$s'>%2$s</a>", BaiduLocationProxy.getInstance(AbstractBaseActivity.this).getPureMapsSearchString(
+                            AbstractBaseActivity.this, loc), address);
                     locationUpdated(mapUrl, locString);
                 }
         });
@@ -433,9 +433,9 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         //try to get address information,
         QiupuORM.sWorker.post(new Runnable() {
             public void run() {
-                Address address = LocationRequest.getLocationAddress(BasicActivity.this, loc);
+                Address address = LocationRequest.getLocationAddress(AbstractBaseActivity.this, loc);
                 if (address != null) {
-                    final String locationInfo = LocationRequest.getAddressInfo(BasicActivity.this, address);
+                    final String locationInfo = LocationRequest.getAddressInfo(AbstractBaseActivity.this, address);
                     Log.d(TAG, "###########  locationInfo = " + locationInfo);
                     String locString = gLocationUpdate(loc, locationInfo);
                     HttpClientImpl.setLocation(locString);
@@ -463,7 +463,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             mHandler.post(new Runnable() {
                 public void run() {
                     String mapUrl = String.format("<a href='%1$s'>%2$s</a>", LocationRequest.getPureMapsSearchString(
-                            BasicActivity.this, loc), address);
+                            AbstractBaseActivity.this, loc), address);
                     locationUpdated(mapUrl, locString);
                 }
             });
@@ -484,7 +484,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     }
 
     protected void locationUpdated(String mapUrl, String locString) {
-        Log.d(TAG, "BasicActivity locationUpdated()");
+        Log.d(TAG, "locationUpdated()");
     }
 
     protected void getLocationSucceed(String locString) {
@@ -1156,10 +1156,10 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         AccountServiceUtils.borqsLogout(false);
 
         try {
-            Intent service = new Intent(BasicActivity.this, QiupuService.class);
+            Intent service = new Intent(this, QiupuService.class);
             stopService(service);
 
-            Intent bservice = new Intent(BasicActivity.this, BorqsAccountService.class);
+            Intent bservice = new Intent(this, BorqsAccountService.class);
             stopService(bservice);
 
             android.os.Process.killProcess(android.os.Process.myPid());
@@ -1425,7 +1425,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
             final Action action = actions.get(position);
 
             if (convertView == null) {
-                convertView = LayoutInflater.from(BasicActivity.this).inflate(R.layout.main_tab_more_item, null);
+                convertView = LayoutInflater.from(AbstractBaseActivity.this).inflate(R.layout.main_tab_more_item, null);
                 holder = new ViewHolder();
                 holder.icon = (ImageView) convertView.findViewById(R.id.icon_left);
                 holder.title = (TextView) convertView.findViewById(R.id.id_title_tv);
@@ -1894,7 +1894,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                     } catch (Exception ne) {
                     }
                     if (msg.getData().getBoolean(RESULT, false) == false) {
-                        Toast.makeText(BasicActivity.this, msg.getData().getString(ERROR_MSG), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AbstractBaseActivity.this, msg.getData().getString(ERROR_MSG), Toast.LENGTH_SHORT).show();
                     } else {
                         showOperationSucToast(true);
                     }
@@ -1915,7 +1915,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                             showUpdateVersionDialog(false, versionFeatures, version, size);
                         } else {
                             if (!msg.getData().getBoolean(INIT_CHECKED)) {
-                                Toast.makeText(BasicActivity.this, getString(R.string.check_back), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AbstractBaseActivity.this, getString(R.string.check_back), Toast.LENGTH_SHORT).show();
                             }
                         }
                     } else {
@@ -1944,9 +1944,9 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                     dismissDialog(DIALOG_SEND_EMAIL);
                     boolean ret = msg.getData().getBoolean(RESULT, false);
                     if (ret == false) {
-                        Toast.makeText(BasicActivity.this, getString(R.string.send_message_failed), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AbstractBaseActivity.this, getString(R.string.send_message_failed), Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(BasicActivity.this, R.string.send_message_successful, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AbstractBaseActivity.this, R.string.send_message_successful, Toast.LENGTH_SHORT).show();
                         onEmailInvited();
                     }
 
@@ -2102,7 +2102,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                     boolean ret = msg.getData().getBoolean(RESULT, false);
                     if (ret) {
                         long uid = msg.getData().getLong("uid");
-                        Toast.makeText(BasicActivity.this, getString(R.string.request_ok), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AbstractBaseActivity.this, getString(R.string.request_ok), Toast.LENGTH_SHORT).show();
                     } else {
                         showOperationFailToast("", true);
                     }
@@ -2318,7 +2318,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
 
     private Dialog popupLogoutDialog() {
-        return new AlertDialog.Builder(BasicActivity.this)
+        return new AlertDialog.Builder(AbstractBaseActivity.this)
                 .setTitle(R.string.confirm_logout)
                 .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -2373,7 +2373,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                 return popupLogoutDialog();
             }
             case DIALOG_TUTORAL_LOGIN: {
-                return new AlertDialog.Builder(BasicActivity.this)
+                return new AlertDialog.Builder(AbstractBaseActivity.this)
                         .setTitle(R.string.tutorial_goto_login)
                         .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
@@ -2681,7 +2681,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                         String nameString = name.getText().toString().trim();
                         String typeString = typecontent.getText().toString().trim();
                         if (nameString.length() <= 0 || typeString.length() <= 0) {
-                            Toast.makeText(BasicActivity.this, getString(R.string.invite_dialog_toast), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(AbstractBaseActivity.this, getString(R.string.invite_dialog_toast), Toast.LENGTH_SHORT).show();
                         } else {
                             removeDialog(DIALOG_INVITE_USERINFO);
 //						builder.dismiss();
@@ -2755,7 +2755,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                         .setItems(iteminfo, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
 
-                                Intent intent = new Intent(BasicActivity.this, AddProfileInfoActivity.class);
+                                Intent intent = new Intent(AbstractBaseActivity.this, AddProfileInfoActivity.class);
                                 if (which == 0) {
                                     intent.putExtra(AddProfileInfoActivity.ACTION_TYPE, AddProfileInfoActivity.TYPE_ADD_PHONE);
                                 } else if (which == 1) {
@@ -2834,7 +2834,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                                         UserCircle tmpCircle = QiupuORM.createCircleInformation(cursor);
                                         if (tmpCircle != null && tmpCircle.name != null && tmpCircle.name.equals(textString)) {
                                             hasCirecle = true;
-                                            Toast.makeText(BasicActivity.this, getString(R.string.circle_exists), Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(AbstractBaseActivity.this, getString(R.string.circle_exists), Toast.LENGTH_SHORT).show();
                                             break;
                                         }
                                     }
@@ -2848,7 +2848,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                                         mAlertDialog.dismiss();
                                     }
                                 } else {
-                                    Toast.makeText(BasicActivity.this, getString(R.string.input_content), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(AbstractBaseActivity.this, getString(R.string.input_content), Toast.LENGTH_SHORT).show();
                                 }
 
                             }
@@ -3480,7 +3480,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                     Log.e("SmsSending", "SendException msg="+e.getMessage(), e);
                 }
             }
-            Toast.makeText(BasicActivity.this, R.string.send_message_successful, Toast.LENGTH_SHORT).show();
+            Toast.makeText(AbstractBaseActivity.this, R.string.send_message_successful, Toast.LENGTH_SHORT).show();
             onMessageInvited();
 //        } catch (Exception e) {
 //            Log.e("SmsSending", "SendException msg="+e.getMessage(), e);
@@ -4129,12 +4129,12 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
                                 if (currentApk == null) {
                                     currentApk = new ApkResponse();
                                     //build for qiupu
-                                    parseQiupuApkInfo(currentApk, BasicActivity.this.getApplicationInfo());
+                                    parseQiupuApkInfo(currentApk, AbstractBaseActivity.this.getApplicationInfo());
                                     currentApk.apksize = size;
                                 }
 
                                 if (canDownload(currentApk)) {
-                                    Intent service = new Intent(BasicActivity.this, QiupuService.class);
+                                    Intent service = new Intent(AbstractBaseActivity.this, QiupuService.class);
                                     service.setAction(QiupuService.INTENT_QP_DOWNLOAD_APK);
 
                                     currentApk.apkurl = QiupuHelper.getQpApkUrl();
@@ -4199,10 +4199,10 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
         this.onDestroy();
 
         try {
-            Intent service = new Intent(BasicActivity.this, QiupuService.class);
+            Intent service = new Intent(this, QiupuService.class);
             stopService(service);
 
-            Intent accountservice = new Intent(BasicActivity.this, BorqsAccountService.class);
+            Intent accountservice = new Intent(this, BorqsAccountService.class);
             stopService(accountservice);
 
             finish();
@@ -4918,7 +4918,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
     	mBasicHandler.post(new Runnable(){
     		public void run()
     		{
-    			Toast.makeText(BasicActivity.this, resId, Toast.LENGTH_SHORT).show();
+    			Toast.makeText(AbstractBaseActivity.this, resId, Toast.LENGTH_SHORT).show();
     		}
     	});
 
@@ -5045,7 +5045,7 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
     protected void shootNotificationActivity() {
         if (ensureAccountLogin()) {
-            Intent intent = new Intent(BasicActivity.this, BpcInformationActivity.class);
+            Intent intent = new Intent(this, BpcInformationActivity.class);
             startActivity(intent);
         }
     }
@@ -5180,4 +5180,8 @@ public abstract class BasicActivity extends FragmentActivity implements Progress
 
         initHeadViews(parent);
     }
+}
+
+public abstract class BasicActivity extends AbstractBaseActivity {
+    private static final String TAG = "Qiupu.BasicActivity";
 }

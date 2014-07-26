@@ -4,7 +4,7 @@
           android:versionName="1.3.2(374)" android:versionCode="374" android:installLocation="internalOnly">
           <!-- About version code: odd for internal, e.g., 239, even for external market, e.g., 238. -->
 
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="14" android:maxSdkVersion="1000"/>
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="20" android:maxSdkVersion="1000"/>
 
     <!-- 可选权限  -->
     <uses-permission android:name="android.permission.SEND_SMS"/>
