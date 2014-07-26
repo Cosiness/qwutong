@@ -18,6 +18,8 @@ import com.borqs.common.api.BpcApiUtils;
 import com.borqs.common.listener.RefreshPostListener;
 import com.borqs.common.listener.RefreshPostProfileImageListener;
 import com.borqs.common.util.DataConnectionUtils;
+import com.borqs.common.util.DialogUtils;
+import com.borqs.common.util.IntentUtil;
 import com.borqs.common.util.TwitterExceptionUtils;
 import com.borqs.common.view.AbstractStreamRowView;
 import com.borqs.common.view.CustomListView.LoadOldListener;
@@ -28,6 +30,7 @@ import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.cache.StreamCacheManager;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.bpc.BpcPostsFilterActivity;
+import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.ToastUtil;
 import com.borqs.wutong.utils.ServiceHelper;
 
@@ -44,6 +47,7 @@ import twitter4j.Stream;
 import twitter4j.TwitterAdapter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterMethod;
+import twitter4j.UserCircle;
 
 public class StreamListFragment extends AbstractStreamListFragment implements
         OlderPostsLoader,
@@ -202,6 +206,8 @@ public class StreamListFragment extends AbstractStreamListFragment implements
         mPostAdapter = StreamListAdapter.newInstance(mActivity, this, BpcApiUtils.ONLY_PURE_APK_POST == mMetaData.mSourceFilter);
         mListView.setAdapter(mPostAdapter);
         AbstractStreamRowView.attachListViewItemClickerContext(mActivity, mListView);
+
+        setupQuickAction();
 
         restoreStreamList(savedInstanceState);
     }
@@ -897,4 +903,81 @@ public class StreamListFragment extends AbstractStreamListFragment implements
 		}
 	}
 
+    // quick action from organization activity begin
+
+    public interface StreamActionInterface {
+        public static final int ACTION_SEARCH = 0;
+        public static final int ACTION_PHOTO = 1;
+        public static final int ACTION_COMPOSE = 2;
+        public static final int ACTION_MORE = 3;
+
+        public void onStreamAction(View view, int action);
+    }
+
+    private StreamActionInterface mActionInterface;
+    private void setupQuickAction() {
+        Activity activity = getActivity();
+        if (null != activity && activity instanceof StreamActionInterface) {
+            mActionInterface = (StreamActionInterface)activity;
+        }
+
+        final View rootView = getView();
+        View actionView;
+        actionView = rootView.findViewById(R.id.toggle_search);
+        if (null != actionView) {
+            actionView.setVisibility(View.VISIBLE);
+            actionView.setOnClickListener(searchClickListener);
+        }
+        actionView = rootView.findViewById(R.id.toggle_photo);
+        if (null != actionView) {
+            actionView.setOnClickListener(mTogglePhotoListener);
+        }
+        actionView = rootView.findViewById(R.id.toggle_composer);
+        if (null != actionView) {
+            actionView.setOnClickListener(gotoComposeListener);
+        }
+
+        actionView = rootView.findViewById(R.id.toggle_more);
+        if (null != actionView) {
+            actionView.setOnClickListener(showMoreActionListener);
+        }
+    }
+
+    private View.OnClickListener showMoreActionListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (null != mActionInterface) {
+                mActionInterface.onStreamAction(v, StreamActionInterface.ACTION_MORE);
+            }
+        }
+    };
+
+    private View.OnClickListener searchClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (null != mActionInterface) {
+                mActionInterface.onStreamAction(v, StreamActionInterface.ACTION_SEARCH);
+            }
+        }
+    };
+
+    private View.OnClickListener mTogglePhotoListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (null != mActionInterface) {
+                mActionInterface.onStreamAction(v, StreamActionInterface.ACTION_PHOTO);
+            }
+        }
+    };
+
+    View.OnClickListener gotoComposeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (null != mActionInterface) {
+                mActionInterface.onStreamAction(v, StreamActionInterface.ACTION_COMPOSE);
+            }
+        }
+    };
+
+    // quick action from organization activity end
 }

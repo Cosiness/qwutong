@@ -57,6 +57,7 @@ import twitter4j.UserCircle;
  */
 public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         StreamListFragment.StreamListFragmentCallBack,
+        StreamListFragment.StreamActionInterface,
         OrganizationExtraCallBack,
         HomePickerActivity.PickerInterface, ActivityFinishListner {
 
@@ -85,7 +86,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
         setUpMenu(StreamListFragment.class);
 //        changeFragment();
-        setupQuickAction();
         overrideRightActionBtn(R.drawable.home_screen_menu_people_icon_default, editProfileClick);
 
         mHandler.postDelayed(new Runnable() {
@@ -180,13 +180,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         }
     };
 
-    View.OnClickListener gotoComposeListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            startComposeActivity();
-        }
-    };
-
     protected void showCorpusSelectionDialog(ArrayList<SelectionItem> items) {
         if(mRightActionBtn != null) {
             int location[] = new int[2];
@@ -248,6 +241,64 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     
     private final static int GET_PUBLIC_CIRCLE_INFO = 105;
     private final static int GET_PUBLIC_CIRCLE_INFO_END = 106;
+
+    @Override
+    public void onStreamAction(View v, int action) {
+        switch (action) {
+            case ACTION_SEARCH:
+                showSearhView();
+                break;
+            case ACTION_PHOTO:
+                DialogUtils.ShowPhotoPickDialog(this, R.string.share_photo_title,
+                        new DialogUtils.PhotoPickInterface() {
+                            @Override
+                            public void doTakePhotoCallback() {
+                                if (mCircle != null) {
+                                    long parent_id = -1;
+                                    if (mCircle.mGroup != null) {
+                                        if (mCircle.mGroup.formal == UserCircle.circle_top_formal) {
+                                            parent_id = mCircle.circleid;
+                                        } else {
+                                            parent_id = mCircle.mGroup.parent_id;
+                                        }
+                                    }
+                                    IntentUtil.startTakingPhotoIntent(OrganizationHomeActivity.this, getDefaultRecipient(), parent_id, -1);
+                                }
+                            }
+
+                            @Override
+                            public void doPickPhotoFromGalleryCallback() {
+                                if (mCircle != null) {
+                                    long parent_id = -1;
+                                    if (mCircle.mGroup != null) {
+                                        if (mCircle.mGroup.formal == UserCircle.circle_top_formal) {
+                                            parent_id = mCircle.circleid;
+                                        } else {
+                                            parent_id = mCircle.mGroup.parent_id;
+                                        }
+                                    }
+                                    IntentUtil.startPickingPhotoIntent(OrganizationHomeActivity.this, getDefaultRecipient(), parent_id, -1);
+                                }
+                            }
+                        }
+                );
+                break;
+            case ACTION_COMPOSE:
+                startComposeActivity();
+                break;
+            case ACTION_MORE:
+                if(mMoreDialog == null) {
+                    mMoreDialog = new BottomMoreQuickAction(OrganizationHomeActivity.this, v.getWidth(), mCircle);
+                    mMoreDialog.show(v);
+                }else {
+                    mMoreDialog.show(v);
+                }
+                break;
+            default:
+                Log.w(TAG, "onStreamAction, unknown action = " + action + ", is it a new one?");
+        }
+    }
+
     private class MainHandler extends Handler {
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -520,44 +571,6 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         return true;
     }
 
-    private View.OnClickListener mTogglePhotoListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            DialogUtils.ShowPhotoPickDialog(OrganizationHomeActivity.this, R.string.share_photo_title,
-                    new DialogUtils.PhotoPickInterface() {
-                @Override
-                public void doTakePhotoCallback() {
-                	if(mCircle != null) {
-                		long parent_id = -1;
-                		if(mCircle.mGroup != null) {
-                			if(mCircle.mGroup.formal == UserCircle.circle_top_formal) {
-                				parent_id = mCircle.circleid;	
-                			}else {
-                				parent_id = mCircle.mGroup.parent_id;
-                			}
-                		}
-                		IntentUtil.startTakingPhotoIntent(OrganizationHomeActivity.this, getDefaultRecipient(), parent_id, -1);
-                	}
-                }
-
-                @Override
-                public void doPickPhotoFromGalleryCallback() {
-                	if(mCircle != null) {
-                		long parent_id = -1;
-                		if(mCircle.mGroup != null) {
-                			if(mCircle.mGroup.formal == UserCircle.circle_top_formal) {
-                				parent_id = mCircle.circleid;	
-                			}else {
-                				parent_id = mCircle.mGroup.parent_id;
-                			}
-                		}
-                		IntentUtil.startPickingPhotoIntent(OrganizationHomeActivity.this, getDefaultRecipient(), parent_id, -1);
-                	}
-                }
-            });
-        }
-    };
-
     private String getDefaultRecipient() {
         return "#" + mCircle.circleid;
     }
@@ -622,28 +635,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 //        	mHomeFragment.switchCircle(circleId);
 //        }
     }
-    
-    
-    private View.OnClickListener showMoreActionListener = new View.OnClickListener() {
-    	
-    	@Override
-    	public void onClick(View v) {
-    		if(mMoreDialog == null) {
-				mMoreDialog = new BottomMoreQuickAction(OrganizationHomeActivity.this, v.getWidth(), mCircle);
-				mMoreDialog.show(v);
-			}else {
-				mMoreDialog.show(v);
-			}
-    	}
-    };
-	
-    private View.OnClickListener searchClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-        	showSearhView();
-        }
-    };
-    
+
 //    @Override
 //    public boolean onQueryTextSubmit(String query) {
 //    	Log.d(TAG, "IntentUtil onQueryTextSubmit: " + query);
@@ -715,25 +707,4 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, OrganizationExtraFragment.Poll.class);
     }
 
-    private void setupQuickAction() {
-        View actionView;
-        actionView = findViewById(R.id.toggle_search);
-        if (null != actionView) {
-            actionView.setVisibility(View.VISIBLE);
-            actionView.setOnClickListener(searchClickListener);
-        }
-        actionView = findViewById(R.id.toggle_photo);
-        if (null != actionView) {
-            actionView.setOnClickListener(mTogglePhotoListener);
-        }
-        actionView = findViewById(R.id.toggle_composer);
-        if (null != actionView) {
-            actionView.setOnClickListener(gotoComposeListener);
-        }
-
-        actionView = findViewById(R.id.toggle_more);
-        if (null != actionView) {
-            actionView.setOnClickListener(showMoreActionListener);
-        }
-    }
 }
