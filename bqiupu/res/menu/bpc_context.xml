@@ -13,17 +13,6 @@
 
     <item android:enabled="true"
           android:visible="false"
-          android:id="@+id/bpc_remove_shortcut"
-          android:title="@string/menu_remove_shortcut">
-    </item>
-
-    <item android:enabled="true"
-          android:visible="false"
-          android:id="@+id/bpc_remove_all_shortcut"
-          android:title="@string/menu_remove_all_shortcut">
-    </item>
-    <item android:enabled="true"
-          android:visible="false"
           android:id="@+id/bpc_exchange_profile"
           android:title="@string/menu_exchange_profile">
     </item>
