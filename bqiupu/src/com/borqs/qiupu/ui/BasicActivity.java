@@ -160,20 +160,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
     protected Handler mHandler;
     protected Application mApp;
 
-    private TextView mTitle;
-    private TextView mSubTitle;
-    private TextView mTitleActionText;
-
-
-    protected ImageView mEditTitleBtn;
-    protected ImageView mLeftActionBtn;
-    protected ImageView mRightActionBtn;
-    protected ImageView mMiddleActionBtn;
-
-    protected MenuItem mLeftActionBtnMenu;
-    protected MenuItem mRightActionBtnMenu;
-    protected MenuItem mMiddleActionBtnMenu;
-
     public static final String USER_NICKNAME = "USER_NICKNAME";
     public static final String USER_CONCERN_TYPE = "USER_CONCERN_TYPE";
     private int displayType = -1;
@@ -231,25 +217,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
     protected boolean fromtab;
     protected boolean fromHome;
 
-    protected WeakReference<LeftNavigationCallBack> mLeftNavigationCallBack;
-
-    private LinearLayout title_container;
-    protected boolean supportLeftNavigation = false;
-    private boolean mIsShowNtf = false;
-
-    protected void enableLeftNav() {
-        enableLeftNav(true);
-    }
-
-    protected void enableLeftNav(boolean enable)
-    {
-    	supportLeftNavigation = enable;
-    }
-
-    protected void enableTitleNtf(boolean enable) {
-    	mIsShowNtf = enable;
-    }
-
     private static HandlerThread sWorkerThread = null;
 	public static Handler sWorker = null;
 
@@ -263,14 +230,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
 		}
 	}
 
-	// this is the place to check whether we need use action bar, sub class
-	// might override this method if it prefer to alter the default condition.
-	//
-	protected boolean isUsingActionBar()
-	{
-		return false && supportLeftNavigation == false && fromtab == false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-	}
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate, " + this);
@@ -280,8 +239,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
 
         fromtab = getIntent().getBooleanExtra("fromtab", false);
         fromHome = getIntent().getBooleanExtra("from_home", false);
-
-        prepareActionBar();
 
         initUIThread();
         mApp = getApplication();
@@ -317,10 +274,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
 
         notify = new StatusNotification(this);
 
-        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
-            mLeftNavigationCallBack.get().onCreate();
-        }
-
         setupLatencyStaff();
     }
 
@@ -329,20 +282,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
             setBDLocationListener();
         } else {
             setLocationListener();
-        }
-    }
-
-    protected void prepareActionBar() {
-        if (isUsingActionBar()) {
-            boolean ret = requestWindowFeature(Window.FEATURE_ACTION_BAR | Window.FEATURE_PROGRESS);
-            if (ret == true && getActionBar() != null) {
-                getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_bg));
-                getActionBar().setDisplayShowCustomEnabled(true);
-
-                invalidateOptionsMenu();
-            }
-        } else {
-            requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
     }
 
@@ -479,38 +418,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
         } else {
             DialogUtils.showOpenGPSDialog(this);
         }
-    }
-
-    // override this to set the title bar action, sub class
-    // could alter the default behavior.
-    protected void setTitleResource(int resId) {
-        setTitleResource(getWindow().getDecorView(), resId);
-    }
-
-    protected void setTitleResource(View parent, int resId) {
-    	if (isUsingActionBar()) {
-    		title_container = (LinearLayout) parent.findViewById(R.id.titlebar_container);
-    		if (null != title_container) {
-    			title_container.setVisibility(View.GONE);
-    		}
-    	} else {
-    		title_container = (LinearLayout) parent.findViewById(R.id.titlebar_container);
-    		if (title_container != null) {
-    			if (isUsingActionBar()) {
-    				if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-    					title_container.setVisibility(View.GONE);
-    				} else {
-    					title_container.setVisibility(View.VISIBLE);
-    				}
-    			} else {
-    				View content = LayoutInflater.from(this).inflate(resId, null);
-    				content.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-    				title_container.addView(content);
-    			}
-    		} else {
-    			Log.e(TAG, "why I am null, *****************");
-    		}
-    	}
     }
 
     @Override
@@ -830,22 +737,12 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.qiupu_option_menu, menu);
-
-        mLeftActionBtnMenu   = menu.findItem(R.id.menu_left);
-        mMiddleActionBtnMenu = menu.findItem(R.id.menu_middle);
-        mRightActionBtnMenu  = menu.findItem(R.id.menu_right);
-
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-
-        mLeftActionBtnMenu   = menu.findItem(R.id.menu_left);
-        mMiddleActionBtnMenu = menu.findItem(R.id.menu_middle);
-        mRightActionBtnMenu  = menu.findItem(R.id.menu_right);
-
         // process main UI activity
         if (BpcFriendsActivity.class.isInstance(this)
                 || BpcFriendsFragmentActivity.class.isInstance(this)) {
@@ -871,20 +768,8 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
             menu.findItem(R.id.menu_version_check).setVisible(false);
         } else if (BpcPostsNewActivity.class.isInstance(this)
         		|| OrganizationHomeActivity.class.isInstance(this)) {
-
-            if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
-                menu.findItem(R.id.menu_feedback).setVisible(true);
-                menu.findItem(R.id.menu_share_qiupu).setVisible(true);
-                menu.findItem(R.id.menu_version_check).setVisible(true);
-                menu.findItem(R.id.menu_settings).setVisible(true);
-                menu.findItem(R.id.menu_exit_qiupu).setVisible(true);
-            }
             menu.findItem(R.id.menu_refresh).setVisible(false);
             menu.findItem(R.id.menu_search).setVisible(false);
-        } else if (RequestActivity.class.isInstance(this)) {
-            if (isUsingActionBar()) {
-                menu.findItem(R.id.menu_refresh).setVisible(true);
-            }
         } else {
             menu.findItem(R.id.menu_search).setVisible(false);
             menu.findItem(R.id.menu_refresh).setVisible(false);
@@ -896,16 +781,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int i = item.getItemId();
-        if(isUsingActionBar())
-        {
-        	if (i == android.R.id.home)
-        	{
-        		// The user clicked on the Messaging icon in the action bar. Take them back from
-                // wherever they came from
-                return performGoHomeAction();
-        	}
-        }
-
         if (i == R.id.menu_refresh) {
             loadRefresh();
 
@@ -994,9 +869,9 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
                 public void getApkDetailInformation(ApkResponse info) {
                     if (QiupuConfig.LOGD) Log.d(TAG, "finish getApkDetailInformation info:" + info +
                             ", for :" + pkgName + ", version:" + versionCode);
-                    if(info == null) {
-                    	Log.e(TAG, "getApkDetailInformation: back apk info is null");
-                    	return;
+                    if (info == null) {
+                        Log.e(TAG, "getApkDetailInformation: back apk info is null");
+                        return;
                     }
 
                     boolean haveNewVersion = false;
@@ -1160,63 +1035,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         QiupuHelper.updateDropDownDialogUI(newConfig);
-        boolean isUsingActionBar = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-        if (isUsingActionBar) {
-            invalidateOptionsMenu();
-            return;
-        }
-
-        title_container = (LinearLayout) findViewById(R.id.titlebar_container);
-
-        // why do this?
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
-        {
-                if (title_container != null) {
-//                        title_container.setVisibility(View.GONE);
-                }
-        }
-        else
-        {
-                if (title_container != null) {
-                        if(isUsingActionBar() == false)
-                        {
-                                title_container.setVisibility(View.VISIBLE);
-                        }
-                }
-        }
-
-    }
-
-	@Override
-    public final void setContentView(int layoutResID) {
-        boolean skip = false;
-
-        if ((isUsingTabNavigation(this, fromtab) == false && supportLeftNavigation) || mIsShowNtf) {
-            int overlayId = getOverlayContentId();
-            if (overlayId > 0) {
-                super.setContentView(overlayId);
-                skip = inflateNavigatingContentView(layoutResID);
-            }
-        }
-
-        if(mIsShowNtf) {
-        	overrideSlideIcon(R.drawable.ic_back_holo_dark, new OnClickListener() {
-                public void onClick(View v) {
-                    finish();
-                }
-            });
-        }
-
-        if (!skip) {
-            super.setContentView(layoutResID);
-
-            final View parent = getWindow().getDecorView();
-            setTitleResource(parent, R.layout.title_bar_base);
-
-            initActionBarContent();
-
-            initCustomizedHeader(parent);
-        }
     }
 
     protected int getOverlayContentId() {
@@ -1251,13 +1069,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
             slideToggle.setOnClickListener(listener);
     	}
 	}
-
-    protected void initActionBarContent() {
-        if (isUsingActionBar() && getActionBar() != null) {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setDisplayShowTitleEnabled(true);
-        }
-    }
 
     private class Action {
         public Drawable icon;
@@ -1398,162 +1209,7 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    protected void initHeadViews() {
-        initHeadViews(getWindow().getDecorView());
-    }
-
-    protected void initHeadViews(View parent) {
-        Log.d(TAG, "initHeadViews");
-
-        mTitle = (TextView) parent.findViewById(R.id.head_title);
-        mSubTitle = (TextView) parent.findViewById(R.id.sub_head_title);
-        mTitleActionText = (TextView) parent.findViewById(R.id.head_action_text);
-
-        mEditTitleBtn = (ImageView) parent.findViewById(R.id.head_action_edit_title);
-        if (mEditTitleBtn != null) mEditTitleBtn.setOnClickListener(this);
-
-        mLeftActionBtn = (ImageView) parent.findViewById(R.id.head_action_left);
-        if (mLeftActionBtn != null) mLeftActionBtn.setOnClickListener(this);
-
-        mMiddleActionBtn = (ImageView) parent.findViewById(R.id.head_action_middle);
-        if (mMiddleActionBtn != null) mMiddleActionBtn.setOnClickListener(this);
-
-        mRightActionBtn = (ImageView) parent.findViewById(R.id.head_action_right);
-        if (mRightActionBtn != null) mRightActionBtn.setOnClickListener(this);
-    }
-
-    protected void overrideRightActionBtn(int drawableid, final OnClickListener click) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mRightActionBtnMenu.setIcon(drawableid);
-            mRightActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                public boolean onMenuItemClick(MenuItem item) {
-                    click.onClick(null);
-                    return false;
-                }
-            });
-        }
-        else
-        {
-            if (mRightActionBtn != null) {
-                mRightActionBtn.setImageResource(drawableid);
-                mRightActionBtn.setOnClickListener(click);
-            }
-        }
-    }
-
-    protected void overrideMiddleActionBtn(int drawableid, final OnClickListener click) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mMiddleActionBtnMenu.setIcon(drawableid);
-            mMiddleActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                public boolean onMenuItemClick(MenuItem item) {
-                    click.onClick(null);
-                    return false;
-                }
-            });
-        }else{
-            if (mMiddleActionBtn != null) {
-                mMiddleActionBtn.setImageResource(drawableid);
-                mMiddleActionBtn.setOnClickListener(click);
-            }
-        }
-    }
-
     protected void setToggleClickListener(View slideToggle) {
-
-    }
-
-    protected void overrideEditTitleActionBtn(int drawableid, final OnClickListener click) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-        }else{
-            if (mEditTitleBtn != null) {
-                mEditTitleBtn.setImageResource(drawableid);
-                mEditTitleBtn.setOnClickListener(click);
-            }
-        }
-    }
-
-    protected void overrideLeftActionBtn(int drawableid, final OnClickListener click) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mLeftActionBtnMenu.setIcon(drawableid);
-            mLeftActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                public boolean onMenuItemClick(MenuItem item) {
-                    click.onClick(null);
-                    return false;
-                }
-            });
-        }else{
-            if (mLeftActionBtn != null) {
-                mLeftActionBtn.setImageResource(drawableid);
-                mLeftActionBtn.setOnClickListener(click);
-            }
-        }
-    }
-
-    protected void overrideRightTextActionBtn(int textid, final OnClickListener click) {
-        if (mTitleActionText != null) {
-            mTitleActionText.setText(textid);
-            mTitleActionText.setOnClickListener(click);
-        }
-    }
-
-    protected void setHeadTitle(final String title) {
-        mBasicHandler.post(new Runnable() {
-            public void run() {
-            	if(supportLeftNavigation == false && isUsingActionBar() && getActionBar() != null)
-            	{
-            	    setTitle(title);
-            	}
-            	else
-            	{
-	                if (mTitle != null)
-	                    mTitle.setText(title);
-	                else
-	                	setTitle(title);
-            	}
-            }
-        });
-    }
-
-    protected void setHeadTitle(final int resid) {
-    	mBasicHandler.post(new Runnable() {
-    		public void run() {
-    			if(supportLeftNavigation == false && isUsingActionBar() && getActionBar() != null)
-    			{
-    				setTitle(resid);
-    			}
-    			else
-    			{
-    				if (mTitle != null)
-    					mTitle.setText(resid);
-    				else
-    					setTitle(resid);
-    			}
-    		}
-    	});
-    }
-
-    protected void setSubTitle(final String title) {
-    	mBasicHandler.post(new Runnable() {
-    		public void run() {
-    			if (mSubTitle != null) {
-    				mSubTitle.setVisibility(View.VISIBLE);
-    				mSubTitle.setText(title);
-    			}
-    		}
-    	});
-    }
-
-    protected void showTitleSpinnerIcon(boolean flag) {
-        if(flag) {
-        	if(mTitle != null) {
-        		mTitle.setBackgroundResource(R.drawable.spinner_bg);
-        		mTitle.setOnClickListener(this);
-        	}
-        }
     }
 
     @Override
@@ -1567,30 +1223,10 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
             LocationRequest.instance().setLocationListener(null);
         }
 
-        notify = null;
         ImageCacheManager.ContextCache.revokeAllImageView(this);
 
-        Log.d(TAG, "onDestroy" + this);
-
-        //clear for left
-        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
-            mLeftNavigationCallBack.get().onDestroy();
-
-            mLeftNavigationCallBack.clear();
-        }
-
-        mLeftNavigationCallBack = null;
-        // comment out while it might be crash from sub class.
-        // asyncQiupu = null;
-        notify     = null;
-
+        notify = null;
         mApp = null;
-        mTitle = null;
-        mSubTitle = null;
-
-        mLeftActionBtn = null;
-        mRightActionBtn = null;
-        mMiddleActionBtn = null;
     }
 
     @Override
@@ -1601,23 +1237,14 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
 
         lastDownKeyCode = 0;
         showProgressBtn(false);
-
-        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
-            mLeftNavigationCallBack.get().onPause();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         Log.d(TAG, "onResume=" + this);
 
         showProgressBtn(false);
-
-        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
-            mLeftNavigationCallBack.get().onResume();
-        }
     }
 
     public synchronized void onLogin() {
@@ -1871,9 +1498,7 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
                         boolean result = msg.getData().getBoolean(RESULT);
                         doUsersSetCallBack(String.valueOf(uid), result);
                     } else {
-                        showLeftActionBtn(false);
-                        String errorMsg = msg.getData().getString(ERROR_MSG);
-                        showOperationFailToast(errorMsg, true);
+                        onVCardExchangeFail(msg.getData().getString(ERROR_MSG));
                     }
                     break;
                 }
@@ -1971,22 +1596,10 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
 
     protected void uiLoadBegin() {
         showProgressBtn(true);
-        showLeftActionBtn(false);
-
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-        	setProgress(500);
-        }
     }
 
     protected void uiLoadEnd() {
         showProgressBtn(false);
-        showLeftActionBtn(true);
-
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-        	setProgress(10000);
-        }
     }
 
     public void onClick(View view) {
@@ -1999,13 +1612,7 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
 
         } else if (id == R.id.head_action_right) {
             loadSearch();
-        } else if(id == R.id.head_title) {
-            onPrepareTitleDropDown();
-            showCorpusSelectionDialog(mTitle);
         }
-    }
-
-    protected void onPrepareTitleDropDown() {
     }
 
     protected void showCorpusSelectionDialog(View view) {
@@ -2796,7 +2403,7 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
         	if(hideSearhView()) {
         		return true;
         	}
-            if ((fromtab && fromHome) || supportLeftNavigation) {
+            if (isDoubleBackToExit()) {
                 if (lastUpKey != null && lastUpKey.getKeyCode() == KeyEvent.KEYCODE_BACK) {
                     long span = event.getEventTime() - lastUpKey.getEventTime();
                     if (span < 5 * QiupuConfig.A_SECOND) {
@@ -3606,150 +3213,6 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
         }
     }
 
-    protected void doClickVoiceDialogCallBack(String backString) {
-    }
-
-    //show
-    protected void showRightActionBtn(boolean show) {
-
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mRightActionBtnMenu.setVisible(show ? true : false);
-        }
-        else
-        {
-            if (mRightActionBtn != null && mRightActionBtn.isEnabled()) {
-                mRightActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        }
-    }
-
-    protected void showRightTextActionBtn(boolean show) {
-
-        if (mTitleActionText != null && mTitleActionText.isEnabled()) {
-            mTitleActionText.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-    }
-
-    protected void showEditTitleActionBtn(boolean show) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-        }
-        else
-        {
-            if (mEditTitleBtn != null && mEditTitleBtn.isEnabled()) {
-                mEditTitleBtn.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        }
-    }
-
-    protected void showLeftActionBtn(boolean show) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mLeftActionBtnMenu.setVisible(show ? true : false);
-        }
-        else
-        {
-            if (mLeftActionBtn != null && mLeftActionBtn.isEnabled()) {
-                mLeftActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        }
-    }
-
-    protected void showMiddleActionBtn(boolean show) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mMiddleActionBtnMenu.setVisible(show ? true : false);
-        }
-        else
-        {
-            if (mMiddleActionBtn != null)
-                mMiddleActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-    }
-
-
-    protected void setLeftActionImageRes(int res) {
-        showLeftActionBtn(true);
-
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mLeftActionBtnMenu.setIcon(res);
-        }
-        else
-        {
-            if (mLeftActionBtn != null) {
-                mLeftActionBtn.setImageResource(res);
-            }
-        }
-    }
-
-    protected void alterMiddleActionBtnByComposer(int favRes, OnClickListener composeClick) {
-        showMiddleActionBtn(true);
-        overrideMiddleActionBtn(favRes, composeClick);
-    }
-
-    protected void enableLeftActionBtn(boolean enable) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mLeftActionBtnMenu.setVisible(enable);
-        }
-        else
-        {
-            if (null != mLeftActionBtn) {
-                if (enable && !mLeftActionBtn.isEnabled()) {
-                    mLeftActionBtn.setEnabled(true);
-                    mLeftActionBtn.setOnClickListener(this);
-                } else if (!enable && mLeftActionBtn.isEnabled()) {
-                    mLeftActionBtn.setOnClickListener(null);
-                    mLeftActionBtn.setEnabled(false);
-                    mLeftActionBtn.setVisibility(View.GONE);
-                }
-            }
-        }
-    }
-
-    protected void enableMiddleActionBtn(boolean enable) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mMiddleActionBtnMenu.setVisible(enable);
-        }
-        else
-        {
-            if (null != mMiddleActionBtn) {
-                if (enable && !mMiddleActionBtn.isEnabled()) {
-                    mMiddleActionBtn.setEnabled(true);
-                    mMiddleActionBtn.setOnClickListener(this);
-                } else if (!enable && mMiddleActionBtn.isEnabled()) {
-                    mMiddleActionBtn.setOnClickListener(null);
-                    mMiddleActionBtn.setEnabled(false);
-                    mMiddleActionBtn.setVisibility(View.GONE);
-                }
-            }
-        }
-    }
-
-    protected void enableRightActionBtn(boolean enable) {
-        if(isUsingActionBar() && getActionBar() != null)
-        {
-            mRightActionBtnMenu.setVisible(enable);
-        }
-        else
-        {
-            if (null != mRightActionBtn) {
-                if (enable && !mRightActionBtn.isEnabled()) {
-                    mRightActionBtn.setEnabled(true);
-                    mRightActionBtn.setOnClickListener(this);
-                } else if (!enable && mRightActionBtn.isEnabled()) {
-                    mRightActionBtn.setOnClickListener(null);
-                    mRightActionBtn.setEnabled(false);
-                    mRightActionBtn.setVisibility(View.GONE);
-                }
-            }
-        }
-    }
-
-
     boolean inloadingFollower = false;
     Object mFollowerLock = new Object();
     boolean inloadingFollowing = false;
@@ -4549,6 +4012,593 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
     }
     // legancy compatible end
 
+    protected boolean isDoubleBackToExit() {
+        return (fromtab && fromHome);
+    }
+
+    protected void onVCardExchangeFail(String errorMsg) {
+        showOperationFailToast(errorMsg, true);
+    }
+}
+
+public abstract class BasicActivity extends AbstractBaseActivity {
+    private static final String TAG = "Qiupu.BasicActivity";
+
+    // customize title bar begin
+    private TextView mTitle;
+    private TextView mSubTitle;
+    private TextView mTitleActionText;
+
+    protected ImageView mEditTitleBtn;
+    protected ImageView mLeftActionBtn;
+    protected ImageView mRightActionBtn;
+    protected ImageView mMiddleActionBtn;
+
+    protected MenuItem mLeftActionBtnMenu;
+    protected MenuItem mRightActionBtnMenu;
+    protected MenuItem mMiddleActionBtnMenu;
+
+    protected WeakReference<LeftNavigationCallBack> mLeftNavigationCallBack;
+
+    private LinearLayout title_container;
+    protected boolean supportLeftNavigation = false;
+    private boolean mIsShowNtf = false;
+
+    protected void enableLeftNav() {
+        enableLeftNav(true);
+    }
+
+    protected void enableLeftNav(boolean enable)
+    {
+        supportLeftNavigation = enable;
+    }
+
+    protected void enableTitleNtf(boolean enable) {
+        mIsShowNtf = enable;
+    }
+
+    // this is the place to check whether we need use action bar, sub class
+    // might override this method if it prefer to alter the default condition.
+    //
+    protected boolean isUsingActionBar()
+    {
+        return false && supportLeftNavigation == false && fromtab == false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate, " + this);
+        super.onCreate(savedInstanceState);
+
+        prepareActionBar();
+
+        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
+            mLeftNavigationCallBack.get().onCreate();
+        }
+    }
+
+    @Override
+    public final void setContentView(int layoutResID) {
+        boolean skip = false;
+
+        if ((isUsingTabNavigation(this, fromtab) == false && supportLeftNavigation) || mIsShowNtf) {
+            int overlayId = getOverlayContentId();
+            if (overlayId > 0) {
+                super.setContentView(overlayId);
+                skip = inflateNavigatingContentView(layoutResID);
+            }
+        }
+
+        if(mIsShowNtf) {
+            overrideSlideIcon(R.drawable.ic_back_holo_dark, new OnClickListener() {
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        }
+
+        if (!skip) {
+            super.setContentView(layoutResID);
+
+            final View parent = getWindow().getDecorView();
+            setTitleResource(parent, R.layout.title_bar_base);
+
+            initActionBarContent();
+
+            initCustomizedHeader(parent);
+        }
+    }
+
+    // override this to set the title bar action, sub class
+    // could alter the default behavior.
+    protected void setTitleResource(int resId) {
+        setTitleResource(getWindow().getDecorView(), resId);
+    }
+
+    protected void setTitleResource(View parent, int resId) {
+        if (isUsingActionBar()) {
+            title_container = (LinearLayout) parent.findViewById(R.id.titlebar_container);
+            if (null != title_container) {
+                title_container.setVisibility(View.GONE);
+            }
+        } else {
+            title_container = (LinearLayout) parent.findViewById(R.id.titlebar_container);
+            if (title_container != null) {
+                if (isUsingActionBar()) {
+                    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        title_container.setVisibility(View.GONE);
+                    } else {
+                        title_container.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    View content = LayoutInflater.from(this).inflate(resId, null);
+                    content.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+                    title_container.addView(content);
+                }
+            } else {
+                Log.e(TAG, "why I am null, *****************");
+            }
+        }
+    }
+
+    protected void prepareActionBar() {
+        if (isUsingActionBar()) {
+            boolean ret = requestWindowFeature(Window.FEATURE_ACTION_BAR | Window.FEATURE_PROGRESS);
+            if (ret == true && getActionBar() != null) {
+                getActionBar().setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_bg));
+                getActionBar().setDisplayShowCustomEnabled(true);
+
+                invalidateOptionsMenu();
+            }
+        } else {
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean result = super.onCreateOptionsMenu(menu);
+
+        mLeftActionBtnMenu   = menu.findItem(R.id.menu_left);
+        mMiddleActionBtnMenu = menu.findItem(R.id.menu_middle);
+        mRightActionBtnMenu  = menu.findItem(R.id.menu_right);
+
+        return result;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        mLeftActionBtnMenu = menu.findItem(R.id.menu_left);
+        mMiddleActionBtnMenu = menu.findItem(R.id.menu_middle);
+        mRightActionBtnMenu = menu.findItem(R.id.menu_right);
+        if (BpcPostsNewActivity.class.isInstance(this)
+                || OrganizationHomeActivity.class.isInstance(this)) {
+            if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
+                menu.findItem(R.id.menu_feedback).setVisible(true);
+                menu.findItem(R.id.menu_share_qiupu).setVisible(true);
+                menu.findItem(R.id.menu_version_check).setVisible(true);
+                menu.findItem(R.id.menu_settings).setVisible(true);
+                menu.findItem(R.id.menu_exit_qiupu).setVisible(true);
+            }
+        } else if (RequestActivity.class.isInstance(this)) {
+            if (isUsingActionBar()) {
+                menu.findItem(R.id.menu_refresh).setVisible(true);
+            }
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (isUsingActionBar()) {
+            if (item.getItemId() == android.R.id.home) {
+                // The user clicked on the Messaging icon in the action bar. Take them back from
+                // wherever they came from
+                return performGoHomeAction();
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        boolean isUsingActionBar = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+        if (isUsingActionBar) {
+            invalidateOptionsMenu();
+            return;
+        }
+
+        title_container = (LinearLayout) findViewById(R.id.titlebar_container);
+
+        // why do this?
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            if (title_container != null) {
+//                        title_container.setVisibility(View.GONE);
+            }
+        }
+        else
+        {
+            if (title_container != null) {
+                if(isUsingActionBar() == false)
+                {
+                    title_container.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
+    }
+
+
+    protected void initHeadViews() {
+        initHeadViews(getWindow().getDecorView());
+    }
+
+    protected void initHeadViews(View parent) {
+        Log.d(TAG, "initHeadViews");
+
+        mTitle = (TextView) parent.findViewById(R.id.head_title);
+        mSubTitle = (TextView) parent.findViewById(R.id.sub_head_title);
+        mTitleActionText = (TextView) parent.findViewById(R.id.head_action_text);
+
+        mEditTitleBtn = (ImageView) parent.findViewById(R.id.head_action_edit_title);
+        if (mEditTitleBtn != null) mEditTitleBtn.setOnClickListener(this);
+
+        mLeftActionBtn = (ImageView) parent.findViewById(R.id.head_action_left);
+        if (mLeftActionBtn != null) mLeftActionBtn.setOnClickListener(this);
+
+        mMiddleActionBtn = (ImageView) parent.findViewById(R.id.head_action_middle);
+        if (mMiddleActionBtn != null) mMiddleActionBtn.setOnClickListener(this);
+
+        mRightActionBtn = (ImageView) parent.findViewById(R.id.head_action_right);
+        if (mRightActionBtn != null) mRightActionBtn.setOnClickListener(this);
+    }
+
+    protected void overrideRightActionBtn(int drawableid, final OnClickListener click) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mRightActionBtnMenu.setIcon(drawableid);
+            mRightActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                public boolean onMenuItemClick(MenuItem item) {
+                    click.onClick(null);
+                    return false;
+                }
+            });
+        }
+        else
+        {
+            if (mRightActionBtn != null) {
+                mRightActionBtn.setImageResource(drawableid);
+                mRightActionBtn.setOnClickListener(click);
+            }
+        }
+    }
+
+    protected void overrideMiddleActionBtn(int drawableid, final OnClickListener click) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mMiddleActionBtnMenu.setIcon(drawableid);
+            mMiddleActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                public boolean onMenuItemClick(MenuItem item) {
+                    click.onClick(null);
+                    return false;
+                }
+            });
+        }else{
+            if (mMiddleActionBtn != null) {
+                mMiddleActionBtn.setImageResource(drawableid);
+                mMiddleActionBtn.setOnClickListener(click);
+            }
+        }
+    }
+
+    protected void initActionBarContent() {
+        if (isUsingActionBar() && getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setDisplayShowTitleEnabled(true);
+        }
+    }
+
+    protected void overrideEditTitleActionBtn(int drawableid, final OnClickListener click) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+        }else{
+            if (mEditTitleBtn != null) {
+                mEditTitleBtn.setImageResource(drawableid);
+                mEditTitleBtn.setOnClickListener(click);
+            }
+        }
+    }
+
+    protected void overrideLeftActionBtn(int drawableid, final OnClickListener click) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mLeftActionBtnMenu.setIcon(drawableid);
+            mLeftActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                public boolean onMenuItemClick(MenuItem item) {
+                    click.onClick(null);
+                    return false;
+                }
+            });
+        }else{
+            if (mLeftActionBtn != null) {
+                mLeftActionBtn.setImageResource(drawableid);
+                mLeftActionBtn.setOnClickListener(click);
+            }
+        }
+    }
+
+    protected void overrideRightTextActionBtn(int textid, final OnClickListener click) {
+        if (mTitleActionText != null) {
+            mTitleActionText.setText(textid);
+            mTitleActionText.setOnClickListener(click);
+        }
+    }
+
+    protected void setHeadTitle(final String title) {
+        mBasicHandler.post(new Runnable() {
+            public void run() {
+                if(supportLeftNavigation == false && isUsingActionBar() && getActionBar() != null)
+                {
+                    setTitle(title);
+                }
+                else
+                {
+                    if (mTitle != null)
+                        mTitle.setText(title);
+                    else
+                        setTitle(title);
+                }
+            }
+        });
+    }
+
+    protected void setHeadTitle(final int resid) {
+        mBasicHandler.post(new Runnable() {
+            public void run() {
+                if(supportLeftNavigation == false && isUsingActionBar() && getActionBar() != null)
+                {
+                    setTitle(resid);
+                }
+                else
+                {
+                    if (mTitle != null)
+                        mTitle.setText(resid);
+                    else
+                        setTitle(resid);
+                }
+            }
+        });
+    }
+
+    protected void setSubTitle(final String title) {
+        mBasicHandler.post(new Runnable() {
+            public void run() {
+                if (mSubTitle != null) {
+                    mSubTitle.setVisibility(View.VISIBLE);
+                    mSubTitle.setText(title);
+                }
+            }
+        });
+    }
+
+    protected void showTitleSpinnerIcon(boolean flag) {
+        if(flag) {
+            if(mTitle != null) {
+                mTitle.setBackgroundResource(R.drawable.spinner_bg);
+                mTitle.setOnClickListener(this);
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        Log.d(TAG, "onDestroy" + this);
+
+        //clear for left
+        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
+            mLeftNavigationCallBack.get().onDestroy();
+
+            mLeftNavigationCallBack.clear();
+        }
+
+        mLeftNavigationCallBack = null;
+        // comment out while it might be crash from sub class.
+        // asyncQiupu = null;
+
+        mTitle = null;
+        mSubTitle = null;
+
+        mLeftActionBtn = null;
+        mRightActionBtn = null;
+        mMiddleActionBtn = null;
+
+        super.onDestroy();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
+            mLeftNavigationCallBack.get().onPause();
+        }
+    }
+
+
+    protected void uiLoadBegin() {
+        super.uiLoadBegin();
+
+        showLeftActionBtn(false);
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            setProgress(500);
+        }
+    }
+
+    protected void uiLoadEnd() {
+        super.uiLoadEnd();
+
+        showLeftActionBtn(true);
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            setProgress(10000);
+        }
+    }
+
+    @Override
+    protected boolean isDoubleBackToExit() {
+        if (supportLeftNavigation) {
+            return true;
+        }
+        return super.isDoubleBackToExit();
+    }
+
+    //show
+    protected void showRightActionBtn(boolean show) {
+
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mRightActionBtnMenu.setVisible(show ? true : false);
+        }
+        else
+        {
+            if (mRightActionBtn != null && mRightActionBtn.isEnabled()) {
+                mRightActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        }
+    }
+
+    protected void showRightTextActionBtn(boolean show) {
+
+        if (mTitleActionText != null && mTitleActionText.isEnabled()) {
+            mTitleActionText.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    protected void showEditTitleActionBtn(boolean show) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+        }
+        else
+        {
+            if (mEditTitleBtn != null && mEditTitleBtn.isEnabled()) {
+                mEditTitleBtn.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        }
+    }
+
+    protected void showLeftActionBtn(boolean show) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mLeftActionBtnMenu.setVisible(show ? true : false);
+        }
+        else
+        {
+            if (mLeftActionBtn != null && mLeftActionBtn.isEnabled()) {
+                mLeftActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        }
+    }
+
+    protected void showMiddleActionBtn(boolean show) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mMiddleActionBtnMenu.setVisible(show ? true : false);
+        }
+        else
+        {
+            if (mMiddleActionBtn != null)
+                mMiddleActionBtn.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+    }
+
+
+    protected void setLeftActionImageRes(int res) {
+        showLeftActionBtn(true);
+
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mLeftActionBtnMenu.setIcon(res);
+        }
+        else
+        {
+            if (mLeftActionBtn != null) {
+                mLeftActionBtn.setImageResource(res);
+            }
+        }
+    }
+
+    protected void alterMiddleActionBtnByComposer(int favRes, OnClickListener composeClick) {
+        showMiddleActionBtn(true);
+        overrideMiddleActionBtn(favRes, composeClick);
+    }
+
+    protected void enableLeftActionBtn(boolean enable) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mLeftActionBtnMenu.setVisible(enable);
+        }
+        else
+        {
+            if (null != mLeftActionBtn) {
+                if (enable && !mLeftActionBtn.isEnabled()) {
+                    mLeftActionBtn.setEnabled(true);
+                    mLeftActionBtn.setOnClickListener(this);
+                } else if (!enable && mLeftActionBtn.isEnabled()) {
+                    mLeftActionBtn.setOnClickListener(null);
+                    mLeftActionBtn.setEnabled(false);
+                    mLeftActionBtn.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    protected void enableMiddleActionBtn(boolean enable) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mMiddleActionBtnMenu.setVisible(enable);
+        }
+        else
+        {
+            if (null != mMiddleActionBtn) {
+                if (enable && !mMiddleActionBtn.isEnabled()) {
+                    mMiddleActionBtn.setEnabled(true);
+                    mMiddleActionBtn.setOnClickListener(this);
+                } else if (!enable && mMiddleActionBtn.isEnabled()) {
+                    mMiddleActionBtn.setOnClickListener(null);
+                    mMiddleActionBtn.setEnabled(false);
+                    mMiddleActionBtn.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    protected void enableRightActionBtn(boolean enable) {
+        if(isUsingActionBar() && getActionBar() != null)
+        {
+            mRightActionBtnMenu.setVisible(enable);
+        }
+        else
+        {
+            if (null != mRightActionBtn) {
+                if (enable && !mRightActionBtn.isEnabled()) {
+                    mRightActionBtn.setEnabled(true);
+                    mRightActionBtn.setOnClickListener(this);
+                } else if (!enable && mRightActionBtn.isEnabled()) {
+                    mRightActionBtn.setOnClickListener(null);
+                    mRightActionBtn.setEnabled(false);
+                    mRightActionBtn.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
 
     protected void initCustomizedHeader(View parent) {
         if (fromtab == false) {
@@ -4566,8 +4616,34 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
 
         initHeadViews(parent);
     }
-}
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume=" + this);
 
-public abstract class BasicActivity extends AbstractBaseActivity {
-    private static final String TAG = "Qiupu.BasicActivity";
+        if (mLeftNavigationCallBack != null && mLeftNavigationCallBack.get() != null) {
+            mLeftNavigationCallBack.get().onResume();
+        }
+    }
+
+    @Override
+    protected void onVCardExchangeFail(String errorMsg) {
+        showLeftActionBtn(false);
+        super.onVCardExchangeFail(errorMsg);
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(view.getId() == R.id.head_title) {
+            onPrepareTitleDropDown();
+            showCorpusSelectionDialog(mTitle);
+        } else {
+            super.onClick(view);
+        }
+    }
+
+    protected void onPrepareTitleDropDown() {
+    }
+
+    // customize title bar end
 }
