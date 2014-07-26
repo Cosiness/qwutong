@@ -4646,4 +4646,50 @@ public abstract class BasicActivity extends AbstractBaseActivity {
     }
 
     // customize title bar end
+
+    public abstract static class SimpleBaseActivity extends AbstractBaseActivity {
+        protected void initHeadViews(View parent) {
+        }
+        protected void initCustomizedHeader(View parent) {
+
+        }
+
+        protected void setHeadTitle(final String title) {
+            setTitle(title);
+        }
+        protected void setHeadTitle(final int titleId) {
+            setTitle(titleId);
+        }
+        protected void overrideRightActionBtn(int drawableid, final OnClickListener click) {
+//            if(isUsingActionBar() && getActionBar() != null)
+//            {
+//                mRightActionBtnMenu.setIcon(drawableid);
+//                mRightActionBtnMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+//                    public boolean onMenuItemClick(MenuItem item) {
+//                        click.onClick(null);
+//                        return false;
+//                    }
+//                });
+//            }
+//            else
+            {
+                ImageView right = (ImageView)findViewById(R.id.head_action_right);
+                if (right != null) {
+                    right.setImageResource(drawableid);
+                    right.setOnClickListener(click);
+                }
+            }
+        }
+
+        protected int[] getRightButtonLocation() {
+            ImageView right = (ImageView)findViewById(R.id.head_action_right);
+            if (right != null) {
+                int location[] = new int[2];
+                right.getLocationInWindow(location);
+                return location;
+            }
+            return null;
+        }
+
+    }
 }

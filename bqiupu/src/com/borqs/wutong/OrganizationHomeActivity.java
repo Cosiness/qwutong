@@ -180,9 +180,8 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
     };
 
     protected void showCorpusSelectionDialog(ArrayList<SelectionItem> items) {
-        if(mRightActionBtn != null) {
-            int location[] = new int[2];
-            mRightActionBtn.getLocationInWindow(location);
+        int[] location = getRightButtonLocation();
+        if(location != null) {
             int x = location[0];
             int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
 
