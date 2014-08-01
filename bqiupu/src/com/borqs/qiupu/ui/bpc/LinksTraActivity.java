@@ -155,12 +155,12 @@ public class LinksTraActivity extends BasicActivity
     }
 	
 	private void loadurl(final WebView view,final String url){
-    	new Thread(TAG){
-        	public void run(){
+//    	new Thread(TAG){
+//        	public void run(){
         		mhandler.sendEmptyMessage(LOAD_WEB_BEGIN);
         		view.loadUrl(url);
-        	}
-        }.start();
+//        	}
+//        }.start();
     }
 	
 	@Override
