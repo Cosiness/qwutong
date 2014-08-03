@@ -21,7 +21,7 @@ import twitter4j.AsyncQiupu;
  * To change this template use File | Settings | File Templates.
  */
 
-public abstract class BaseResideMenuActivity extends BasicActivity.SimpleBaseActivity {
+public abstract class BaseResideMenuActivity extends BaseNotificationActivity {
     // reside menu begin
     private ResideMenu resideMenu;
     //    private BpcPostsNewActivity mContext;

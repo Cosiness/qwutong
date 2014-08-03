@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -103,7 +104,10 @@ import com.borqs.qiupu.util.StringUtil;
 
 public abstract class SlidingMenuOverlayActivity extends BasicActivity
         implements /*NotifyActionListener,*/ Animation.AnimationListener, 
-        LeftMenuListView.LeftNavigationListener/*, UpdateNotificationListener*/, NotificationListener, RequestActionListner, RequestListener, RequestRefreshListner, OnDismissListener, MoreItemCheckListener {
+        LeftMenuListView.LeftNavigationListener/*, UpdateNotificationListener*/,
+        NotificationListener, RequestActionListner,
+        RequestListener, RequestRefreshListner,
+        OnDismissListener, MoreItemCheckListener {
     private static final String TAG = "Qiupu.SlidingMenuOverlayActivity";
     // change for to add list action menu
     private static final boolean FORCE_DISABLE_CUSTOMIZED_TITLE = false;
@@ -702,20 +706,7 @@ public abstract class SlidingMenuOverlayActivity extends BasicActivity
         refreshToMeNtf();
         refreshOtherNtf();
     }
-    
-    private long getSceneId () {
-    	final String sId = QiupuORM.getSettingValue(this, QiupuORM.HOME_ACTIVITY_ID);
-    	long sceneId = -1;
-    	if(TextUtils.isEmpty(sId) == false) {
-    		try {
-    			sceneId = Long.parseLong(sId);
-    		} catch (Exception e) {
-    			Log.d(TAG, "homeid is null");
-    		}
-    	}
-    	
-    	return sceneId;
-    }
+
     private void refreshRequestNtf() {
     	final long sceneId = getSceneId();
     	ImageView requestView = (ImageView) findViewById(R.id.head_request);
@@ -819,51 +810,7 @@ public abstract class SlidingMenuOverlayActivity extends BasicActivity
 			}
 		});
     }
-    
-    private Bitmap generatorTargetCountIcon(Drawable base, int count){ 
-    	int iconWidth = base.getIntrinsicWidth();
-		int iconHeight = base.getIntrinsicHeight();
-    	
-        Bitmap targetIcon=Bitmap.createBitmap(iconWidth, iconHeight, Config.ARGB_8888);  
-        Canvas canvas=new Canvas(targetIcon);  
-          
-        // draw target icon
-        Bitmap baseb = ((BitmapDrawable)base).getBitmap();
-		canvas.drawBitmap(baseb, 0, 0, new Paint());
-		
-        // draw count bg
-        Paint countbgPaint=new Paint();  
-        countbgPaint.setDither(true);
-        countbgPaint.setFilterBitmap(true);
-        Bitmap countbgbt;
-        if(count < 100) {
-        	Drawable tmpDrawable = getResources().getDrawable(R.drawable.tips);
-        	countbgbt = ((BitmapDrawable)tmpDrawable).getBitmap();
-			int bgWidth = countbgbt.getWidth();
-			int bgLeft = iconWidth - bgWidth;
-			canvas.drawBitmap(countbgbt, bgLeft, 0, new Paint());
-			
-			Paint p = new Paint(Paint.ANTI_ALIAS_FLAG
-					| Paint.DEV_KERN_TEXT_FLAG);
-			p.setColor(Color.WHITE);
-			p.setTextSize(getResources().getDimension(R.dimen.noti_count_text_size));
-			p.setTypeface(Typeface.DEFAULT_BOLD);
-			float countWidth = p.measureText(String.valueOf(count));
-			float countHeight = (float)(Math.ceil(p.ascent())
-					+  Math.ceil(p.descent()));
 
-			float x = (bgWidth - countWidth) / 2 + bgLeft;
-			float y = (countbgbt.getHeight() - countHeight) / 2;
-			canvas.drawText(String.valueOf(count), x, y, p);
-        	
-        }else {
-        	Drawable tmpDrawable = getResources().getDrawable(R.drawable.ntf_toast_icon);
-        	countbgbt = ((BitmapDrawable)tmpDrawable).getBitmap();
-			canvas.drawBitmap(countbgbt, iconWidth - countbgbt.getWidth(), 0, new Paint());
-        }
-        return targetIcon;  
-    }  
-    
     OnItemClickListener infomationItemClickListenter = new OnItemClickListener() {
 
 		@Override

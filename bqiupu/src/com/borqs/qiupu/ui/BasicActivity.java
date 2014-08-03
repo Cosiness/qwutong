@@ -15,7 +15,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Location;
@@ -4019,6 +4026,74 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
     protected void onVCardExchangeFail(String errorMsg) {
         showOperationFailToast(errorMsg, true);
     }
+
+
+    // common code from SlidingMenuOverlayActivity begin
+    protected Bitmap generatorTargetCountIcon(Drawable base, int count){
+        return generatorTargetCountIcon(getResources(), base, count);
+    }
+
+    protected static Bitmap generatorTargetCountIcon(Resources resources, Drawable base, int count){
+        int iconWidth = base.getIntrinsicWidth();
+        int iconHeight = base.getIntrinsicHeight();
+
+        Bitmap targetIcon=Bitmap.createBitmap(iconWidth, iconHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas=new Canvas(targetIcon);
+
+        // draw target icon
+        Bitmap baseb = ((BitmapDrawable)base).getBitmap();
+        canvas.drawBitmap(baseb, 0, 0, new Paint());
+
+        // draw count bg
+        Paint countbgPaint=new Paint();
+        countbgPaint.setDither(true);
+        countbgPaint.setFilterBitmap(true);
+        Bitmap countbgbt;
+        if(count < 100) {
+            Drawable tmpDrawable = resources.getDrawable(R.drawable.tips);
+            countbgbt = ((BitmapDrawable)tmpDrawable).getBitmap();
+            int bgWidth = countbgbt.getWidth();
+            int bgLeft = iconWidth - bgWidth;
+            canvas.drawBitmap(countbgbt, bgLeft, 0, new Paint());
+
+            Paint p = new Paint(Paint.ANTI_ALIAS_FLAG
+                    | Paint.DEV_KERN_TEXT_FLAG);
+            p.setColor(Color.WHITE);
+            p.setTextSize(resources.getDimension(R.dimen.noti_count_text_size));
+            p.setTypeface(Typeface.DEFAULT_BOLD);
+            float countWidth = p.measureText(String.valueOf(count));
+            float countHeight = (float)(Math.ceil(p.ascent())
+                    +  Math.ceil(p.descent()));
+
+            float x = (bgWidth - countWidth) / 2 + bgLeft;
+            float y = (countbgbt.getHeight() - countHeight) / 2;
+            canvas.drawText(String.valueOf(count), x, y, p);
+
+        }else {
+            Drawable tmpDrawable = resources.getDrawable(R.drawable.ntf_toast_icon);
+            countbgbt = ((BitmapDrawable)tmpDrawable).getBitmap();
+            canvas.drawBitmap(countbgbt, iconWidth - countbgbt.getWidth(), 0, new Paint());
+        }
+        return targetIcon;
+    }
+
+    protected long getSceneId () {
+        return getSceneId(this);
+    }
+    protected static long getSceneId (Context context) {
+        final String sId = QiupuORM.getSettingValue(context, QiupuORM.HOME_ACTIVITY_ID);
+        long sceneId = -1;
+        if(TextUtils.isEmpty(sId) == false) {
+            try {
+                sceneId = Long.parseLong(sId);
+            } catch (Exception e) {
+                Log.d(TAG, "homeid is null");
+            }
+        }
+
+        return sceneId;
+    }
+    // common code from SlidingMenuOverlayActivity end
 }
 
 public abstract class BasicActivity extends AbstractBaseActivity {
@@ -4648,10 +4723,7 @@ public abstract class BasicActivity extends AbstractBaseActivity {
     // customize title bar end
 
     public abstract static class SimpleBaseActivity extends AbstractBaseActivity {
-        protected void initHeadViews(View parent) {
-        }
         protected void initCustomizedHeader(View parent) {
-
         }
 
         protected void setHeadTitle(final String title) {
@@ -4690,6 +4762,5 @@ public abstract class BasicActivity extends AbstractBaseActivity {
             }
             return null;
         }
-
     }
 }
