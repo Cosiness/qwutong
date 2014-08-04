@@ -1,5 +1,7 @@
 package com.borqs.wutong;
 
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MotionEvent;
@@ -54,22 +56,26 @@ public abstract class BaseResideMenuActivity extends BaseNotificationActivity {
         return resideMenu.dispatchTouchEvent(ev);
     }
 
-    protected void createLeftItem(int iconId, int labelId, final Class<?> fragmentClass) {
-        createItem(iconId, labelId, ResideMenu.DIRECTION_LEFT, fragmentClass);
+    protected ResideMenuItem createLeftItem(int iconId, int labelId, final Class<?> fragmentClass) {
+        return createItem(iconId, labelId, ResideMenu.DIRECTION_LEFT, fragmentClass);
     }
-    protected void createRightItem(int iconId, int labelId, final Class<?> fragmentClass) {
-        createItem(iconId, labelId, ResideMenu.DIRECTION_RIGHT, fragmentClass);
+    protected ResideMenuItem createRightItem(int iconId, int labelId, final Class<?> fragmentClass) {
+        return createItem(iconId, labelId, ResideMenu.DIRECTION_RIGHT, fragmentClass);
     }
-    private void createItem(int iconId, int labelId, int type, final Class<?> fragmentClass) {
+    private ResideMenuItem createItem(int iconId, int labelId, int type, final Class<?> fragmentClass) {
         final ResideMenuItem item = new ResideMenuItem(this, iconId, labelId);
         resideMenu.addMenuItem(item, type);
+        final String className = fragmentClass.getSimpleName();
         item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (v == item) {
                     try {
-                        Fragment fragment = (Fragment)fragmentClass.newInstance();
-                        changeFragment(fragment);
+                        if (!wasIdenticalFragment(className)) {
+                            Fragment fragment = (Fragment) fragmentClass.newInstance();
+                            changeFragment(fragment);
+                            setCurrentMenuItem(item);
+                        }
                         resideMenu.closeMenu();
                     } catch (InstantiationException e) {
                         e.printStackTrace();
@@ -79,6 +85,7 @@ public abstract class BaseResideMenuActivity extends BaseNotificationActivity {
                 }
             }
         });
+        return item;
     }
 
     protected void createRightMenuItems() {
@@ -105,11 +112,19 @@ public abstract class BaseResideMenuActivity extends BaseNotificationActivity {
         }
     };
 
+    private final String FRAGMENT_TAG = "fragment";
+    private boolean wasIdenticalFragment(String className) {
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
+        if (fragment.getClass().getSimpleName().equals(className)) {
+            return true;
+        }
+        return false;
+    }
     protected void changeFragment(Fragment targetFragment){
         resideMenu.clearIgnoredViewList();
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_fragment, targetFragment, "fragment")
+                .replace(R.id.main_fragment, targetFragment, FRAGMENT_TAG)
                 .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .commit();
     }
@@ -130,5 +145,20 @@ public abstract class BaseResideMenuActivity extends BaseNotificationActivity {
         });
         tryUpdateInitialDetect();
     }
+
+    // current reside menu item begin
+    private ResideMenuItem mCurrentItem;
+    protected void setCurrentMenuItem(ResideMenuItem item) {
+        if (null == item) {
+            return; // keep no change??
+        }
+
+        if (null != mCurrentItem) {
+            mCurrentItem.setCurrent(false);
+        }
+        mCurrentItem = item;
+        mCurrentItem.setCurrent(true);
+    }
+    // current reside menu item end
 }
 
