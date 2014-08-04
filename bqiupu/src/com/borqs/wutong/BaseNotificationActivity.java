@@ -13,7 +13,6 @@ import android.widget.ImageView;
 
 import com.borqs.account.service.AccountServiceUtils;
 import com.borqs.common.adapter.InformationAdapter;
-import com.borqs.common.adapter.LeftMenuAdapter;
 import com.borqs.common.adapter.RequestsAdapter;
 import com.borqs.common.api.BpcApiUtils;
 import com.borqs.common.listener.NotificationListener;
@@ -32,6 +31,7 @@ import com.borqs.qiupu.QiupuConfig;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.db.QiupuORM;
+import com.borqs.qiupu.service.QiupuService;
 import com.borqs.qiupu.service.RequestsService;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.bpc.InformationListActivity;
@@ -39,6 +39,7 @@ import com.borqs.qiupu.ui.circle.quickAction.NtfQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.JSONUtil;
 import com.borqs.qiupu.util.StringUtil;
+import com.borqs.wutong.utils.CacheHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -48,7 +49,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import twitter4j.AsyncQiupu;
 import twitter4j.Requests;
 import twitter4j.TwitterAdapter;
 import twitter4j.TwitterException;
@@ -85,7 +85,10 @@ public abstract class BaseNotificationActivity extends BasicActivity.SimpleBaseA
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         mOperator = new NotificationOperator(this);
+        orm = CacheHelper.getOrm(this);
 //        QiupuHelper.registerNotificationListener(getClass().getName(), this);
         InformationUtils.registerNotificationListener(getClass().getName(), this);
         RequestsService.regiestRequestListener(getClass().getName(), this);
@@ -93,12 +96,28 @@ public abstract class BaseNotificationActivity extends BasicActivity.SimpleBaseA
     }
 
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
+    @Override
+    protected void onResume() {
+        super.onResume();
 ////            setLeftMenuPosition();
 //        setListAdapterForDynamic();
-//    }
+
+//        new NotificationEntry().execute();
+        InformationUtils.getInforByDelay(this, 3 * QiupuConfig.A_SECOND);
+        // sync requests
+        if(QiupuService.mRequestsService != null) {
+//		    	QiupuService.mRequestsService.regiestRequestListener(LeftMenuListView.class.getName(), LeftMenuListView.this);
+            QiupuService.mRequestsService.rescheduleRequests(true);
+        }
+        else {
+            mHandler.postDelayed(new Runnable() {
+                public void run() {
+//		    			QiupuService.mRequestsService.regiestRequestListener(LeftMenuListView.class.getName(), LeftMenuListView.this);
+                    QiupuService.mRequestsService.rescheduleRequests(true);
+                }
+            }, 5 * QiupuConfig.A_SECOND);
+        }
+    }
 //
 //    private void setListAdapterForDynamic() {
 //        if (leftMenuListView != null && isStreamIndex()) {
