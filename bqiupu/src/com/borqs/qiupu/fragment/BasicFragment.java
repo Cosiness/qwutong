@@ -22,7 +22,6 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.ImageRun;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.ui.BasicActivity;
-import com.borqs.qiupu.ui.bpc.AlbumActivity;
 import com.borqs.qiupu.ui.bpc.ProgressInterface;
 
 import java.util.ArrayList;

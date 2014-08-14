@@ -30,7 +30,9 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.fragment.BasicFragment.BaseExFragment;
 import com.borqs.qiupu.fragment.PollDetailFragment;
+import com.borqs.qiupu.ui.bpc.AlbumActivity;
 import com.borqs.qiupu.ui.bpc.PollCreateActivity;
+import com.borqs.qiupu.ui.bpc.PollListActivity;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.StringUtil;
 import com.borqs.qiupu.util.ToastUtil;
@@ -74,9 +76,20 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mUserId = getIntent().getLongExtra(EXTRA_USER_ID_KEY, 0);
-        mUserName = getIntent().getStringExtra(EXTRA_USER_NAME_KEY);
-        isFromCircle = getIntent().getBooleanExtra(EXTRA_FROM_CIRCLE, false);
+
+        Intent intent = getIntent();
+        if (null != intent) {
+            mUserId = intent.getLongExtra(EXTRA_USER_ID_KEY, 0);
+            mUserName = intent.getStringExtra(EXTRA_USER_NAME_KEY);
+            isFromCircle = intent.getBooleanExtra(EXTRA_FROM_CIRCLE, false);
+            mCurrentScreen = intent.getIntExtra(EXTRA_CURRENT_SCREEN_KEY, PollInfo.TYPE_INVITED_ME);
+        } else {
+            mUserId = 0;
+            mUserName = "";
+            isFromCircle = false;
+            mCurrentScreen = PollInfo.TYPE_INVITED_ME;
+        }
+
         if (mUserId == 0) {
             enableLeftNav();
             setHeadTitle(getTitleRes());
@@ -89,7 +102,6 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
         }
 //        setContentView(R.layout.poll_list_main);
 
-        mCurrentScreen = getIntent().getIntExtra(EXTRA_CURRENT_SCREEN_KEY, PollInfo.TYPE_INVITED_ME);
         if (mUserId == 0) {
             showTitleSpinnerIcon(true);
         }
@@ -101,7 +113,7 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
         } else {
             mPollList = QiupuORM.queryPollListInfo(getActivity(), mCurrentScreen);
         }
-        mPollAdapter = new PollListAdapter(getActivity(), mPollList,false);
+        mPollAdapter = new PollListAdapter(getActivity(), mPollList, false, this);
         mListView.setSelector(R.drawable.list_selector_background);
         mListView.setAdapter(mPollAdapter);
         mListView.setOnItemClickListener(mItemClickListener);
@@ -132,7 +144,7 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
     }
 
     private void showDialog() {
-        LayoutInflater inflater = getLayoutInflater();
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(R.layout.poll_detail_main, null);
         view.setBackgroundResource(R.color.white);
 
@@ -154,46 +166,69 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
 
     };
 
-    @Override
-    protected void createHandler() {
-        mHandler = new MainHandler();
-    }
+//    @Override
+//    protected void createHandler() {
+//        mHandler = new MainHandler();
+//    }
 
-    @Override
-    protected void loadRefresh() {
+//    @Override
+//    protected void loadRefresh() {
+//        mForceRefresh = true;
+//        mHandler.obtainMessage(SYNC_POLL).sendToTarget();
+//    }
+
+//    private final int SYNC_POLL     = 101;
+//    private final int SYNC_POLL_END = 102;
+
+//    private class MainHandler extends Handler {
+//        public void handleMessage(Message msg) {
+//            switch (msg.what) {
+//                case SYNC_POLL: {
+//                    if(mCurrentScreen == PollInfo.TYPE_PUBLIC) {
+//                        getPublicPollList(mCurrentScreen,getCurrentPage());
+//                    }else if(mCurrentScreen == PollInfo.TYPE_INVITED_ME) {
+//                        getUserPollList(mCurrentScreen,2, getCurrentPage());
+//                    }else {
+//                        getUserPollList(mCurrentScreen,0, getCurrentPage());
+//                    }
+//                    break;
+//                }
+//                case SYNC_POLL_END: {
+//                    mPollAdapter.refreshLoadingStatus();
+//                    if(mForceRefresh) {
+//                        mForceRefresh = false;
+//                    }
+//                    if (msg.getData().getBoolean(RESULT)) {
+//                        refreshUI();
+//                    } else {
+//                        ToastUtil.showOperationFailed(getActivity(), mHandler, false);
+//                    }
+//                    break;
+//                }
+//            }
+//        }
+//    }
+
+    public void loadRefresh() {
         mForceRefresh = true;
-        mHandler.obtainMessage(SYNC_POLL).sendToTarget();
+        if(mCurrentScreen == PollInfo.TYPE_PUBLIC) {
+            getPublicPollList(mCurrentScreen,getCurrentPage());
+        }else if(mCurrentScreen == PollInfo.TYPE_INVITED_ME) {
+            getUserPollList(mCurrentScreen,2, getCurrentPage());
+        }else {
+            getUserPollList(mCurrentScreen,0, getCurrentPage());
+        }
     }
 
-    private final int SYNC_POLL     = 101;
-    private final int SYNC_POLL_END = 102;
-
-    private class MainHandler extends Handler {
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case SYNC_POLL: {
-                    if(mCurrentScreen == PollInfo.TYPE_PUBLIC) {
-                        getPublicPollList(mCurrentScreen,getCurrentPage());
-                    }else if(mCurrentScreen == PollInfo.TYPE_INVITED_ME) {
-                        getUserPollList(mCurrentScreen,2, getCurrentPage());
-                    }else {
-                        getUserPollList(mCurrentScreen,0, getCurrentPage());
-                    }
-                    break;
-                }
-                case SYNC_POLL_END: {
-                    mPollAdapter.refreshLoadingStatus();
-                    if(mForceRefresh) {
-                        mForceRefresh = false;
-                    }
-                    if (msg.getData().getBoolean(RESULT)) {
-                        refreshUI();
-                    } else {
-                        ToastUtil.showOperationFailed(getActivity(), mHandler, false);
-                    }
-                    break;
-                }
-            }
+    public void syncPollEnd(boolean success, Handler handler) {
+        mPollAdapter.refreshLoadingStatus();
+        if(mForceRefresh) {
+            mForceRefresh = false;
+        }
+        if (success) {
+            refreshUI();
+        } else {
+            ToastUtil.showOperationFailed(getActivity(), handler, false);
         }
     }
 
@@ -312,9 +347,10 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
                     }
                     mPollList.addAll(pollList);
 
-                    Message msg = mHandler.obtainMessage(SYNC_POLL_END);
-                    msg.getData().putBoolean(RESULT, true);
-                    msg.sendToTarget();
+                    onPollFetchOk();
+//                    Message msg = mHandler.obtainMessage(SYNC_POLL_END);
+//                    msg.getData().putBoolean(RESULT, true);
+//                    msg.sendToTarget();
                 } else {
                     if (page == 0) {
                         insertPollToDb(currentType, pollList);
@@ -327,9 +363,10 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
             public void onException(TwitterException ex,
                                     TwitterMethod method) {
                 if (mCurrentScreen == currentType) {
-                    Message msg = mHandler.obtainMessage(SYNC_POLL_END);
-                    msg.getData().putBoolean(RESULT, false);
-                    msg.sendToTarget();
+                    onPollFetchFailed();
+//                    Message msg = mHandler.obtainMessage(SYNC_POLL_END);
+//                    msg.getData().putBoolean(RESULT, false);
+//                    msg.sendToTarget();
                 }
                 setLoadingStatus(false, currentType, true);
             }
@@ -343,8 +380,7 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
                 if (lockData.inLoading == true) {
                     if(mCurrentScreen == type) {
                         begin();
-                        ToastUtil.showShortToast(getActivity(), mHandler,
-                                R.string.string_in_processing);
+                        showShortToast(R.string.string_in_processing);
                     }
                     return false;
                 }
@@ -409,10 +445,7 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
                         mPollList.clear();
                     }
                     mPollList.addAll(pollList);
-
-                    Message msg = mHandler.obtainMessage(SYNC_POLL_END);
-                    msg.getData().putBoolean(RESULT, true);
-                    msg.sendToTarget();
+                    onPollFetchOk();
                 }else {
                     if(page == 0) {
                         insertPollToDb(currentType,pollList);
@@ -424,9 +457,7 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
             public void onException(TwitterException ex,
                                     TwitterMethod method) {
                 if(mCurrentScreen == currentType) {
-                    Message msg = mHandler.obtainMessage(SYNC_POLL_END);
-                    msg.getData().putBoolean(RESULT, false);
-                    msg.sendToTarget();
+                    onPollFetchFailed();
                 }
                 setLoadingStatus(false, currentType,true);
             }
@@ -445,18 +476,15 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
     @Override
     public OnClickListener loaderMoreClickListener() {
         OnClickListener clickListener = new OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                mHandler.obtainMessage(SYNC_POLL).sendToTarget();
+                loadMore();
 
             }
         };
         return clickListener;
     }
 
-
-    @Override
     protected void showCorpusSelectionDialog(View view) {
         int location[] = new int[2];
         view.getLocationInWindow(location);
@@ -641,5 +669,34 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+    }
+
+    private void onPollFetchOk() {
+        if (null != thiz && thiz instanceof PollListActivity) {
+            PollListActivity activity = (PollListActivity)thiz;
+            activity.onPollFetchOk();
+        }
+    }
+
+    private void onPollFetchFailed() {
+        if (null != thiz && thiz instanceof PollListActivity) {
+            PollListActivity activity = (PollListActivity)thiz;
+            activity.onPollFetchFailed();
+        }
+    }
+
+    private void loadMore() {
+        if (null != thiz && thiz instanceof PollListActivity) {
+            PollListActivity activity = (PollListActivity)thiz;
+            activity.loadMore();
+        }
+    }
+
+    private void showShortToast(int msgId) {
+
+        if (null != thiz && thiz instanceof PollListActivity) {
+            PollListActivity activity = (PollListActivity)thiz;
+            activity.showShortToast(msgId);
+        }
     }
 }

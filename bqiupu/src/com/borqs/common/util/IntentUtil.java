@@ -85,6 +85,7 @@ import com.borqs.qiupu.ui.bpc.UserCircleSelectedActivity;
 import com.borqs.qiupu.ui.bpc.UserProfileFragmentActivity;
 import com.borqs.qiupu.ui.bpc.UsersArrayListActivity;
 import com.borqs.qiupu.ui.bpc.UsersCursorListActivity;
+import com.borqs.qiupu.ui.bpc.fragment.PollListFragment;
 import com.borqs.qiupu.ui.circle.CircleEventsActivity;
 import com.borqs.qiupu.ui.circle.EditPublicCircleActivity;
 import com.borqs.qiupu.ui.circle.EventDetailActivity;
@@ -233,10 +234,10 @@ public class IntentUtil {
 
     public static void startPollIntent(Context context, long userId, String UserName, int currentScreen, boolean fromCircle) {
         Intent intent = new Intent(context,PollListActivity.class);
-        intent.putExtra(PollListActivity.EXTRA_USER_ID_KEY, userId);
-        intent.putExtra(PollListActivity.EXTRA_CURRENT_SCREEN_KEY,currentScreen);
-        intent.putExtra(PollListActivity.EXTRA_USER_NAME_KEY, UserName);
-        intent.putExtra(PollListActivity.EXTRA_FROM_CIRCLE, fromCircle);
+        intent.putExtra(PollListFragment.EXTRA_USER_ID_KEY, userId);
+        intent.putExtra(PollListFragment.EXTRA_CURRENT_SCREEN_KEY,currentScreen);
+        intent.putExtra(PollListFragment.EXTRA_USER_NAME_KEY, UserName);
+        intent.putExtra(PollListFragment.EXTRA_FROM_CIRCLE, fromCircle);
         context.startActivity(intent);
     }
 

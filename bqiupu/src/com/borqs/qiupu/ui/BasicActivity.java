@@ -3771,7 +3771,7 @@ abstract class AbstractBaseActivity extends FragmentActivity implements Progress
         startActivity(new Intent(this, BpcSettingsActivity.class));
     }
 
-    private void showShortToast(final int resId) {
+    public void showShortToast(final int resId) {
     	mBasicHandler.post(new Runnable(){
     		public void run()
     		{
