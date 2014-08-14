@@ -7,11 +7,16 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 
+import com.borqs.common.SelectionItem;
+import com.borqs.common.util.DialogUtils;
 import com.borqs.qiupu.QiupuConfig;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.ImageRun;
@@ -19,6 +24,8 @@ import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.bpc.AlbumActivity;
 import com.borqs.qiupu.ui.bpc.ProgressInterface;
+
+import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -98,17 +105,19 @@ public class BasicFragment extends Fragment {
         }
     }
 
-    public static class BaseExFragment extends BasicFragment {
+    public static abstract class BaseExFragment extends BasicFragment {
         private View mRootView;
-        private View ensureRootView() {
-            if (null == mRootView) {
-                mRootView = getView();
-            }
+
+        @Override
+        public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+//        return super.onCreateView(inflater, container, savedInstanceState);
+            mRootView = inflater.inflate(getRootViewResourceId(), null);
             return mRootView;
         }
 
+        protected abstract int getRootViewResourceId();
+
         protected View findViewById(int viewId) {
-            ensureRootView();
             if (null != mRootView) {
                 return mRootView.findViewById(viewId);
             }
@@ -126,6 +135,13 @@ public class BasicFragment extends Fragment {
             if (null != thiz && thiz instanceof BasicActivity) {
                 BasicActivity activity = (BasicActivity)thiz;
                 activity.setHeadTitle(titleId);
+            }
+        }
+
+        protected void setHeadTitle(String title) {
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                activity.setHeadTitle(title);
             }
         }
 
@@ -149,5 +165,41 @@ public class BasicFragment extends Fragment {
                 activity.overrideRightActionBtn(iconId, listener);
             }
         }
+
+        protected void showTitleSpinnerIcon(boolean enabled) {
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                activity.showTitleSpinnerIcon(enabled);
+            }
+        }
+
+        protected void enableLeftNav() {
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                activity.enableLeftNav();
+            }
+        }
+
+        protected void showCorpusSelectionDialog(ArrayList<SelectionItem> items, AdapterView.OnItemClickListener listener) {
+            int location[];
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                location = activity.getCorpusSelectionLocation();
+            } else {
+                location = new int[2];
+                location[0] = 0;
+                location[1] = 0;
+            }
+
+//            if(mRightActionBtn != null) {
+//                int location[] = new int[2];
+//                mRightActionBtn.getLocationInWindow(location);
+                int x = location[0];
+                int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
+
+                DialogUtils.showCorpusSelectionDialog(getActivity(), x, y, items, listener);
+//            }
+        }
+
     }
 }

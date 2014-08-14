@@ -11,6 +11,7 @@ import com.borqs.qiupu.db.QiupuORM;
 
 import java.util.ArrayList;
 
+import twitter4j.PollInfo;
 import twitter4j.QiupuAlbum;
 import twitter4j.UserCircle;
 
@@ -134,6 +135,18 @@ public class CacheHelper {
             }
         }
         return TextUtils.isEmpty(nickName) ? "" : nickName;
+    }
+
+    public static void insertPollList(ArrayList<PollInfo> pollList, int type) {
+        getInstance().orm.insertPollList(pollList, type);
+    }
+
+    public static void insertCirclePollList(ArrayList<PollInfo> pollList) {
+        getInstance().orm.insertCirclePollList(pollList);
+    }
+
+    public static void deletePollInfo(String pollId) {
+        getInstance().orm.deletePollnfo(pollId);
     }
 
     // latency compatible end

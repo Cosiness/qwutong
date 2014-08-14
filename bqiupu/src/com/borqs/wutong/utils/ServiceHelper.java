@@ -12,6 +12,7 @@ import java.util.HashMap;
 import twitter4j.AsyncQiupu;
 import twitter4j.TwitterAdapter;
 import twitter4j.TwitterException;
+import twitter4j.TwitterListener;
 import twitter4j.TwitterMethod;
 import twitter4j.conf.ConfigurationContext;
 
@@ -169,5 +170,13 @@ public class ServiceHelper {
 
     public static void getAllAlbums(String sessionID, long uid, boolean withPhotoId, TwitterAdapter twitterAdapter) {
         getInstance().asyncQiupu.getAllAlbums(sessionID, uid, withPhotoId, twitterAdapter);
+    }
+
+    public static void getPublicPollList(String sessionID, int page, int count, TwitterListener listener) {
+        getInstance().asyncQiupu.getPublicPollList(sessionID, page, count, listener);
+    }
+
+    public static void getUserPollList(String ticket, int type, int page, int count, long userId, TwitterListener listener) {
+        getInstance().asyncQiupu.getUserPollList(ticket, type, page, count, userId, listener);
     }
 }

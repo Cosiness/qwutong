@@ -4120,11 +4120,11 @@ public abstract class BasicActivity extends AbstractBaseActivity {
     protected boolean supportLeftNavigation = false;
     private boolean mIsShowNtf = false;
 
-    protected void enableLeftNav() {
+    public void enableLeftNav() {
         enableLeftNav(true);
     }
 
-    protected void enableLeftNav(boolean enable)
+    public void enableLeftNav(boolean enable)
     {
         supportLeftNavigation = enable;
     }
@@ -4415,7 +4415,7 @@ public abstract class BasicActivity extends AbstractBaseActivity {
         }
     }
 
-    protected void setHeadTitle(final String title) {
+    public void setHeadTitle(final String title) {
         mBasicHandler.post(new Runnable() {
             public void run() {
                 if(supportLeftNavigation == false && isUsingActionBar() && getActionBar() != null)
@@ -4462,7 +4462,7 @@ public abstract class BasicActivity extends AbstractBaseActivity {
         });
     }
 
-    protected void showTitleSpinnerIcon(boolean flag) {
+    public void showTitleSpinnerIcon(boolean flag) {
         if(flag) {
             if(mTitle != null) {
                 mTitle.setBackgroundResource(R.drawable.spinner_bg);
@@ -4764,4 +4764,14 @@ public abstract class BasicActivity extends AbstractBaseActivity {
             return null;
         }
     }
+
+    public int[] getCorpusSelectionLocation() {
+        if(mRightActionBtn != null) {
+            int location[] = new int[2];
+            mRightActionBtn.getLocationInWindow(location);
+            return location;
+        }
+        return null;
+    }
+
 }

@@ -38,10 +38,8 @@ public class AlbumFragment extends BaseExFragment {
     private GridView album_grid;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        return super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.album_grid_view, null);
-        return view;
+    protected int getRootViewResourceId() {
+        return R.layout.album_grid_view;
     }
 
     @Override
