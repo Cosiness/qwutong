@@ -37,6 +37,7 @@ import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
 import com.borqs.wutong.utils.CacheHelper;
 import com.borqs.wutong.utils.ServiceHelper;
+import com.special.ResideMenu.ResideMenuItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -692,6 +693,13 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
 
 
     protected void createRightMenuItems() {
+        createRightItem(R.drawable.home_screen_menu_loop_icon_default, R.string.tab_lobby, StreamListFragment.class).setTitle(mCircle.name);;
+        createRightItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, OrganizationExtraFragment.Circle.class);
+        createRightItem(R.drawable.friend_group_icon, R.string.circle_member_label, OrganizationExtraFragment.Member.class);
+        createRightItem(R.drawable.home_screen_event_icon, R.string.event, OrganizationExtraFragment.Event.class);
+        createRightItem(R.drawable.home_screen_voting_icon_default, R.string.poll, OrganizationExtraFragment.Poll.class);
+        createRightItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, OrganizationExtraFragment.Album.class);
+
         createRightItem(R.drawable.menu_setting, R.string.home_settings, StreamRightFlipperFragment.class);
         createRightItem(R.drawable.icon_album, R.string.home_others, StreamRightFlipperFragment.class);
     }

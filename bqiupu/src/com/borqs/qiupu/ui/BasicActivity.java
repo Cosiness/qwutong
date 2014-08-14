@@ -73,6 +73,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.baidu.location.BDLocation;
 import com.borqs.account.commons.AccountServiceAdapter;
 import com.borqs.account.login.service.AccountService;

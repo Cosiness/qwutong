@@ -154,8 +154,8 @@ the hotseat in XML files. -->
         <attr name="y" format="string"/>
         <attr name="spanX" format="string"/>
         <attr name="spanY" format="string"/>
-        <attr name="icon" format="reference"/>
-        <attr name="title" format="reference"/>
+        <attr name="icon"/>
+        <attr name="title"/>
         <attr name="uri" format="string"/>
     </declare-styleable>
 
@@ -380,14 +380,14 @@ opaque background. This allows the list to optimize drawing. -->
      <declare-styleable name="SearchView">
         <!-- The default state of the SearchView. If true, it will be iconified when not in
              use and expanded when clicked. -->
-        <attr name="iconifiedByDefault" format="boolean"/>
+        <attr name="iconifiedByDefault"/>
         <!-- An optional query hint string to be displayed in the empty query field. -->
-        <attr name="queryHint" format="string" />
+        <attr name="queryHint" />
     </declare-styleable>
 
      <declare-styleable name="PullToRefresh">
         <attr name="adapterViewBackground" format="reference|color" />
-        <attr name="headerBackground" format="reference|color" />
+        <attr name="headerBackground" />
         <attr name="headerTextColor" format="color" />
         <attr name="mode">
             <flag name="pullDownFromTop" value="0x1" />
