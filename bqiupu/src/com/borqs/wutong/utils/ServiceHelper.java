@@ -166,4 +166,8 @@ public class ServiceHelper {
     public static void getPostTop(String sessionID, long id, TwitterAdapter twitterAdapter) {
         getInstance().asyncQiupu.getPostTop(sessionID, id, twitterAdapter);
     }
+
+    public static void getAllAlbums(String sessionID, long uid, boolean withPhotoId, TwitterAdapter twitterAdapter) {
+        getInstance().asyncQiupu.getAllAlbums(sessionID, uid, withPhotoId, twitterAdapter);
+    }
 }

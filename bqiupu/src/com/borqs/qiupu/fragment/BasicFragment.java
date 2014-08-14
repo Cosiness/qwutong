@@ -2,18 +2,22 @@ package com.borqs.qiupu.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.borqs.qiupu.QiupuConfig;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.ImageRun;
 import com.borqs.qiupu.db.QiupuORM;
+import com.borqs.qiupu.ui.BasicActivity;
+import com.borqs.qiupu.ui.bpc.AlbumActivity;
 import com.borqs.qiupu.ui.bpc.ProgressInterface;
 
 /**
@@ -64,7 +68,7 @@ public class BasicFragment extends Fragment {
         }
     }
 
-    protected static class UserFragment extends BasicFragment {
+    public static class UserFragment extends BasicFragment {
         protected Cursor musers;
         protected QiupuORM orm;
 
@@ -90,6 +94,59 @@ public class BasicFragment extends Fragment {
                 musers = orm.queryAllSimpleUserInfo();
             } else {
                 Log.w("UserFragment", "queryAllSimpleUser skip with uninitialized orm.");
+            }
+        }
+    }
+
+    public static class BaseExFragment extends BasicFragment {
+        private View mRootView;
+        private View ensureRootView() {
+            if (null == mRootView) {
+                mRootView = getView();
+            }
+            return mRootView;
+        }
+
+        protected View findViewById(int viewId) {
+            ensureRootView();
+            if (null != mRootView) {
+                return mRootView.findViewById(viewId);
+            }
+            return null;
+        }
+
+        protected Context thiz;
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            thiz = getActivity();
+        }
+
+        protected void setHeadTitle(int titleId) {
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                activity.setHeadTitle(titleId);
+            }
+        }
+
+        protected void setSubTitle(String subTitle) {
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                activity.setSubTitle(subTitle);
+            }
+        }
+
+        protected Intent getIntent() {
+            if (null != thiz && thiz instanceof Activity) {
+                ((Activity)thiz).getIntent();
+            }
+            return null;
+        }
+
+        protected void overrideRightActionBtn(int iconId, View.OnClickListener listener) {
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                activity.overrideRightActionBtn(iconId, listener);
             }
         }
     }

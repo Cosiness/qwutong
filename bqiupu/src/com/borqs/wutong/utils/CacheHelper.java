@@ -6,6 +6,9 @@ import android.database.Cursor;
 
 import com.borqs.qiupu.db.QiupuORM;
 
+import java.util.ArrayList;
+
+import twitter4j.QiupuAlbum;
 import twitter4j.UserCircle;
 
 /**
@@ -107,6 +110,10 @@ public class CacheHelper {
 
     public static Cursor queryChildCircleList(long circleid) {
         return getInstance().orm.queryChildCircleList(circleid);
+    }
+
+    public static void insertQiupuAlbumList(ArrayList<QiupuAlbum> albums, long uid) {
+        getInstance().orm.insertQiupuAlbumList(albums, uid);
     }
 
     // latency compatible end

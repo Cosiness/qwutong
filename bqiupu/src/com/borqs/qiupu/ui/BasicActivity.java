@@ -4334,7 +4334,7 @@ public abstract class BasicActivity extends AbstractBaseActivity {
         if (mRightActionBtn != null) mRightActionBtn.setOnClickListener(this);
     }
 
-    protected void overrideRightActionBtn(int drawableid, final OnClickListener click) {
+    public void overrideRightActionBtn(int drawableid, final OnClickListener click) {
         if(isUsingActionBar() && getActionBar() != null)
         {
             mRightActionBtnMenu.setIcon(drawableid);
@@ -4433,7 +4433,7 @@ public abstract class BasicActivity extends AbstractBaseActivity {
         });
     }
 
-    protected void setHeadTitle(final int resid) {
+    public void setHeadTitle(final int resid) {
         mBasicHandler.post(new Runnable() {
             public void run() {
                 if(supportLeftNavigation == false && isUsingActionBar() && getActionBar() != null)
@@ -4451,7 +4451,7 @@ public abstract class BasicActivity extends AbstractBaseActivity {
         });
     }
 
-    protected void setSubTitle(final String title) {
+    public void setSubTitle(final String title) {
         mBasicHandler.post(new Runnable() {
             public void run() {
                 if (mSubTitle != null) {
