@@ -1,5 +1,6 @@
 package com.borqs.qiupu.ui.bpc.fragment;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,8 +47,6 @@ public class AlbumFragment extends BaseExFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
-//        boolean isSupportLeftNavigation  = getIntent().getBooleanExtra("supportLeftNavigation", false);
-//        enableLeftNav(isSupportLeftNavigation);
 
         super.onActivityCreated(savedInstanceState);
 //        setContentView(R.layout.album_grid_view);
@@ -56,20 +55,26 @@ public class AlbumFragment extends BaseExFragment {
 
         overrideRightActionBtn(R.drawable.actionbar_icon_refresh_normal, refreshListener);
         album_grid = (GridView)findViewById(R.id.album_grid);
-        uid = getIntent().getLongExtra("uid", 0);
-        String username = null;
-        username = getIntent().getStringExtra("nick_name");
+
+        Intent intent = getIntent();
+        final String username;
+        if (null != intent) {
+            uid = intent.getLongExtra("uid", 0);
+            username = intent.getStringExtra("nick_name");
+        } else {
+            uid = CacheHelper.getCurrentUserId();
+            username =CacheHelper.getCurrentUserName();
+        }
+
         setHeadTitle(R.string.home_album);
         setSubTitle(username);
         mAlbums = QiupuORM.queryQiupuAlbums(thiz, uid);
         gridAdapter = new AlbumGridLayoutAdapter(thiz,480,mAlbums);
         album_grid.setAdapter(gridAdapter);
         album_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
             @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                IntentUtil.startGridPicIntent(thiz, mAlbums.get(position).album_id, uid,getIntent().getStringExtra("nick_name"),false);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                IntentUtil.startGridPicIntent(thiz, mAlbums.get(position).album_id, uid, username, false);
             }
 
         });

@@ -3,7 +3,10 @@ package com.borqs.wutong.utils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.text.TextUtils;
 
+import com.borqs.account.service.AccountServiceUtils;
+import com.borqs.account.service.BorqsAccount;
 import com.borqs.qiupu.db.QiupuORM;
 
 import java.util.ArrayList;
@@ -114,6 +117,23 @@ public class CacheHelper {
 
     public static void insertQiupuAlbumList(ArrayList<QiupuAlbum> albums, long uid) {
         getInstance().orm.insertQiupuAlbumList(albums, uid);
+    }
+
+    public static long getCurrentUserId() {
+        return AccountServiceUtils.getBorqsAccountID();
+    }
+
+    public static String getCurrentUserName() {
+        String nickName = getInstance().orm.getUserName(getCurrentUserId());
+        if (TextUtils.isEmpty(nickName)) {
+            BorqsAccount account = AccountServiceUtils.getBorqsAccount();
+            if (null == account) {
+                nickName = "";
+            } else {
+                nickName = account.nickname;
+            }
+        }
+        return TextUtils.isEmpty(nickName) ? "" : nickName;
     }
 
     // latency compatible end
