@@ -128,6 +128,18 @@ public class BasicFragment extends Fragment {
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
             thiz = getActivity();
+            checkToHideCustomizedBar(thiz);
+        }
+
+        private void checkToHideCustomizedBar(Context context) {
+            if (context instanceof BasicActivity) {
+                // do nothing
+            } else {
+                View hideView = (View)mRootView.findViewById(R.id.titlebar_container);
+                if (null != hideView) {
+                    hideView.setVisibility(View.GONE);
+                }
+            }
         }
 
         protected void setHeadTitle(int titleId) {
