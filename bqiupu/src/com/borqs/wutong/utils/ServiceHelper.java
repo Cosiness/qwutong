@@ -179,4 +179,8 @@ public class ServiceHelper {
     public static void getUserPollList(String ticket, int type, int page, int count, long userId, TwitterListener listener) {
         getInstance().asyncQiupu.getUserPollList(ticket, type, page, count, userId, listener);
     }
+
+    public static void syncEventInfo(String ticket, String circleIds, boolean withMember, TwitterListener listener) {
+        getInstance().asyncQiupu.syncEventInfo(ticket, circleIds, withMember, listener);
+    }
 }

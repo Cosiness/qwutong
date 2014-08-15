@@ -33,6 +33,7 @@ import com.borqs.qiupu.fragment.StreamListFragment;
 import com.borqs.qiupu.fragment.StreamRightFlipperFragment;
 import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.bpc.fragment.AlbumFragment;
+import com.borqs.qiupu.ui.bpc.fragment.EventListFragment;
 import com.borqs.qiupu.ui.bpc.fragment.PollListFragment;
 import com.borqs.qiupu.ui.circle.quickAction.BottomMoreQuickAction;
 import com.borqs.qiupu.util.CircleUtils;
@@ -711,7 +712,7 @@ public class OrganizationHomeActivity extends BaseResideMenuActivity implements
         createLeftItem(R.drawable.home_screen_photo_icon_default, R.string.home_album, AlbumFragment.class);
         createLeftItem(R.drawable.friend_group_icon, R.string.tab_friends, OrganizationExtraFragment.Member.class);
         createLeftItem(R.drawable.home_screen_menu_people_icon_default, R.string.user_circles, OrganizationExtraFragment.Circle.class);
-        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, OrganizationExtraFragment.Event.class);
+        createLeftItem(R.drawable.home_screen_event_icon, R.string.event, EventListFragment.class);
         createLeftItem(R.drawable.home_screen_voting_icon_default, R.string.poll, PollListFragment.class);
     }
 

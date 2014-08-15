@@ -28,13 +28,18 @@ import com.borqs.common.view.TwoWayGridView;
 import com.borqs.qiupu.QiupuConfig;
 import com.borqs.qiupu.R;
 import com.borqs.qiupu.cache.QiupuHelper;
+import com.borqs.qiupu.fragment.BasicFragment;
 import com.borqs.qiupu.service.FriendsManager;
 import com.borqs.qiupu.service.QiupuService;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
+import com.borqs.qiupu.ui.bpc.EventListActivity;
+import com.borqs.qiupu.ui.bpc.PollListActivity;
 import com.borqs.qiupu.ui.circle.EditPublicCircleActivity;
 import com.borqs.qiupu.ui.circle.EventDetailActivity;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
+import com.borqs.wutong.utils.CacheHelper;
+import com.borqs.wutong.utils.ServiceHelper;
 
 import java.util.ArrayList;
 
@@ -44,8 +49,8 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterMethod;
 import twitter4j.UserCircle;
 
-public class EventListFragment extends BasicNavigationActivity implements UsersActionListner,
-        OnItemClickListener, FriendsManager.FriendsServiceListener {
+public class EventListFragment extends BasicFragment.BaseExFragment implements UsersActionListner,
+        OnItemClickListener {
 
     private final static String TAG = "EventListActivity";
     private TwoWayGridView mListView;
@@ -55,16 +60,22 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
     private static final int TYPE_PAST = 2;
     private int mCurrentScreen;
     private Spinner mSpinner;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected int getRootViewResourceId() {
+        return R.layout.event_list_main;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
         enableLeftNav();
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.event_list_main);
+        super.onActivityCreated(savedInstanceState);
+//        setContentView(R.layout.event_list_main);
         setHeadTitle(R.string.event_title_upcoming);
         overrideRightActionBtn(R.drawable.ic_menu_moreoverflow, editProfileClick);
         mListView  = (TwoWayGridView) findViewById(R.id.gridview);
         mToastTextView = (TextView) findViewById(R.id.toast_tv);
-        mEventAdapter = new EventListAdapter(this);
+        mEventAdapter = new EventListAdapter(getActivity());
         mListView.setSelector(R.drawable.list_selector_background);
         mListView.setAdapter(mEventAdapter);
         mListView.setOnItemClickListener(this);
@@ -80,65 +91,83 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
         if(QiupuService.mFriendsManager != null && QiupuService.mFriendsManager.getLoadStatus(FriendsManager.SYNC_TYPE_EVENTS)) {
         	begin();
         }
-        FriendsManager.registerFriendsServiceListener(getClass().getName(), this);
+//        FriendsManager.registerFriendsServiceListener(getClass().getName(), this);
         QiupuHelper.registerUserListener(getClass().getName(), this);
-        mHandler.obtainMessage(SYNC_EVENT).sendToTarget();
+//        mHandler.obtainMessage(SYNC_EVENT).sendToTarget();
+        startSyncEventInfo();
     }
 
-    @Override
-    protected void createHandler() {
-        mHandler = new MainHandler();
+    public void startSyncEventInfo() {
+        syncEventInfo("", false);
     }
 
-    @Override
-    protected void loadRefresh() {
-    	mHandler.obtainMessage(SYNC_EVENT).sendToTarget();
-    }
-    
-    private final int SYNC_EVENT = 101;
-    private final int SYNC_EVNET_END = 102;
-    private final int SYNC_EVENTS_CALLBACK = 103;
-    private class MainHandler extends Handler {
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            case SYNC_EVENT: {
-            	syncEventInfo("", false);
-                break;
-            }
-            case SYNC_EVNET_END: {
-            	end();
-            	if(msg.getData().getBoolean(RESULT)) {
-            		refreshCircleList(mCurrentScreen);
-            	}else {
-            		ToastUtil.showOperationFailed(EventListFragment.this, mHandler, false);
-            	}
-            	break;
-            }
-            case SYNC_EVENTS_CALLBACK: {
-            	if(msg.getData().getInt(FriendsManager.SYNC_TYPE) != FriendsManager.SYNC_TYPE_EVENTS) {
-            		return ;
-            	}
-                int statuscode = msg.getData().getInt("statuscode");
-                if (statuscode == FriendsManager.STATUS_DO_FAIL) {
-                    end();
-                } else if (statuscode == FriendsManager.STATUS_DOING) {
-                    begin();
-                } else if (statuscode == FriendsManager.STATUS_DO_OK) {
-                    end();
-                    refreshCircleList(mCurrentScreen);
-                } else if (statuscode == FriendsManager.STATUS_ITERATING) {
-                	refreshCircleList(mCurrentScreen);
-                }
-                break;
-            }
-            }
+//    @Override
+//    protected void createHandler() {
+//        mHandler = new MainHandler();
+//    }
+//
+//    @Override
+//    protected void loadRefresh() {
+//    	mHandler.obtainMessage(SYNC_EVENT).sendToTarget();
+//    }
+//
+//    private final int SYNC_EVENT = 101;
+//    private final int SYNC_EVNET_END = 102;
+//    private final int SYNC_EVENTS_CALLBACK = 103;
+//
+//    private class MainHandler extends Handler {
+//        public void handleMessage(Message msg) {
+//            switch (msg.what) {
+//            case SYNC_EVENT: {
+//            	syncEventInfo("", false);
+//                break;
+//            }
+//            case SYNC_EVNET_END: {
+//            	end();
+//            	if(msg.getData().getBoolean(RESULT)) {
+//            		refreshCircleList(mCurrentScreen);
+//            	}else {
+//            		ToastUtil.showOperationFailed(EventListFragment.this, mHandler, false);
+//            	}
+//            	break;
+//            }
+//            case SYNC_EVENTS_CALLBACK: {
+//            	if(msg.getData().getInt(FriendsManager.SYNC_TYPE) != FriendsManager.SYNC_TYPE_EVENTS) {
+//            		return ;
+//            	}
+//                int statuscode = msg.getData().getInt("statuscode");
+//                if (statuscode == FriendsManager.STATUS_DO_FAIL) {
+//                    end();
+//                } else if (statuscode == FriendsManager.STATUS_DOING) {
+//                    begin();
+//                } else if (statuscode == FriendsManager.STATUS_DO_OK) {
+//                    end();
+//                    refreshCircleList(mCurrentScreen);
+//                } else if (statuscode == FriendsManager.STATUS_ITERATING) {
+//                	refreshCircleList(mCurrentScreen);
+//                }
+//                break;
+//            }
+//            }
+//        }
+//    }
+
+    public void onEventSyncState(int statuscode) {
+        if (statuscode == FriendsManager.STATUS_DO_FAIL) {
+            end();
+        } else if (statuscode == FriendsManager.STATUS_DOING) {
+            begin();
+        } else if (statuscode == FriendsManager.STATUS_DO_OK) {
+            end();
+            refreshCircleList(mCurrentScreen);
+        } else if (statuscode == FriendsManager.STATUS_ITERATING) {
+            refreshCircleList(mCurrentScreen);
         }
     }
-    
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
     	QiupuHelper.unregisterUserListener(getClass().getName());
-    	FriendsManager.unregisterFriendsServiceListener(getClass().getName());
+//    	FriendsManager.unregisterFriendsServiceListener(getClass().getName());
     	mEventAdapter.clearCursor();
         super.onDestroy();
     }
@@ -146,13 +175,13 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
     boolean inLoadingEvent;
     Object mLockSyncEventInfo = new Object();
     public void syncEventInfo(final String circleId, final boolean with_member) {
-        if (!ToastUtil.testValidConnectivity(this)) {
+        if (!ToastUtil.testValidConnectivity(getActivity())) {
             Log.i(TAG, "checkQiupuVersion, ignore while no connection.");
             return;
         }
         
     	if (inLoadingEvent == true) {
-    		ToastUtil.showShortToast(this, mHandler, R.string.string_in_processing);
+    		showShortToast(R.string.string_in_processing);
     		return;
     	}
     	
@@ -161,42 +190,43 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
     	}
     	begin();
     	
-    	asyncQiupu.syncEventInfo(AccountServiceUtils.getSessionID(), circleId, with_member, new TwitterAdapter() {
-    		public void syncEventInfo(ArrayList<UserCircle> circles) {
-    			Log.d(TAG, "finish syncEventInfo=" + circles.size());
-    			
-    			if (circles.size() > 0) {
-    				orm.insertEventsList(EventListFragment.this, circles);
+    	ServiceHelper.syncEventInfo(AccountServiceUtils.getSessionID(), circleId, with_member, new TwitterAdapter() {
+            public void syncEventInfo(ArrayList<UserCircle> circles) {
+                Log.d(TAG, "finish syncEventInfo=" + circles.size());
+
+                if (circles.size() > 0) {
+                    CacheHelper.insertEventsList(getActivity(), circles);
                 }
-    			
-    			Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
-    			msg.getData().putBoolean(RESULT, true);
-    			msg.sendToTarget();
-    			synchronized (mLockSyncEventInfo) {
-    				inLoadingEvent = false;
-    			}
-    		}
-    		
-    		public void onException(TwitterException ex, TwitterMethod method) {
-    		    synchronized (mLockSyncEventInfo) {
-    		    	inLoadingEvent = false;
-    			}
-    			Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
-    			msg.getData().putBoolean(RESULT, false);
-    			msg.sendToTarget();
-    		}
-    	});
+
+                onEventSyncOk();
+
+                synchronized (mLockSyncEventInfo) {
+                    inLoadingEvent = false;
+                }
+            }
+
+            public void onException(TwitterException ex, TwitterMethod method) {
+                synchronized (mLockSyncEventInfo) {
+                    inLoadingEvent = false;
+                }
+
+                onEventSyncFail();
+            }
+        });
     }
 
-	private void refreshCircleList(int currenttype) {
+    public void refreshCircleList() {
+        refreshCircleList(mCurrentScreen);
+    }
+    private void refreshCircleList(int currenttype) {
 		Cursor events = null;
 		if(currenttype == TYPE_UPCOMING) {
-			events = orm.queryUpcomingEvents();
+			events = CacheHelper.queryUpcomingEvents();
 			if (events != null)
 				Log.d(TAG, "TYPE_UPCOMING events.getCount() = " +events.getCount());
 	        mEventAdapter.alterCircles(events);
 		}else if(currenttype == TYPE_PAST) {
-			events = orm.queryPastEvents();
+			events = CacheHelper.queryPastEvents();
 			if (events != null)
 				Log.d(TAG, "TYPE_PAST events.getCount() = " +events.getCount());
 	        mEventAdapter.alterCircles(events);
@@ -239,11 +269,11 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
 			EventItemView item = (EventItemView) view;
             UserCircle circle = item.getItemView();
             if(circle != null) {
-            	final Intent intent = new Intent(this, EventDetailActivity.class);
+            	final Intent intent = new Intent(getActivity(), EventDetailActivity.class);
 
                 Bundle bundle = new Bundle();
                 bundle.putString(CircleUtils.CIRCLE_NAME,
-                        CircleUtils.getLocalCircleName(this, circle.circleid, circle.name));
+                        CircleUtils.getLocalCircleName(getActivity(), circle.circleid, circle.name));
                 bundle.putLong(CircleUtils.CIRCLE_ID, circle.circleid);
                 intent.putExtras(bundle);
                 startActivity(intent);
@@ -264,7 +294,6 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
 		}
 	}
 	
-	@Override
 	protected void showCorpusSelectionDialog(View view) {
 		int location[] = new int[2];
         view.getLocationInWindow(location);
@@ -274,7 +303,7 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
         ArrayList<SelectionItem> items = new ArrayList<SelectionItem>();
         items.add(new SelectionItem("", getString(R.string.event_title_upcoming)));
         items.add(new SelectionItem("", getString(R.string.event_title_past)));
-        DialogUtils.showCorpusSelectionDialog(this, x, y, items, circleListItemClickListener);
+        DialogUtils.showCorpusSelectionDialog(getActivity(), x, y, items, circleListItemClickListener);
 	}
 	
 	AdapterView.OnItemClickListener circleListItemClickListener = new AdapterView.OnItemClickListener() {
@@ -299,22 +328,26 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
     	}else if(getString(R.string.label_refresh).equals(value)){ 
     		loadRefresh();
     	}else if(getString(R.string.create_new_event_title).equals(value)){
-    		IntentUtil.gotoCreateEventActivity(EventListFragment.this, EditPublicCircleActivity.type_create_event, null, null);
+    		IntentUtil.gotoCreateEventActivity(getActivity(), EditPublicCircleActivity.type_create_event, null, null);
     	}else {
     		Log.d(TAG, "more drop down items " + value);
     	}
     }
 
-	@Override
-	public void updateUI(int msgcode, Message message) {
-		if (QiupuConfig.LOGD) Log.d(TAG, "msgcode: " + msgcode + " message: " + message);
-        Message msg = mHandler.obtainMessage(SYNC_EVENTS_CALLBACK);
-        msg.getData().putInt("statuscode", msgcode);
-        if(message != null) {
-        	msg.getData().putInt(FriendsManager.SYNC_TYPE, message.getData().getInt(FriendsManager.SYNC_TYPE));
-        }
-        msg.sendToTarget();
-	}
+    private void loadRefresh() {
+        startSyncEventInfo();
+    }
+
+//	@Override
+//	public void updateUI(int msgcode, Message message) {
+//		if (QiupuConfig.LOGD) Log.d(TAG, "msgcode: " + msgcode + " message: " + message);
+//        Message msg = mHandler.obtainMessage(SYNC_EVENTS_CALLBACK);
+//        msg.getData().putInt("statuscode", msgcode);
+//        if(message != null) {
+//        	msg.getData().putInt(FriendsManager.SYNC_TYPE, message.getData().getInt(FriendsManager.SYNC_TYPE));
+//        }
+//        msg.sendToTarget();
+//	}
 	
 	View.OnClickListener editProfileClick = new View.OnClickListener() {
         public void onClick(View v) {
@@ -327,14 +360,15 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
     };
     
     protected void showCorpusSelectionDialog(ArrayList<SelectionItem> items) {
-	    if(mRightActionBtn != null) {
-	        int location[] = new int[2];
-	        mRightActionBtn.getLocationInWindow(location);
-	        int x = location[0];
-	        int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
-	        
-	        DialogUtils.showCorpusSelectionDialog(this, x, y, items, actionListItemClickListener);
-	    }
+        showCorpusSelectionDialog(items, actionListItemClickListener);
+//	    if(mRightActionBtn != null) {
+//	        int location[] = new int[2];
+//	        mRightActionBtn.getLocationInWindow(location);
+//	        int x = location[0];
+//	        int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
+//
+//	        DialogUtils.showCorpusSelectionDialog(this, x, y, items, actionListItemClickListener);
+//	    }
 	}
     
     AdapterView.OnItemClickListener actionListItemClickListener = new AdapterView.OnItemClickListener() {
@@ -348,7 +382,7 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
     
     private void buildEventCategoryList() {
     	final String[] adapterValue = new String[]{getString(R.string.event_title_upcoming), getString(R.string.event_title_past)};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
                 R.layout.event_spinner_textview, adapterValue);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinner.setAdapter(adapter);
@@ -365,4 +399,19 @@ public class EventListFragment extends BasicNavigationActivity implements UsersA
         	}
         });
     }
+
+    private void onEventSyncFail() {
+        if (null != thiz && thiz instanceof EventListActivity) {
+            EventListActivity activity = (EventListActivity)thiz;
+            activity.onEventSyncFail();
+        }
+    }
+
+    private void onEventSyncOk() {
+        if (null != thiz && thiz instanceof EventListActivity) {
+            EventListActivity activity = (EventListActivity)thiz;
+            activity.onEventSyncOk();
+        }
+    }
+
 }

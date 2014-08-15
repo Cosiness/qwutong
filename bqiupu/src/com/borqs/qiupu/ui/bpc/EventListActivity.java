@@ -38,50 +38,55 @@ import com.borqs.qiupu.cache.QiupuHelper;
 import com.borqs.qiupu.service.FriendsManager;
 import com.borqs.qiupu.service.QiupuService;
 import com.borqs.qiupu.ui.BasicNavigationActivity;
+import com.borqs.qiupu.ui.bpc.fragment.EventListFragment;
 import com.borqs.qiupu.ui.circle.EditPublicCircleActivity;
 import com.borqs.qiupu.ui.circle.EventDetailActivity;
 import com.borqs.qiupu.util.CircleUtils;
 import com.borqs.qiupu.util.ToastUtil;
 
-public class EventListActivity extends BasicNavigationActivity implements UsersActionListner,
-        OnItemClickListener, FriendsManager.FriendsServiceListener {
-
+public class EventListActivity extends BasicNavigationActivity implements FriendsManager.FriendsServiceListener {
     private final static String TAG = "EventListActivity";
-    private TwoWayGridView mListView;
-    private TextView mToastTextView;
-    private EventListAdapter mEventAdapter;
-    private static final int TYPE_UPCOMING = 1;
-    private static final int TYPE_PAST = 2;
-    private int mCurrentScreen;
-    private Spinner mSpinner;
+//    private TwoWayGridView mListView;
+//    private TextView mToastTextView;
+//    private EventListAdapter mEventAdapter;
+//    private static final int TYPE_UPCOMING = 1;
+//    private static final int TYPE_PAST = 2;
+//    private int mCurrentScreen;
+//    private Spinner mSpinner;
+
+    private EventListFragment mEventListFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         enableLeftNav();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.event_list_main);
+        setContentView(R.layout.event_fragment_activity);
         setHeadTitle(R.string.event_title_upcoming);
-        overrideRightActionBtn(R.drawable.ic_menu_moreoverflow, editProfileClick);
-        mListView  = (TwoWayGridView) findViewById(R.id.gridview);
-        mToastTextView = (TextView) findViewById(R.id.toast_tv);
-        mEventAdapter = new EventListAdapter(this);
-        mListView.setSelector(R.drawable.list_selector_background);
-        mListView.setAdapter(mEventAdapter);
-        mListView.setOnItemClickListener(this);
-        
-        mSpinner = (Spinner) findViewById(R.id.event_category_spinner);
-        buildEventCategoryList();
-        
-        onConfigurationChanged(getResources().getConfiguration());
-        
-        mCurrentScreen = TYPE_UPCOMING;
-        refreshCircleList(mCurrentScreen);
 
-        if(QiupuService.mFriendsManager != null && QiupuService.mFriendsManager.getLoadStatus(FriendsManager.SYNC_TYPE_EVENTS)) {
-        	begin();
-        }
+        mEventListFragment = (EventListFragment)getSupportFragmentManager().findFragmentById(R.id.event_fragment);
+
+//        overrideRightActionBtn(R.drawable.ic_menu_moreoverflow, editProfileClick);
+//        mListView  = (TwoWayGridView) findViewById(R.id.gridview);
+//        mToastTextView = (TextView) findViewById(R.id.toast_tv);
+//        mEventAdapter = new EventListAdapter(this);
+//        mListView.setSelector(R.drawable.list_selector_background);
+//        mListView.setAdapter(mEventAdapter);
+//        mListView.setOnItemClickListener(this);
+//
+//        mSpinner = (Spinner) findViewById(R.id.event_category_spinner);
+//        buildEventCategoryList();
+        
+//        onConfigurationChanged(getResources().getConfiguration());
+//
+//        mCurrentScreen = TYPE_UPCOMING;
+//        refreshCircleList(mCurrentScreen);
+//
+//        if(QiupuService.mFriendsManager != null && QiupuService.mFriendsManager.getLoadStatus(FriendsManager.SYNC_TYPE_EVENTS)) {
+//        	begin();
+//        }
         FriendsManager.registerFriendsServiceListener(getClass().getName(), this);
-        QiupuHelper.registerUserListener(getClass().getName(), this);
-        mHandler.obtainMessage(SYNC_EVENT).sendToTarget();
+//        QiupuHelper.registerUserListener(getClass().getName(), this);
+//        mHandler.obtainMessage(SYNC_EVENT).sendToTarget();
     }
 
     @Override
@@ -101,13 +106,13 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case SYNC_EVENT: {
-            	syncEventInfo("", false);
+                mEventListFragment.startSyncEventInfo();
                 break;
             }
             case SYNC_EVNET_END: {
             	end();
             	if(msg.getData().getBoolean(RESULT)) {
-            		refreshCircleList(mCurrentScreen);
+                    mEventListFragment.refreshCircleList();
             	}else {
             		ToastUtil.showOperationFailed(EventListActivity.this, mHandler, false);
             	}
@@ -118,16 +123,18 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
             		return ;
             	}
                 int statuscode = msg.getData().getInt("statuscode");
-                if (statuscode == FriendsManager.STATUS_DO_FAIL) {
-                    end();
-                } else if (statuscode == FriendsManager.STATUS_DOING) {
-                    begin();
-                } else if (statuscode == FriendsManager.STATUS_DO_OK) {
-                    end();
-                    refreshCircleList(mCurrentScreen);
-                } else if (statuscode == FriendsManager.STATUS_ITERATING) {
-                	refreshCircleList(mCurrentScreen);
-                }
+                mEventListFragment.onEventSyncState(statuscode);
+
+//                if (statuscode == FriendsManager.STATUS_DO_FAIL) {
+//                    end();
+//                } else if (statuscode == FriendsManager.STATUS_DOING) {
+//                    begin();
+//                } else if (statuscode == FriendsManager.STATUS_DO_OK) {
+//                    end();
+//                    refreshCircleList(mCurrentScreen);
+//                } else if (statuscode == FriendsManager.STATUS_ITERATING) {
+//                	refreshCircleList(mCurrentScreen);
+//                }
                 break;
             }
             }
@@ -136,173 +143,173 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
     
     @Override
     protected void onDestroy() {
-    	QiupuHelper.unregisterUserListener(getClass().getName());
+//    	QiupuHelper.unregisterUserListener(getClass().getName());
     	FriendsManager.unregisterFriendsServiceListener(getClass().getName());
-    	mEventAdapter.clearCursor();
+//    	mEventAdapter.clearCursor();
         super.onDestroy();
     }
     
-    boolean inLoadingEvent;
-    Object mLockSyncEventInfo = new Object();
-    public void syncEventInfo(final String circleId, final boolean with_member) {
-        if (!ToastUtil.testValidConnectivity(this)) {
-            Log.i(TAG, "checkQiupuVersion, ignore while no connection.");
-            return;
-        }
-        
-    	if (inLoadingEvent == true) {
-    		ToastUtil.showShortToast(this, mHandler, R.string.string_in_processing);
-    		return;
-    	}
-    	
-    	synchronized (mLockSyncEventInfo) {
-    		inLoadingEvent = true;
-    	}
-    	begin();
-    	
-    	asyncQiupu.syncEventInfo(AccountServiceUtils.getSessionID(), circleId, with_member, new TwitterAdapter() {
-    		public void syncEventInfo(ArrayList<UserCircle> circles) {
-    			Log.d(TAG, "finish syncEventInfo=" + circles.size());
-    			
-    			if (circles.size() > 0) {
-    				orm.insertEventsList(EventListActivity.this, circles);
-                }
-    			
-    			Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
-    			msg.getData().putBoolean(RESULT, true);
-    			msg.sendToTarget();
-    			synchronized (mLockSyncEventInfo) {
-    				inLoadingEvent = false;
-    			}
-    		}
-    		
-    		public void onException(TwitterException ex, TwitterMethod method) {
-    		    synchronized (mLockSyncEventInfo) {
-    		    	inLoadingEvent = false;
-    			}
-    			Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
-    			msg.getData().putBoolean(RESULT, false);
-    			msg.sendToTarget();
-    		}
-    	});
-    }
+//    boolean inLoadingEvent;
+//    Object mLockSyncEventInfo = new Object();
+//    public void syncEventInfo(final String circleId, final boolean with_member) {
+//        if (!ToastUtil.testValidConnectivity(this)) {
+//            Log.i(TAG, "checkQiupuVersion, ignore while no connection.");
+//            return;
+//        }
+//
+//    	if (inLoadingEvent == true) {
+//    		ToastUtil.showShortToast(this, mHandler, R.string.string_in_processing);
+//    		return;
+//    	}
+//
+//    	synchronized (mLockSyncEventInfo) {
+//    		inLoadingEvent = true;
+//    	}
+//    	begin();
+//
+//    	asyncQiupu.syncEventInfo(AccountServiceUtils.getSessionID(), circleId, with_member, new TwitterAdapter() {
+//    		public void syncEventInfo(ArrayList<UserCircle> circles) {
+//    			Log.d(TAG, "finish syncEventInfo=" + circles.size());
+//
+//    			if (circles.size() > 0) {
+//    				orm.insertEventsList(EventListActivity.this, circles);
+//                }
+//
+//    			Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
+//    			msg.getData().putBoolean(RESULT, true);
+//    			msg.sendToTarget();
+//    			synchronized (mLockSyncEventInfo) {
+//    				inLoadingEvent = false;
+//    			}
+//    		}
+//
+//    		public void onException(TwitterException ex, TwitterMethod method) {
+//    		    synchronized (mLockSyncEventInfo) {
+//    		    	inLoadingEvent = false;
+//    			}
+//    			Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
+//    			msg.getData().putBoolean(RESULT, false);
+//    			msg.sendToTarget();
+//    		}
+//    	});
+//    }
+//
+//	private void refreshCircleList(int currenttype) {
+//		Cursor events = null;
+//		if(currenttype == TYPE_UPCOMING) {
+//			events = orm.queryUpcomingEvents();
+//			if (events != null)
+//				Log.d(TAG, "TYPE_UPCOMING events.getCount() = " +events.getCount());
+//	        mEventAdapter.alterCircles(events);
+//		}else if(currenttype == TYPE_PAST) {
+//			events = orm.queryPastEvents();
+//			if (events != null)
+//				Log.d(TAG, "TYPE_PAST events.getCount() = " +events.getCount());
+//	        mEventAdapter.alterCircles(events);
+//		}
+//
+//        if(events != null && events.getCount() > 0) {
+//        	mToastTextView.setVisibility(View.GONE);
+//        	mListView.setVisibility(View.VISIBLE);
+//        }else {
+//        	mToastTextView.setVisibility(View.VISIBLE);
+//        	mListView.setVisibility(View.GONE);
+//        }
+//    }
 
-	private void refreshCircleList(int currenttype) {
-		Cursor events = null;
-		if(currenttype == TYPE_UPCOMING) {
-			events = orm.queryUpcomingEvents();
-			if (events != null)
-				Log.d(TAG, "TYPE_UPCOMING events.getCount() = " +events.getCount());
-	        mEventAdapter.alterCircles(events);
-		}else if(currenttype == TYPE_PAST) {
-			events = orm.queryPastEvents();
-			if (events != null)
-				Log.d(TAG, "TYPE_PAST events.getCount() = " +events.getCount());
-	        mEventAdapter.alterCircles(events);
-		}
-		
-        if(events != null && events.getCount() > 0) {
-        	mToastTextView.setVisibility(View.GONE);
-        	mListView.setVisibility(View.VISIBLE);
-        }else {
-        	mToastTextView.setVisibility(View.VISIBLE);
-        	mListView.setVisibility(View.GONE);
-        }
-    } 
+//    @Override
+//	public void updateItemUI(QiupuUser user) {
+//		mEventListFragment.refreshCircleList();
+//	}
 
-    @Override
-	public void updateItemUI(QiupuUser user) {
-		refreshCircleList(mCurrentScreen);
-	}
-
-	@Override
-	public void addFriends(QiupuUser user) {
-	}
-
-	@Override
-	public void refuseUser(long uid) {
-	}
-
-	@Override
-	public void deleteUser(QiupuUser userc) {
-	}
-
-	@Override
-	public void sendRequest(QiupuUser user) {
-	}
-
-	@Override
-	public void onItemClick(TwoWayAdapterView<?> parent, View view,
-			int position, long id) {
-		if(EventItemView.class.isInstance(view)) {
-			EventItemView item = (EventItemView) view;
-            UserCircle circle = item.getItemView();
-            if(circle != null) {
-            	final Intent intent = new Intent(this, EventDetailActivity.class);
-
-                Bundle bundle = new Bundle();
-                bundle.putString(CircleUtils.CIRCLE_NAME,
-                        CircleUtils.getLocalCircleName(this, circle.circleid, circle.name));
-                bundle.putLong(CircleUtils.CIRCLE_ID, circle.circleid);
-                intent.putExtras(bundle);
-                startActivity(intent);
-                }
-            }else {
-                Log.d(TAG, "get circle is null.");
-            }
-	}
-	
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-		Configuration conf = getResources().getConfiguration();
-		if(conf.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			mListView.setNumRows(1);
-		} else {
-			mListView.setNumColumns(1);
-		}
-	}
-	
-	@Override
-	protected void showCorpusSelectionDialog(View view) {
-		int location[] = new int[2];
-        view.getLocationInWindow(location);
-        int x = location[0];
-        int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
-
-        ArrayList<SelectionItem> items = new ArrayList<SelectionItem>();
-        items.add(new SelectionItem("", getString(R.string.event_title_upcoming)));
-        items.add(new SelectionItem("", getString(R.string.event_title_past)));
-        DialogUtils.showCorpusSelectionDialog(this, x, y, items, circleListItemClickListener);
-	}
-	
-	AdapterView.OnItemClickListener circleListItemClickListener = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if (CorpusSelectionItemView.class.isInstance(view)) {
-                CorpusSelectionItemView item = (CorpusSelectionItemView) view;
-                setHeadTitle(item.getText());
-                onCorpusSelected(item.getText());
-            }
-        }
-    };
-    
-    private void onCorpusSelected(String value) {
-    	if(getString(R.string.event_title_upcoming).equals(value)) {
-    		setHeadTitle(R.string.event_title_upcoming);
-    		mCurrentScreen = TYPE_UPCOMING;
-    		refreshCircleList(mCurrentScreen);
-    	}else if(getString(R.string.event_title_past).equals(value)) {
-    		setHeadTitle(R.string.event_title_past);
-    		mCurrentScreen = TYPE_PAST;
-    		refreshCircleList(mCurrentScreen);
-    	}else if(getString(R.string.label_refresh).equals(value)){ 
-    		loadRefresh();
-    	}else if(getString(R.string.create_new_event_title).equals(value)){
-    		IntentUtil.gotoCreateEventActivity(EventListActivity.this, EditPublicCircleActivity.type_create_event, null, null);
-    	}else {
-    		Log.d(TAG, "more drop down items " + value);
-    	}
-    }
+//	@Override
+//	public void addFriends(QiupuUser user) {
+//	}
+//
+//	@Override
+//	public void refuseUser(long uid) {
+//	}
+//
+//	@Override
+//	public void deleteUser(QiupuUser userc) {
+//	}
+//
+//	@Override
+//	public void sendRequest(QiupuUser user) {
+//	}
+//
+//	@Override
+//	public void onItemClick(TwoWayAdapterView<?> parent, View view,
+//			int position, long id) {
+//		if(EventItemView.class.isInstance(view)) {
+//			EventItemView item = (EventItemView) view;
+//            UserCircle circle = item.getItemView();
+//            if(circle != null) {
+//            	final Intent intent = new Intent(this, EventDetailActivity.class);
+//
+//                Bundle bundle = new Bundle();
+//                bundle.putString(CircleUtils.CIRCLE_NAME,
+//                        CircleUtils.getLocalCircleName(this, circle.circleid, circle.name));
+//                bundle.putLong(CircleUtils.CIRCLE_ID, circle.circleid);
+//                intent.putExtras(bundle);
+//                startActivity(intent);
+//                }
+//            }else {
+//                Log.d(TAG, "get circle is null.");
+//            }
+//	}
+//
+//	@Override
+//	public void onConfigurationChanged(Configuration newConfig) {
+//		super.onConfigurationChanged(newConfig);
+//		Configuration conf = getResources().getConfiguration();
+//		if(conf.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//			mListView.setNumRows(1);
+//		} else {
+//			mListView.setNumColumns(1);
+//		}
+//	}
+//
+//	@Override
+//	protected void showCorpusSelectionDialog(View view) {
+//		int location[] = new int[2];
+//        view.getLocationInWindow(location);
+//        int x = location[0];
+//        int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
+//
+//        ArrayList<SelectionItem> items = new ArrayList<SelectionItem>();
+//        items.add(new SelectionItem("", getString(R.string.event_title_upcoming)));
+//        items.add(new SelectionItem("", getString(R.string.event_title_past)));
+//        DialogUtils.showCorpusSelectionDialog(this, x, y, items, circleListItemClickListener);
+//	}
+//
+//	AdapterView.OnItemClickListener circleListItemClickListener = new AdapterView.OnItemClickListener() {
+//        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//            if (CorpusSelectionItemView.class.isInstance(view)) {
+//                CorpusSelectionItemView item = (CorpusSelectionItemView) view;
+//                setHeadTitle(item.getText());
+//                onCorpusSelected(item.getText());
+//            }
+//        }
+//    };
+//
+//    private void onCorpusSelected(String value) {
+//    	if(getString(R.string.event_title_upcoming).equals(value)) {
+//    		setHeadTitle(R.string.event_title_upcoming);
+//    		mCurrentScreen = TYPE_UPCOMING;
+//    		refreshCircleList(mCurrentScreen);
+//    	}else if(getString(R.string.event_title_past).equals(value)) {
+//    		setHeadTitle(R.string.event_title_past);
+//    		mCurrentScreen = TYPE_PAST;
+//    		refreshCircleList(mCurrentScreen);
+//    	}else if(getString(R.string.label_refresh).equals(value)){
+//    		loadRefresh();
+//    	}else if(getString(R.string.create_new_event_title).equals(value)){
+//    		IntentUtil.gotoCreateEventActivity(EventListActivity.this, EditPublicCircleActivity.type_create_event, null, null);
+//    	}else {
+//    		Log.d(TAG, "more drop down items " + value);
+//    	}
+//    }
 
 	@Override
 	public void updateUI(int msgcode, Message message) {
@@ -315,53 +322,65 @@ public class EventListActivity extends BasicNavigationActivity implements UsersA
         msg.sendToTarget();
 	}
 	
-	View.OnClickListener editProfileClick = new View.OnClickListener() {
-        public void onClick(View v) {
-        	ArrayList<SelectionItem> items = new ArrayList<SelectionItem>();
-        	items.add(new SelectionItem("", getString(R.string.label_refresh)));
-        	items.add(new SelectionItem("", getString(R.string.create_new_event_title)));
-        	
-        	showCorpusSelectionDialog(items);
-        }
-    };
-    
-    protected void showCorpusSelectionDialog(ArrayList<SelectionItem> items) {
-	    if(mRightActionBtn != null) {
-	        int location[] = new int[2];
-	        mRightActionBtn.getLocationInWindow(location);
-	        int x = location[0];
-	        int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
-	        
-	        DialogUtils.showCorpusSelectionDialog(this, x, y, items, actionListItemClickListener);
-	    }
-	}
-    
-    AdapterView.OnItemClickListener actionListItemClickListener = new AdapterView.OnItemClickListener() {
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            if(CorpusSelectionItemView.class.isInstance(view)) {
-                CorpusSelectionItemView item = (CorpusSelectionItemView) view;
-                onCorpusSelected(item.getText());             
-            }
-        }
-    };
-    
-    private void buildEventCategoryList() {
-    	final String[] adapterValue = new String[]{getString(R.string.event_title_upcoming), getString(R.string.event_title_past)};
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                R.layout.event_spinner_textview, adapterValue);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSpinner.setAdapter(adapter);
-        mSpinner.setSelection(0);
-        mSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-        	@Override
-        	public void onItemSelected(AdapterView<?> parent, View view,
-        			int position, long id) {
-        		onCorpusSelected(adapterValue[position]);
-        	}
-        	
-        	@Override
-        	public void onNothingSelected(AdapterView<?> parent) {
-        	}
-        });
+//	View.OnClickListener editProfileClick = new View.OnClickListener() {
+//        public void onClick(View v) {
+//        	ArrayList<SelectionItem> items = new ArrayList<SelectionItem>();
+//        	items.add(new SelectionItem("", getString(R.string.label_refresh)));
+//        	items.add(new SelectionItem("", getString(R.string.create_new_event_title)));
+//
+//        	showCorpusSelectionDialog(items);
+//        }
+//    };
+//
+//    protected void showCorpusSelectionDialog(ArrayList<SelectionItem> items) {
+//	    if(mRightActionBtn != null) {
+//	        int location[] = new int[2];
+//	        mRightActionBtn.getLocationInWindow(location);
+//	        int x = location[0];
+//	        int y = getResources().getDimensionPixelSize(R.dimen.title_bar_height);
+//
+//	        DialogUtils.showCorpusSelectionDialog(this, x, y, items, actionListItemClickListener);
+//	    }
+//	}
+//
+//    AdapterView.OnItemClickListener actionListItemClickListener = new AdapterView.OnItemClickListener() {
+//        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//            if(CorpusSelectionItemView.class.isInstance(view)) {
+//                CorpusSelectionItemView item = (CorpusSelectionItemView) view;
+//                onCorpusSelected(item.getText());
+//            }
+//        }
+//    };
+//
+//    private void buildEventCategoryList() {
+//    	final String[] adapterValue = new String[]{getString(R.string.event_title_upcoming), getString(R.string.event_title_past)};
+//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+//                R.layout.event_spinner_textview, adapterValue);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        mSpinner.setAdapter(adapter);
+//        mSpinner.setSelection(0);
+//        mSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+//        	@Override
+//        	public void onItemSelected(AdapterView<?> parent, View view,
+//        			int position, long id) {
+//        		onCorpusSelected(adapterValue[position]);
+//        	}
+//
+//        	@Override
+//        	public void onNothingSelected(AdapterView<?> parent) {
+//        	}
+//        });
+//    }
+
+    public void onEventSyncFail() {
+        Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
+        msg.getData().putBoolean(RESULT, false);
+        msg.sendToTarget();
+    }
+
+    public void onEventSyncOk() {
+        Message msg = mHandler.obtainMessage(SYNC_EVNET_END);
+        msg.getData().putBoolean(RESULT, true);
+        msg.sendToTarget();
     }
 }

@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.borqs.account.service.AccountServiceUtils;
 import com.borqs.account.service.BorqsAccount;
 import com.borqs.qiupu.db.QiupuORM;
+import com.borqs.qiupu.ui.bpc.fragment.EventListFragment;
 
 import java.util.ArrayList;
 
@@ -147,6 +148,18 @@ public class CacheHelper {
 
     public static void deletePollInfo(String pollId) {
         getInstance().orm.deletePollnfo(pollId);
+    }
+
+    public static void insertEventsList(Context context, ArrayList<UserCircle> circles) {
+        getInstance().orm.insertEventsList(context, circles);
+    }
+
+    public static Cursor queryUpcomingEvents() {
+        return getInstance().orm.queryUpcomingEvents();
+    }
+
+    public static Cursor queryPastEvents() {
+        return getInstance().orm.queryPastEvents();
     }
 
     // latency compatible end

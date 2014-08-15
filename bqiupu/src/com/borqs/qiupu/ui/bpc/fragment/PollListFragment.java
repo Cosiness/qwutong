@@ -29,6 +29,7 @@ import com.borqs.qiupu.R;
 import com.borqs.qiupu.db.QiupuORM;
 import com.borqs.qiupu.fragment.BasicFragment.BaseExFragment;
 import com.borqs.qiupu.fragment.PollDetailFragment;
+import com.borqs.qiupu.ui.BasicActivity;
 import com.borqs.qiupu.ui.bpc.PollCreateActivity;
 import com.borqs.qiupu.ui.bpc.PollListActivity;
 import com.borqs.qiupu.util.CircleUtils;
@@ -687,14 +688,6 @@ public class PollListFragment extends BaseExFragment implements LoaderMoreListen
         if (null != thiz && thiz instanceof PollListActivity) {
             PollListActivity activity = (PollListActivity)thiz;
             activity.loadMore();
-        }
-    }
-
-    private void showShortToast(int msgId) {
-
-        if (null != thiz && thiz instanceof PollListActivity) {
-            PollListActivity activity = (PollListActivity)thiz;
-            activity.showShortToast(msgId);
         }
     }
 }

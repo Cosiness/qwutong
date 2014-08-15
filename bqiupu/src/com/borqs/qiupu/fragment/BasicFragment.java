@@ -212,5 +212,11 @@ public class BasicFragment extends Fragment {
 //            }
         }
 
+        protected void showShortToast(int msgId) {
+            if (null != thiz && thiz instanceof BasicActivity) {
+                BasicActivity activity = (BasicActivity)thiz;
+                activity.showShortToast(msgId);
+            }
+        }
     }
 }
